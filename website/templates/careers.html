@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block title %}Careers{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <h2>Current openings</h2>
+
+  <div id="accordion">
+    {% for item in items %}
+    <div class="card">
+      <div class="card-header" id="header_{{ item.id }}">
+        <h5>Job Title: {{ item.job_title }}</h5>
+        <p>Salary: {{ item.salary }}</p>
+        <p>Experience: {{ item.experience }}</p>
+        <p>Required: {{ item.required }}</p>
+        <p>Opening: {{ item.opening }}</p>
+
+        <button class="btn btn-link"
+                data-toggle="collapse"
+                data-target="#collapse_{{ item.id }}"
+                aria-expanded="false"
+                aria-controls="collapse_{{ item.id }}">+</button>
+      </div>
+
+      <div id="collapse_{{ item.id }}"
+           class="collapse"
+           aria-labelledby="header_{{ item.id }}"
+           data-parent="#accordion">
+        <div class="card-body">
+          <h5>Job Description</h5>
+          <p>{{ item.description }}</p>
+          <h5>Education: {{ item.education }}</h5>
+          <p>{{ item.education_requirements }}</p>
+          <hr>
+          <p>To apply for the job, send your CV/Resume to {{ item.dept_email }} mentioning {{ item.job_title }} in the subject.</p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="container">
+  <h3>Why Work for Wish Net ?</h3>
+  <p>Whether you’re a seasoned professional or a recent graduate, you’ll find an environment that allows you to explore and map out a dynamic career path tailored to your personal goals, and a supportive community of colleagues working together toward real opportunities to positively impact our company, our clients, and their own careers.</p>
+</div>
+
+<div class="container">
+  <h3>Benefits:</h3>
+  <ul>
+    <li>Regular and Process Oriented Appraisals</li>
+    <li>20 days paid and sick leave</li>
+    <li>Fun @ Wish Net</li>
+    <li>Maternity Leave</li>
+    <li>Dedicated Training Room and Library</li>
+    <li>Awards for Excellence</li>
+    <li>Long-term Service Benefits</li>
+    <li>Provident Fund</li>
+  </ul>
+</div>
+{% endblock %}
