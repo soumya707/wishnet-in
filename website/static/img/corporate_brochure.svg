@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW X5 -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="297mm" height="210mm" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 297 210"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .fil0 {fill:none}
+   ]]>
+  </style>
+   <clipPath id="id0">
+    <rect x="97.5307" y="10.7735" width="92.5386" height="188.453"/>
+   </clipPath>
+   <clipPath id="id1">
+    <rect x="102.421" y="10.8555" width="92.1574" height="188.289"/>
+   </clipPath>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <rect class="fil0" x="48.5" y="5" width="200" height="200"/>
+  <g style="clip-path:url(#id0)">
+   <image transform="matrix(0.999232 -0.0391916 0.0391916 0.999232 -47.7101 100.127)" x="148.5" y="-80.2506" width="85.344" height="185.251" xlink:href="Brochure_2_Images\Brochure_2_ImgID1.png"/>
+  </g>
+  <g style="clip-path:url(#id1)">
+   <image transform="matrix(0.999312 0.0370963 -0.0370963 0.999312 -42.0814 85.542)" x="148.5" y="-80.2506" width="85.344" height="185.251" xlink:href="Brochure_2_Images\Brochure_2_ImgID2.png"/>
+  </g>
+ </g>
+</svg>
