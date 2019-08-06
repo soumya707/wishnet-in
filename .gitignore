@@ -1,4 +1,16 @@
 # macOS specific
 .DS_STORE
 
+# Flask-Migrate
+migrations/
+
+# Pipfile
+Pipfile
+Pipfile.lock
+
+# instance specific config
+instance/
+
+# tox specific instance files
+.tox/
 
