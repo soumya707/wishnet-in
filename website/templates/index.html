@@ -1,94 +1,166 @@
 {% extends "layout.html" %}
+{% from "_macros.html" import render_inline_field_with_errors, render_submit_button_inline %}
 
 {% block title %}Wishnet{% endblock %}
 
 {% block content %}
-<div class="jumbotron">
-  <div class="container">
-    <h1 class="display-4">Fluid jumbotron</h1>
-    <p class="lead">This is a modified jumbotron that occupies the entire horizontal space of its parent.</p>
+
+<!-- CAROUSEL -->
+<div id="carouselDiv" class="carousel slide" data-ride="carousel">
+
+  <!-- Indicators -->
+  <ol class="carousel-indicators">
+    <li data-target="#carouselDiv" data-slide-to="0" class="active"></li>
+    <li data-target="#carouselDiv" data-slide-to="1"></li>
+    <li data-target="#carouselDiv" data-slide-to="2"></li>
+  </ol>
+
+  <!-- Images -->
+  <div class="carousel-inner" role="listbox">
+    <div class="carousel-item active">
+      <img src="{{ url_for('static', filename='img/banner_1.jpg') }}"
+           class="d-block w-100" alt="Banner 1">
+    </div>
+    <div class="carousel-item">
+      <img src="{{ url_for('static', filename='img/banner_2.jpg') }}"
+           class="d-block w-100" alt="Banner 2">
+    </div>
+    <div class="carousel-item">
+      <img src="{{ url_for('static', filename='img/banner_3.jpg') }}"
+           class="d-block w-100" alt="Banner 3">
+    </div>
   </div>
-</div>
 
+</div> <!-- carousel -->
 
-<div class="container">
-  <div class="row">
+<!-- RECHARGE FACILITY -->
+<div class="container-fluid" id="recharge">
 
-    <div class="col-md-4 shadow p-3 mb-5 rounded" style="background-color: #0090ff">
-      <h2>High Speed Broadband</h2>
-      <ul>
-        <li>Highly Advanced Infrastructure</li>
-        <li>Underground OFC Backbone</li>
-        <li>Value Added Services</li>
-        <li>Managed Services</li>
-        <li>Advanced Data Center</li>
-        <li>Assured QoS</li>
-        <li>24 x 7 Professional Support</li>
-        <li>Customized SLA</li>
-        <li>Transparent Relationship</li>
-      </ul>
+  <h3 class="d-flex p-3 justify-content-center text-white">Quick recharge</h3>
+
+  <form class="form-inline justify-content-center pb-3"
+        method="POST"
+        action="{{ url_for('index') }}">
+    {{ form.hidden_tag() }}
+    {{ render_inline_field_with_errors(form.user_id) }}
+    {{ render_submit_button_inline(form.submit)}}
+  </form>
+
+</div> <!-- container -->
+
+<!-- SERVICES -->
+{% for service in services %}
+  <div class="container-fluid {{ loop.cycle('service-odd', 'service-even') }}">
+
+    <div class="d-flex flex-wrap justify-content-around {{ loop.cycle('flex-row', 'flex-row-reverse') }} service">
+      <!-- service features -->
+      <div class="d-flex flex-column p-3 justify-content-center">
+        <h1 class="service-name">{{ service.name }}</h1>
+        <h5 class="service-desc">{{ service.features | safe}}</h5>
+      </div>
+      <!-- service img -->
+      <div>
+        <img src="{{ url_for('static', filename='img/{}.svg'.format(service.logo_id)) }}"
+             class="service-img">
+      </div>
     </div>
 
-    <div class="col-md-4">
-      <h2>Corporate and Business services</h2>
-      <ul>
-        <li>Focus on Delivering</li>
-        <li>Speed & Reliability</li>
-        <li>Highly Advanced Infrastructure</li>
-        <li>Underground OFC Backbone</li>
-        <li>100% Non Blocking Throughout</li>
-        <li>Customized SLA</li>
-      </ul>
-    </div>
+  </div> <!-- container -->
+{% endfor %}
 
-    <div class="col-md-4">
-      <h2>Network Services</h2>
-      <ul>
-        <li>Network Turnkey Projects</li>
-        <li>OFC Connectivity</li>
-        <li>WAN</li>
-        <li>MAN</li>
-        <li>LAN</li>
-        <li>VPN</li>
-        <li>IP Triple Play Services</li>
-        <li>Wireless Solutions</li>
-        <li>Total Enterprise</li>
-        <li>Structure Cabling</li>
-      </ul>
-    </div>
+<!-- BEST PLANS -->
+<div class="container-fluid">
+  <h3 class="d-flex p-3 justify-content-center">Best plans</h3>
 
+  <div class="card-deck p-1">
+
+    {% for plan in plans %}
+    <div class="card shadow plan-card">
+      <!-- Color bar at top -->
+      <div class="d-flex w-100" id="plan-color-bar"></div>
+      <!-- Plan name -->
+      <div class="d-flex pt-3 pb-1 w-100 justify-content-center" id="plan-name">
+        <h3>{{ plan.name }}</h3>
+      </div>
+      <!-- Plan img -->
+      <img src="{{ url_for('static', filename='img/{}.svg'.format(plan.logo_id)) }}">
+      <!-- Package speed -->
+      <div class="d-flex p-2 justify-content-center">
+        <h5>{{ plan.speed }} Mbps speed</h5>
+      </div>
+      <!-- Package price -->
+      <div class="d-flex p-2 justify-content-center">
+        <h5>&#8377 {{ plan.price }} / month</h5>
+      </div>
+      <!-- Package validity -->
+      <div class="d-flex p-2 justify-content-center">
+        <h5>{{ plan.validity }} days validity</h5>
+      </div>
+    </div>
+    {% endfor %}
+
+  </div> <!-- card-deck -->
+
+  <!-- View all plans -->
+  <div class="d-flex pt-5 pb-4 justify-content-center">
+    <button type="button" class="btn btn-dark">Check all our plans</button>
   </div>
 
 </div> <!-- container -->
 
-<div class="container">
-  <h2>Our Mission</h2>
-  <p>Technology is vast , which is always expanding and changing. For all it challenges, it's also a place of virtually unlimited opportunities. To find and exploit this opportunities it requires proven expertise and the right tools. Wish Net Private Limited is a leading service provider focused and deployed in offering solutions with comprehensive suite of next generation system & network solutions, training solutions & lots of similar comprehensive solutions.
-    <br><br>
-    We combine our expertise with unmatched seamless solution. It has enabled a multitude of companies to take advantage of technology in an effective, reliable and cost-efficient manner. We provide total solution and customize communication services to enable the key business processes to our customers.
-    <br><br>
-    At Wishnet, it means achieving real business results that allow you to transform, and not just maintain, your operations. Our IT services, business solutions, and outsourcing bring you a level of certainty that no other competitor can match. You'll experience requirements that are met on-time, within budget, and with high quality.It begins greater efficiency and responsiveness to your business which has the ability to shift investment to strategic initiatives rather than tactical functions.</p>
+<!-- BROCHURES -->
+<div class="container-fluid" id="brochures">
+  <h3 class="d-flex p-3 justify-content-center">Downloads</h3>
 
-  <h2>A Practical Approach</h2>
-  <p>We understand that the solution which we will provide,must actually differentiate from others. The difference also comes from our uniquely rigorous methodology.</p>
+  <div class="d-flex justify-content-center">
 
-  <h2>Making the difference</h2>
-  <p>In various way differentiate . We work according to a four-step system. A diligent and meticulous analysis of the client's problem/project, animates the development process, which then leads on to a comprehensive and effective solution.</p>
-  <ul>
-    <li>
-      <strong>Deep Dive : </strong>Performing an in-depth analysis of the existing technology infrastructure and e-business readiness of the organization.
-    </li>
-    <li>
-      <strong>Conceive : </strong>Design solution architecture, system architecture and user interface of application.
-    </li>
-    <li>
-      <strong>Create : </strong>Build or customize packaged application.
-    </li>
-    <li>
-      <strong>Nurture : </strong>Extend and support the solution.
-    </li>
-  </ul>
+    <div class="card-deck pt-3 pb-5">
 
-</div>  <!-- container -->
+      {% for download in downloads %}
+        <div class="card shadow">
+          <img class="card-img-top"
+               src="{{ url_for('static', filename='img/{}.svg'.format(download.img)) }}"
+               alt="{{ download.name }}">
+          <div class="card-body">
+            <h5 class="card-title">{{ download.name }}</h5>
+          </div>
+          <div class="card-footer d-flex justify-content-center">
+            <a href="{{ download.link }}"
+               class="btn btn-primary"
+               download="{{ download.name }}">Download</a>
+          </div>
+        </div>
+      {% endfor %}
+
+    </div>
+  </div> <!-- flex -->
+
+</div> <!-- container -->
+
+<!-- Other ventures -->
+<div class="container-fluid">
+  <h3 class="d-flex p-3 justify-content-center">Our other ventures</h3>
+</div> <!-- container -->
+
+{% for venture in ventures %}
+  <div class="container-fluid {{ loop.cycle('service-odd', 'service-even') }}">
+
+    <h3 class="d-flex p-3 justify-content-center">{{ venture.name }}</h3>
+
+    <div class="d-flex flex-wrap justify-content-around {{ loop.cycle('flex-row', 'flex-row-reverse') }}">
+      <!-- venture description -->
+      <div>
+        <h5 class="p-3 service">{{ venture.description | safe }}</h5>
+      </div>
+      <!-- venture img -->
+      <div>
+        <img src="{{ url_for('static', filename='img/{}.svg'.format(venture.pic)) }}"
+             class="service-img">
+      </div>
+    </div>
+
+  </div> <!-- container -->
+{% endfor %}
+
 
 {% endblock %}

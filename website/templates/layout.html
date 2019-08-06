@@ -5,21 +5,69 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
+    <!-- Bootstrap 4 -->
     <link rel="stylesheet"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
           crossorigin="anonymous">
 
+    <!-- Bootswatch -->
+    <!-- <link rel="stylesheet" -->
+    <!--       href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.3.1/materia/bootstrap.min.css" -->
+    <!--       integrity="sha256-8CkGrzjOaLKQcuIPUmdEEJQ07Q83rdadwUrePJTaI4I=" -->
+    <!--       crossorigin="anonymous" /> -->
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css?family=Hind&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/f90a8ccd0a.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
     <title>{% block title %}{% endblock %}</title>
   </head>
   <body>
+
+    <!-- Extra content above Navbar -->
+    <div class="d-none d-lg-flex d-xl-flex justify-content-end align-middle"
+         id="content-above-navbar">
+      <!-- Toll free number -->
+      <div class="p-2">
+        <p class="text-white">1800-419-4244</p>
+      </div>
+      <!-- Careers -->
+      <div class="p-2">
+        <a class="text-white" href="{{ url_for('career') }}">Career</a>
+      </div>
+      <!-- About us -->
+      <div class="p-2 mr-2">
+        <a class="text-white" href="{{ url_for('about') }}">About us</a>
+      </div>
+    </div>
+
+
     <!-- NAVBAR -->
-    <nav class="navbar sticky-top navbar-expand-lg navbar-light" style="background-color: #DB1665">
+    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+
+      <!-- Brand logo -->
       <a class="navbar-brand" href="{{ url_for('index') }}">
-        <img src="{{ url_for('static', filename='img/wishnet_logo.svg') }}" width="120px" height="40px" alt="Logo" style="background-size: contain; position: relative">
+        <img src="{{ url_for('static', filename='img/wishnet_logo.svg') }}"
+             width="150px" height="50px" alt="Logo">
       </a>
-      <button class="navbar-toggler"
+
+      <!-- Login (on small and medium screens) -->
+      <ul class="navbar-nav ml-auto d-lg-none d-xl-none m-2">
+        <li class="nav-item">
+          <a class="nav-link {% if request.path == url_for('login') %}active{% endif %}"
+             href="{{ url_for('login') }}"><i class="far fa-user fa-lg"></i></a>
+        </li>
+      </ul>
+
+      <!-- Toggle button -->
+      <button class="navbar-toggler border-0"
               type="button"
               data-toggle="collapse"
               data-target="#navbarSupportedContent"
@@ -31,57 +79,60 @@
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle"
-               href="#"
-               id="navbarDropdown"
-               role="button"
-               data-toggle="dropdown"
-               aria-haspopup="true"
-               aria-expanded="false">Tariff</a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="{{ url_for('tariff', loc='kol') }}">Kolkata</a>
-              <a class="dropdown-item" href="{{ url_for('tariff', loc='wb') }}">West Bengal</a>
-            </div>
-          </li>
+          <!-- Plans -->
           <li class="nav-item">
-            <a class="nav-link {% if request.path == url_for('downloads') %}active{% endif %}"
-               href="{{ url_for('downloads') }}">Downloads</a>
+            <a class="nav-link {% if request.path == url_for('tariff') %}active{% endif %}"
+               href="{{ url_for('tariff') }}">PLANS</a>
           </li>
+          </li>
+          <!-- New connection -->
           <li class="nav-item">
-            <a class="nav-link {% if request.path == url_for('careers') %}active{% endif %}"
-               href="{{ url_for('careers') }}">Carrers</a>
+            <a class="nav-link {% if request.path == url_for('new_conn') %}active{% endif %}"
+               href="{{ url_for('new_conn') }}">NEW CONNECTION</a>
           </li>
+          <!-- Contact -->
           <li class="nav-item">
             <a class="nav-link {% if request.path == url_for('contact') %}active{% endif %}"
-               href="{{ url_for('contact') }}">Contact</a>
+               href="{{ url_for('contact') }}">CONTACT</a>
+          </li>
+          <!-- Support -->
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == url_for('support') %}active{% endif %}"
+               href="{{ url_for('support') }}">SUPPORT</a>
+          </li>
+          <!-- Career (on small and medium screens) -->
+          <li class="nav-item d-lg-none d-xl-none">
+            <a class="nav-link" href="{{ url_for('career') }}">CAREER</a>
+          </li>
+          <!-- About us (on small and medium screens) -->
+          <li class="nav-item d-lg-none d-xl-none">
+            <a class="nav-link" href="{{ url_for('about') }}">ABOUT US</a>
           </li>
         </ul>
 
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item mr-2">
-            <a class="btn btn-outline-success"
-               href="{{ url_for('recharge') }}"
-               role="button">Recharge</a>
-          </li>
+        <!-- Login on large screens-->
+        <ul class="navbar-nav ml-auto d-none d-lg-block">
           <li class="nav-item">
-            <a class="btn btn-outline-info"
-               href="{{ url_for('new_conn') }}"
-               role="button">New connection</a>
+            <a class="nav-link {% if request.path == url_for('login') %}active{% endif %}"
+               href="{{ url_for('login') }}"><i class="far fa-user fa-2x"></i></a>
           </li>
         </ul>
+
       </div>
     </nav>
 
     <main role="main">
 
       <!-- CONTENT -->
-      <div id="container">
+      <div id="container-fluid">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
               {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                   {{ message }}
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
                 </div>
               {% endfor %}
             {% endif %}
@@ -92,19 +143,40 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="pt-4 my-md-5 pt-md-5 border-top text-muted">
-      <div class="container">
-        <p class="float-right">
-          <a href="#">Back to top</a>
-        </p>
-        <p>&copy; 2014-2019 Wish Net Pvt. Ltd. &middot; <a href="{{ url_for('privacy') }}">Privacy</a></p>
+    <!-- <footer class="pt-4 my-md-5 pt-md-5 border-top text-muted"> -->
+    <footer class="border-top text-muted">
+      <div class="d-flex justify-content-between m-3 p-3">
+
+        <div>
+          <!-- Copyright -->
+          &copy; 2019 Wish Net Pvt. Ltd. &middot;
+          <!-- Privacy -->
+          <a href="{{ url_for('privacy') }}">Privacy</a> &middot;
+          <!-- Facebook -->
+          <a href="https://www.facebook.com/wishnetisp">
+            <i class="fab fa-facebook-square fa-lg"></i>
+          </a> &middot;
+          <!-- Instagram -->
+          <a href="https://www.instagram.com/wishnet_broadband/">
+            <i class="fab fa-instagram fa-lg"></i>
+          </a> &middot;
+          <!-- Twitter -->
+          <a href="https://www.twitter.com/WishnetB">
+            <i class="fab fa-twitter-square fa-lg"></i>
+          </a>
+        </div>
+
+        <div><a href="#">Back to top</a></div>
+
       </div>
     </footer>
 
+    {% block scripts %}
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    {% endblock %}
   </body>
 </html>

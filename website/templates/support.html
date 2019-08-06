@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}Support{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+  <h2>FAQs</h2>
+
+  <div id="accordion">
+    {% for item in items %}
+    <div class="card">
+
+      <div class="card-header" id="header_{{ item.id }}">
+
+        <h2 class="mb-0">
+          <button class="btn btn-link"
+                  type="button"
+                  data-toggle="collapse"
+                  data-target="#collapse_{{ item.id }}"
+                  aria-expanded="false"
+                  aria-controls="collapse_{{ item.id }}">
+          {{ item.question }}
+        </button>
+        </h2>
+
+      </div> <!-- card-header -->
+
+      <div id="collapse_{{ item.id }}"
+           class="collapse"
+           aria-labelledby="header_{{ item.id }}"
+           data-parent="#accordion">
+        <div class="card-body">
+          {{ item.answer }}
+        </div>
+
+      </div> <!-- collapse -->
+
+    </div> <!-- card -->
+    {% endfor %}
+  </div> <!-- accordion -->
+
+</div> <!-- container -->
+
+{% endblock %}

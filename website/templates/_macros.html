@@ -1,0 +1,39 @@
+{% macro render_inline_field_with_errors(field) %}
+
+    {{ field.label(class_='sr-only') }}
+    {{ field(class_='form-control mb-2 mr-sm-2') }}
+
+{% endmacro %}
+
+{% macro render_submit_button_inline(field) %}
+
+    {{ field(class_='btn btn-primary mb-2') }}
+
+{% endmacro %}
+
+{% macro render_field_with_errors_user_side(field) %}
+
+<div class="form-group">
+  {{ field.label(class_='form-control-label')  }}
+
+  <!-- display error if invalid -->
+  {% if field.errors %}
+    {{ field(class_='form-control is-invalid') }}
+    <div class="invalid-feedback">
+      {% for error in field.errors %}
+        <span>{{ error }}</span>
+      {% endfor %}
+    </div>
+  {% else %}
+    {{ field(class_='form-control', **kwargs)  | safe}}
+  {% endif %}
+
+</div> <!-- form-group -->
+
+{% endmacro %}
+
+{% macro render_submit_button(field) %}
+  <div class="form-group">
+    {{ field(class_='btn btn-outline-info') }}
+  </div>
+{% endmacro %}
