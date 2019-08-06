@@ -1,0 +1,86 @@
+/* basic settings */
+body {
+    font-family: 'Hind' !important;
+}
+
+/* contents above navbar on medium and large screens */
+#content-above-navbar {
+    background-color: #4A4d4e;
+    height: 30px;
+    font-size: small;
+}
+
+#content-above-navbar div.p div.a {
+    vertical-align: middle;
+}
+
+/* Navbar */
+nav {
+    font-family: 'Raleway' !important;
+}
+
+/* Carousel */
+.carousel-indicators li {
+    background-color: #4A4D4E;
+}
+
+.carousel-indicators .active {
+    background-color: red;
+}
+
+/* Recharge section */
+#recharge {
+    background-color: #4A4D4E;
+}
+
+.btn {
+    vertical-align: top;
+}
+
+/* Services */
+.service-odd {
+    background-color: #fff;
+}
+
+.service-even {
+    background-color: #eeeeee;
+}
+
+.service-name {
+    color: red;
+}
+
+.service-desc {
+    line-height: 1.6;
+}
+
+.service-img {
+    width: 35em;
+}
+
+/* Best plans */
+.plan-card {
+    transition: 0.3s;
+}
+
+.plan-card:hover {
+    transform:scale(1.05);
+}
+
+#plan-color-bar {
+    height: 0.2rem;
+    background-color: red;
+}
+
+#plan-name {
+    background-color: #eeeeee;
+}
+
+.card img {
+    height: 10rem;
+}
+
+/* Brochure section */
+#brochures {
+    background-color: #eeeeee;
+}
