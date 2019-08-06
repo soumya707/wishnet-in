@@ -37,6 +37,20 @@ This repository contains the code and resources for the website.
 
 ## Initiating the application
 
+### Basic setup
+
+You need a fresh Python virtualenv before starting out. To ease the process, `pipenv` is used and hence the `Pipfile` in the project. Install `pipenv` for your platform if not installed. Once done, run the following in the project root:
+
+``` shell
+pipenv --python <path/to/python/binary> install
+```
+
+This will create a new virtualenv and also install the packages specified in `Pipfile`. Make sure you are able to run the following:
+
+``` powershell
+pipenv shell
+```
+
 ### Configurations
 
 To do a fresh start of the application, create a directory called `instance` in the root of the project. Once inside the `instance` directory, create a file called `config.py` and put specific configurations. The following might serve as an example:
