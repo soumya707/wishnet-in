@@ -11,6 +11,11 @@ tox = "*"
 flask = "*"
 flask-wtf = "*"
 flask-sqlalchemy = "*"
+flask-admin = "*"
+flask-security = "*"
+flask-migrate = "*"
+suds-py3 = "*"
+lxml = "*"
 
 [requires]
 python_version = "3.7"
