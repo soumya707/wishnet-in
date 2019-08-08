@@ -15,11 +15,16 @@ from website import db
 roles_users = db.Table(
     'roles_users',
     db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
-    db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
+    db.Column('role_id', db.Integer(), db.ForeignKey('role.id')),
+    info={'bind_key': 'users'}
 )
 
 
 class Role(db.Model, RoleMixin):
+    """Define the role for users."""
+
+    __bind_key__ = 'users'
+
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
@@ -29,6 +34,10 @@ class Role(db.Model, RoleMixin):
 
 
 class User(db.Model, UserMixin):
+    """Define the user."""
+
+    __bind_key__ = 'users'
+
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
@@ -62,7 +71,6 @@ class EditorModelView(ModelView):
             (current_user.has_role('editor') or
              current_user.has_role('superuser'))
         )
-
 
 
 class UserModelView(ModelView):

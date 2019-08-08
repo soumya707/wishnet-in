@@ -2,6 +2,9 @@
 
 """Contains the models for the application."""
 
+from datetime import datetime
+import random
+import string
 
 from website import db
 
@@ -9,6 +12,9 @@ from website import db
 # Job Vacancies
 class JobVacancy(db.Model):
     """Class for representing job vacancies."""
+
+    __bind_key__ = 'assets'
+
     id = db.Column(db.Integer, primary_key=True)
     job_title = db.Column(db.String(200), nullable=False)
     salary = db.Column(db.Integer, nullable=True)
@@ -25,7 +31,9 @@ class JobVacancy(db.Model):
 # Tariff Plans
 class DataPlan(db.Model):
     """Base class for representing basic data plan."""
+
     __abstract__ = True
+    __bind_key__ = 'assets'
 
     id = db.Column(db.Integer, primary_key=True)
     plan_name = db.Column(db.String(50), nullable=False)
@@ -41,18 +49,26 @@ class DataPlan(db.Model):
 class UnlimitedPlan(DataPlan):
     """Class for representing Unlimited Plan."""
 
+    __bind_key__ = 'assets'
+
 
 class FTTHPlan(DataPlan):
     """Class for representing FTTH Plan."""
+
+    __bind_key__ = 'assets'
 
 
 class BizPlan(DataPlan):
     """Class for representing Biz Plan."""
 
+    __bind_key__ = 'assets'
+
 
 class LimitedPlan(DataPlan):
     """Base class for representing Limited Plans."""
+
     __abstract__ = True
+    __bind_key__ = 'assets'
 
     data_limit = db.Column(db.Integer, nullable=False)
     speed_after_limit = db.Column(db.Integer, nullable=False)
@@ -61,10 +77,15 @@ class LimitedPlan(DataPlan):
 class FUPPlan(LimitedPlan):
     """Class for representing FUP Plan."""
 
+    __bind_key__ = 'assets'
+
 
 # FAQ
 class FAQ(db.Model):
     """Class for representing FAQs."""
+
+    __bind_key__ = 'assets'
+
     id = db.Column(db.Integer, primary_key=True)
     question = db.Column(db.String(200), nullable=False)
     answer = db.Column(db.Text, nullable=False)
@@ -73,6 +94,9 @@ class FAQ(db.Model):
 # Best plans
 class BestPlans(db.Model):
     """Class for representing the best plans displayed on homepage."""
+
+    __bind_key__ = 'assets'
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     speed = db.Column(db.Integer, nullable=False)
@@ -84,6 +108,9 @@ class BestPlans(db.Model):
 # Services
 class Services(db.Model):
     """Class for representing the services offered."""
+
+    __bind_key__ = 'assets'
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     features = db.Column(db.Text, nullable=False)
@@ -93,6 +120,9 @@ class Services(db.Model):
 # Downloads
 class Downloads(db.Model):
     """Class for representing the downloads."""
+
+    __bind_key__ = 'assets'
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     img = db.Column(db.String(20), nullable=False)
@@ -102,7 +132,39 @@ class Downloads(db.Model):
 # Ventures
 class Ventures(db.Model):
     """Class for representing the ventures."""
+
+    __bind_key__ = 'assets'
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
     pic = db.Column(db.String(20), nullable=False)
+
+
+# New Connection form model
+class NewConnection(db.Model):
+    """Class for representing the already existing new connection info."""
+
+    __bind_key__ = 'connection'
+
+    def random_query_no_gen():
+        """Generate random query number."""
+        return ''.join(
+            random.choices(
+                string.ascii_letters + string.digits, k=8
+            )
+        )
+
+    id = db.Column(db.Integer, primary_key=True)
+    query_no = db.Column(db.String(8), unique=True,
+                         default=random_query_no_gen())
+    name = db.Column(db.String(100), nullable=False)
+    address = db.Column(db.String(500), nullable=False)
+    location = db.Column(db.String(20), nullable=False)
+    postal_code = db.Column(db.String(6), nullable=False)
+    phone_no = db.Column(db.String(10), nullable=False)
+    remark = db.Column(db.Text, nullable=True)
+    source = db.Column(db.String(10), nullable=False, default='website')
+    cust_add = db.Column(db.String(20), nullable=False, default='ADD_CUST')
+    time = db.Column(db.DateTime(), nullable=False,
+                     default=datetime.now().astimezone())
