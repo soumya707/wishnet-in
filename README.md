@@ -53,7 +53,7 @@ pipenv shell
 
 ### Configurations
 
-To do a fresh start of the application, create a directory called `instance` in the root of the project. Once inside the `instance` directory, create a file called `config.py` and put specific configurations. The following might serve as an example:
+To do a fresh start of the application, set the `FLASK_APP` environment variable to `website/__init__.py`. This will let you use the `flask` command line command later on. Then create a directory called `instance` in the root of the project. Once inside the `instance` directory, create a file called `config.py` and put specific configurations. The following might serve as an example:
 
 ``` python
 
@@ -102,3 +102,23 @@ This will create all the necessary tables.
 ### Creating admin access
 
 Before you do anything else, it is necessary to generate a `admin` superuser so that you can create and update contents of the website. To generate the same head over to the webserver in the browser and append `/admin` to the end of the URL. This will open the admin portal and is customizable via the configurations.
+
+## Maintenance
+
+### Database migrations
+
+To perform database migrations, run the following command in the project root:
+
+``` shell
+flask db migrate
+```
+
+If new changes are detected, it will generate a new Python script for upgrade/downgrade using `alembic`. Open the latest generated script to check if everything is in order. Once done, run:
+
+``` shell
+flask db upgrade
+```
+
+### Content
+
+To add/remove content on the website, head over to the admin portal and sign in either as `superuser` or `editor` (recommended). Once in the portal, you'll find the necessary options to change the contents.
