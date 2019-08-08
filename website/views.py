@@ -2,13 +2,17 @@
 
 """Views for the website."""
 
+
+import random
+import string
+
 from flask import (
     current_app, flash, redirect, render_template, request, url_for)
 
 from website import app
 from website.forms import ContactForm, NewConnectionForm, RechargeForm
 from website.models import (
-    FAQ, BestPlans, Downloads, JobVacancy, Services, Ventures)
+    FAQ, BestPlans, Downloads, JobVacancy, NewConnection, Services, Ventures)
 from website.helpers import Recharge
 
 
@@ -65,6 +69,27 @@ def new_conn():
     form = NewConnectionForm()
 
     if form.validate_on_submit():
+        connection = NewConnection(
+            query_no=''.join(
+                random.choices(
+                    string.ascii_letters + string.digits, k=8
+                )
+            ),
+            name='{} {} {}'.format(
+                form.first_name.data,
+                form.middle_name.data,
+                form.last_name.data
+            ),
+            address=form.address.data,
+            location=form.location.data,
+            postal_code=form.postal_code.data,
+            phone_no=form.phone_no.data,
+            remark=form.remark.data,
+        )
+        db = current_app.extensions['sqlalchemy'].db
+        db.session.add(connection)
+        db.session.commit()
+
         flash('Request sent successfully!', 'success')
         return redirect(url_for('new_conn'))
 
