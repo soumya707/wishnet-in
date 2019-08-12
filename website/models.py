@@ -166,5 +166,7 @@ class NewConnection(db.Model):
     remark = db.Column(db.Text, nullable=True)
     source = db.Column(db.String(10), nullable=False, default='website')
     cust_add = db.Column(db.String(20), nullable=False, default='ADD_CUST')
-    time = db.Column(db.DateTime(), nullable=False,
-                     default=datetime.now().astimezone())
+    date = db.Column(db.Date(), nullable=False,
+                     default=datetime.now().astimezone().date())
+    time = db.Column(db.Time(), nullable=False,
+                     default=datetime.now().astimezone().time())
