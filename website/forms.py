@@ -26,7 +26,7 @@ class RechargeForm(FlaskForm):
         'User ID',
         validators=[DataRequired()],
         render_kw={'placeholder': 'Customer no.'})
-    submit = SubmitField('Pay')
+    submit = SubmitField('Select plan')
 
 
 class NewConnectionForm(FlaskForm):
