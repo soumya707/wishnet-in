@@ -107,6 +107,12 @@ Before you do anything else, it is necessary to generate a `admin` superuser so 
 
 ### Database migrations
 
+Before performing any migrations, run the following command to generate a `migrations` folder and keep that in version control:
+
+``` shell
+flask db init --multidb
+```
+
 To perform database migrations, run the following command in the project root:
 
 ``` shell
