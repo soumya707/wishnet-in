@@ -1,15 +1,16 @@
-# -*- codiing: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """Define helper functions for the application."""
 
-import random, string
+import random
+import string
 
 from lxml import etree as et
 
 from suds.client import Client
 
 
-class MQSAPI(object):
+class MQSAPI():
     """Base class for accessing MQS SOAP API."""
 
     def __init__(self, app, **kwargs):
@@ -21,8 +22,8 @@ class MQSAPI(object):
     def _generate_reference_no(self):
         """Generate Reference number for transactions."""
 
-        x = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
-        return x
+        return ''.join(random.choices(string.ascii_letters + string.digits,
+                                      k=16))
 
     def _generate_mqs_username_token(self):
         """Generate MQSUserNameToken for SOAP API access."""
@@ -65,17 +66,16 @@ class Recharge(MQSAPI):
     def request(self, cust_id):
         """Send request for TopUp."""
 
-        plan = self.app.config['MQS_PLAN']
-
-        topup_info_xml = """<REQUESTINFO>
-        <KEY_NAMEVALUE>
-        <KEY_NAME>CUSTOMERNO</KEY_NAME>
-        <KEY_VALUE>{}</KEY_VALUE>
-        </KEY_NAMEVALUE>
-        <TOPUPINFO>
-        <PLANCODE>{}</PLANCODE>
-        </TOPUPINFO>
-        </REQUESTINFO>""".format(cust_id, plan)
+        topup_info_xml = '''
+        <REQUESTINFO>
+            <KEY_NAMEVALUE>
+                <KEY_NAME>CUSTOMERNO</KEY_NAME>
+                <KEY_VALUE>{}</KEY_VALUE>
+            </KEY_NAMEVALUE>
+            <TOPUPINFO>
+                <PLANCODE>{}</PLANCODE>
+            </TOPUPINFO>
+        </REQUESTINFO>'''.format(cust_id, plan)
 
         res = self.client.service.TopUp(topup_info_xml, self.ref_no)
 
@@ -104,14 +104,13 @@ class CustomerInfo(MQSAPI):
     def request(self, cust_id):
         """Send request for GetCustomerInfo."""
 
-        plan = self.app.config['MQS_PLAN']
-
-        customer_info_xml = """<REQUESTINFO>
-        <KEY_NAMEVALUE>
-        <KEY_NAME>CUSTOMERNO</KEY_NAME>
-        <KEY_VALUE>{}</KEY_VALUE>
-        </KEY_NAMEVALUE>
-        </REQUESTINFO>""".format(cust_id)
+        customer_info_xml = '''
+        <REQUESTINFO>
+            <KEY_NAMEVALUE>
+                <KEY_NAME>CUSTOMERNO</KEY_NAME>
+                <KEY_VALUE>{}</KEY_VALUE>
+            </KEY_NAMEVALUE>
+        </REQUESTINFO>'''.format(cust_id)
 
         res = self.client.service.GetCustomerInfo(
             customer_info_xml, self.ref_no
@@ -127,3 +126,63 @@ class CustomerInfo(MQSAPI):
 
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
+
+
+class ContractsByKey(MQSAPI):
+    """Define GetContractsByKey API."""
+
+    def __init__(self, app, **kwargs):
+        super(ContractsByKey, self).__init__(app, **kwargs)
+        self.response_code = None
+        self.response_msg = None
+        self.txn_no = None
+        self.txn_msg = None
+        self.active_plans = None
+
+    def request(self, cust_id):
+        """Send request for GetContractsByKey."""
+
+        contracts_info_xml = '''
+        <REQUESTINFO>
+            <KEY_NAMEVALUE>
+                <KEY_NAME>CUSTOMERNO</KEY_NAME>
+                <KEY_VALUE>{}</KEY_VALUE>
+            </KEY_NAMEVALUE>
+        </REQUESTINFO>'''.format(cust_id)
+
+        res = self.client.service.GetContractsByKey(
+            contracts_info_xml, self.ref_no
+        )
+
+        self.response_code, self.response_msg = res[0], res[1]
+
+    def response(self):
+        """Parse response for GetCustomerInfo."""
+
+        if self.response_code == 200:
+            res_tree = et.fromstring(self.response_msg)
+
+            self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
+            self.txn_msg = res_tree.findtext('.//MESSAGE')
+
+            self.active_plans = [plan.text for plan in
+                                 res_tree.iterfind('.//PlanCode')]
+
+
+class ActivePlan():
+    """Define basic functionality for active plan of the user."""
+
+    def __init__(self, mqs_name, **kwds):
+        super(ActivePlan, self).__init__(**kwds)
+        self._mqs_name = mqs_name
+        # TODO: obtain data from cache
+        self.name = self._get_name()
+        self.price = self._get_price()
+
+    def _get_name(self):
+        """Get the registered name for the plan."""
+        pass
+
+    def _get_price(self):
+        """Get the price for the plan."""
+        pass
