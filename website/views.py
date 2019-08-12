@@ -8,12 +8,16 @@ import string
 
 from flask import (
     current_app, flash, redirect, render_template, request, url_for)
+from flask_wtf.csrf import CSRFProtect
 
 from website import app
 from website.forms import ContactForm, NewConnectionForm, RechargeForm
 from website.models import (
     FAQ, BestPlans, Downloads, JobVacancy, NewConnection, Services, Ventures)
-from website.helpers import Recharge
+from website.helpers import ActivePlan, ContractsByKey
+
+
+csrf = CSRFProtect(app)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -23,17 +27,21 @@ def index():
 
     if form.validate_on_submit():
         user = request.form['user_id']
-        recharge_user = Recharge(app)
-        recharge_user.request(user)
-        recharge_user.response()
+        user_contracts = ContractsByKey(app)
+        user_contracts.request(user)
+        user_contracts.response()
 
-        flash('Transaction no.: {} Reference no.: {} Message: {}'.format(
-            recharge_user.txn_no, recharge_user.ref_no, recharge_user.txn_msg),
-              category='success')
+        active_plan_objs = [ActivePlan(plan) for plan in
+                            user_contracts.active_plans]
 
-        return redirect(url_for('index'))
-
-
+        return render_template('payment.html', active_plans=active_plan_objs)
+        # return redirect(
+        #     url_for(
+        #         'payment',
+        #         cust_id=user,
+        #         ref_no=user_contracts.ref_no,
+        #      )
+        # )
 
     services = Services.query.all()
     best_plans = BestPlans.query.all()
@@ -135,16 +143,10 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/recharge')
-def recharge():
-    """Route for recharge."""
-    form = RechargeForm()
-
-    if form.validate_on_submit():
-        flash('Recharge completed!', 'success')
-        return redirect(url_for('recharge'))
-
-    return render_template('recharge.html')
+@app.route('/payment/<int:cust_id>/<ref_no>/')
+def payment(cust_id, ref_no):
+    """Route for payment."""
+    return render_template('payment.html', active_plans=None)
 
 
 @app.route('/privacy')
