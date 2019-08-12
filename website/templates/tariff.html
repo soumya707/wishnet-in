@@ -9,10 +9,11 @@
   <!-- PLAN TABS -->
   <div class="btn-group btn-group-toggle" data-toggle="buttons">
     {% for plan in plans %}
-      <label class="btn btn-primary">
+      <label class="btn btn-primary {% if loop.first %}active{% endif %}">
         <input type="radio" id="{{ plan.__name__ }}"
                name="options" value="{{ plan.__name__ }}"
-               onchange="displayTable(this);"/>
+               autocomplete="off" onchange="displayTable(this);"
+               {% if loop.first %}checked{% endif %}/>
         {{ plan.__name__.split('Plan')[0] }}
       </label>
     {% endfor %}
@@ -23,26 +24,45 @@
 <!-- PLAN TABLES -->
 <div class="container">
   {% for plan in plans %}
-  <table class="table table-striped">
+  <div class="tables" id="{{ plan.__name__ }}-table">
+    <table class="table table-bordered table-striped">
 
-    <!-- HEAD -->
-    <thead>
-      <tr>
-        {% for column in plan.__table__.columns %}
-          <th scope="col">{{ column.name }}</th>
+      <!-- HEAD -->
+      <thead>
+        <tr>
+          <th scope="col">Plan Name</th>
+          <th scope="col">Bandwidth (in Mbps)</th>
+          <th scope="col">Validity (in days)</th>
+          <th scope="col">Price (in INR)</th>
+          {% if plan.__table__.columns.data_limit is defined %}
+          <th scope="col">Data Limit (in GB)</th>
+          {% endif %}
+          {% if plan.__table__.columns.speed_after_limit is defined %}
+          <th scope="col">Speed After Limit (in Mbps)</th>
+          {% endif %}
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for entry in plan.query.all() %}
+        <tr>
+          <!-- <td>{{ entry.id }}</td> -->
+          <th scope="row">{{ entry.plan_name }}</th>
+          <td>{{ entry.bandwidth }}</td>
+          <td>{{ entry.validity }}</td>
+          <td>{{ entry.price }}</td>
+          {% if entry.data_limit is defined %}
+          <td>{{ entry.data_limit }}</td>
+          {% endif %}
+          {% if entry.speed_after_limit is defined %}
+          <td>{{ entry.speed_after_limit }}</td>
+          {% endif %}
+        </tr>
         {% endfor %}
-      </tr>
-    </thead>
+      </tbody>
 
-    <tbody>
-      <tr>
-        {% for row in plan.query.all() %}
-          <td>{{ row }}</td>
-        {% endfor %}
-      </tr>
-    </tbody>
-
-  </table>
+    </table>
+  </div>
   {% endfor %}
 </div> <!-- container -->
 
@@ -53,8 +73,13 @@
   {{ super() }}
 
   <script>
+
+    $(document).ready(function() {
+        $(".tables").eq(0).show();
+    });
+
     function displayTable(elem) {
-        alert($(elem).val());
+        $("#" + $(elem).val() + "-table").show().siblings().hide();
     }
   </script>
 
