@@ -84,3 +84,13 @@ nav {
 #brochures {
     background-color: #eeeeee;
 }
+
+/* Tariffs */
+.tables {
+    display: none;
+}
+
+/* Payment */
+.customer-details {
+    background-color: #eeeeee;
+}
