@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %}Payment{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+  <div class="row">
+
+    <div class="col-sm-8">
+      <h3 class="d-flex p-3 justify-content-center">Active Plans</h3>
+
+      <form method="POST" action="" id="payment-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <!-- ACTIVE PLAN TABS -->
+        <div class="form-group">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            {% for plan in active_plans %}
+            <label class="btn btn-light {% if loop.first %}active{% endif %} m-1 rounded">
+              <input type="radio"
+                     name="{{ plan._mqs_name }}" value="{{ plan._mqs_name }}"
+                     autocomplete="off"
+                     {% if loop.first %}checked{% endif %}>
+              {{ plan._mqs_name }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+      </form>
+    </div> <!-- column -->
+
+    <div class="col-sm-4 customer-details">
+      <h3 class="d-flex p-3 justify-content-center">Customer Details</h3>
+
+      <div>
+        <h5>Customer ID: </h5>{{ cust_id }}
+        <h5>Contact no.: </h5>{{ phone_no }}
+        <h5>E-mail address: </h5>{{ email_id }}
+        <h5>Selected Plan: </h5>{{ plan }}
+        <h5>Total Price: </h5>{{ price }}
+        <input type="submit" class="btn btn-info" name="pay" value="Pay" form="payment-form">
+      </div>
+    </div> <!-- column -->
+
+  </div> <!-- row -->
+</div> <!-- container -->
+
+{% endblock %}
