@@ -17,7 +17,7 @@ flask-migrate = "*"
 suds-py3 = "*"
 lxml = "*"
 mysqlclient = "==1.4.1"
-mysql-python = "*"
+pycryptodome = "*"
 
 [requires]
 python_version = "3.7"

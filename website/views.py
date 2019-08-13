@@ -15,6 +15,7 @@ from website.forms import ContactForm, NewConnectionForm, RechargeForm
 from website.models import (
     FAQ, BestPlans, Downloads, JobVacancy, NewConnection, Services, Ventures)
 from website.helpers import ActivePlan, ContractsByKey
+from website.paytm_generate_checksum import get_form_data
 
 
 csrf = CSRFProtect(app)
@@ -34,7 +35,10 @@ def index():
         active_plan_objs = [ActivePlan(plan) for plan in
                             user_contracts.active_plans]
 
-        return render_template('payment.html', active_plans=active_plan_objs)
+        form_data = get_form_data(user_contracts.ref_no, user)
+
+        return render_template('payment.html', active_plans=active_plan_objs,
+                               paytm_data=form_data)
         # return redirect(
         #     url_for(
         #         'payment',

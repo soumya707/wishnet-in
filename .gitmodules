@@ -1,0 +1,3 @@
+[submodule "website/payments/Paytm_App_Checksum_Kit_Python"]
+	path = website/payments/Paytm_App_Checksum_Kit_Python
+	url = https://github.com/Paytm-Payments/Paytm_App_Checksum_Kit_Python.git

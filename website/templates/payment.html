@@ -10,15 +10,21 @@
     <div class="col-sm-8">
       <h3 class="d-flex p-3 justify-content-center">Active Plans</h3>
 
-      <form method="POST" action="" id="payment-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <form method="POST" action="https://securegw.paytm.in/theia/processTransaction"
+            id="payment-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        {% for name, value in paytm_data.items() %}
+        <input type="hidden" name="{{ name }}" value="{{ value }}">
+        {% endfor %}
+
         <!-- ACTIVE PLAN TABS -->
         <div class="form-group">
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
             {% for plan in active_plans %}
             <label class="btn btn-light {% if loop.first %}active{% endif %} m-1 rounded">
               <input type="radio"
-                     name="{{ plan._mqs_name }}" value="{{ plan._mqs_name }}"
+                     name="plan" value="{{ plan._mqs_name }}"
                      autocomplete="off"
                      {% if loop.first %}checked{% endif %}>
               {{ plan._mqs_name }}
@@ -34,7 +40,7 @@
       <h3 class="d-flex p-3 justify-content-center">Customer Details</h3>
 
       <div>
-        <h5>Customer ID: </h5>{{ cust_id }}
+        <h5>Customer ID: </h5>{{ paytm_data['CUST_ID'] }}
         <h5>Contact no.: </h5>{{ phone_no }}
         <h5>E-mail address: </h5>{{ email_id }}
         <h5>Selected Plan: </h5>{{ plan }}
