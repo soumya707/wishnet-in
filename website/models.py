@@ -163,6 +163,7 @@ class NewConnection(db.Model):
     location = db.Column(db.String(20), nullable=False)
     postal_code = db.Column(db.String(6), nullable=False)
     phone_no = db.Column(db.String(10), nullable=False)
+    email = db.Column(db.String(50), nullable=False)
     remark = db.Column(db.Text, nullable=True)
     source = db.Column(db.String(10), nullable=False, default='website')
     cust_add = db.Column(db.String(20), nullable=False, default='ADD_CUST')
@@ -170,3 +171,14 @@ class NewConnection(db.Model):
                      default=datetime.now().astimezone().date())
     time = db.Column(db.Time(), nullable=False,
                      default=datetime.now().astimezone().time())
+
+
+# Regional offices
+class RegionalOffices(db.Model):
+    """Class for representing regional offices."""
+
+    __bind_key__ = 'assets'
+
+    id = db.Column(db.Integer, primary_key=True)
+    place = db.Column(db.String(15), nullable=False)
+    address = db.Column(db.Text, nullable=False)
