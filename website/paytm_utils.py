@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from website.Checksum import generate_checksum
+from website.Checksum import generate_checksum, verify_checksum
 from website import app
 
 
@@ -13,7 +13,7 @@ def get_form_data(order_id, cust_id):
         'CUST_ID' : cust_id,
         'CHANNEL_ID' : app.config['PAYTM_CHANNELID'],
         'WEBSITE' : app.config['PAYTM_WEBSITE'],
-        # "MOBILE_NO" : "CUSTOMER_MOBILE_NUMBER",
+        # "MOBILE_NO" : "7777777777",
         # "EMAIL" : "CUSTOMER_EMAIL",
         'INDUSTRY_TYPE_ID' : app.config['PAYTM_INDUSTRYTYPE'],
         'TXN_AMOUNT' : '1.00',
@@ -26,3 +26,7 @@ def get_form_data(order_id, cust_id):
     paytm_params['CHECKSUMHASH'] = str(checksum)
 
     return paytm_params
+
+
+def verify_checksum():
+    """Verify the response checksum."""
