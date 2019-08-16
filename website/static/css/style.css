@@ -33,6 +33,10 @@ nav {
     background-color: #4A4D4E;
 }
 
+#recharge-submit {
+    background-color: red;
+}
+
 .btn {
     vertical-align: top;
 }
@@ -55,7 +59,7 @@ nav {
 }
 
 .service-img {
-    width: 35em;
+    width: 25em;
 }
 
 /* Best plans */
@@ -76,6 +80,10 @@ nav {
     background-color: #eeeeee;
 }
 
+#plans-button {
+    background-color:red;
+}
+
 .card img {
     height: 10rem;
 }
@@ -85,9 +93,52 @@ nav {
     background-color: #eeeeee;
 }
 
+#download-color-bar {
+    height: 0.2rem;
+    background-color: red;
+}
+
+.download-button {
+    background-color: #4A4d4e;
+}
+
+/* Ventures */
+.venture-odd {
+    background-color: #fff;
+}
+
+.venture-even {
+    background-color: #eeeeee;
+}
+
+.venture-img {
+    height: 15em;
+}
+
+.venture-name {
+    color: red;
+}
+
+.venture-desc {
+    line-height: 1.6;
+}
+
 /* Tariffs */
-.tables {
+.cards {
     display: none;
+
+    @include media-breakpoint-only(xl) {
+        column-count: 5;
+    }
+    @include media-breakpoint-only(lg) {
+        column-count: 4;
+    }
+    @include media-breakpoint-only(md) {
+        column-count: 4;
+    }
+    @include media-breakpoint-only(sm) {
+        column-count: 2;
+    }
 }
 
 /* Payment */

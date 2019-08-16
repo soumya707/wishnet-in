@@ -46,41 +46,41 @@
 <!-- RECHARGE FACILITY -->
 <div class="container-fluid" id="recharge">
 
-  <h3 class="d-flex p-3 justify-content-center text-white">Quick recharge</h3>
+  <h3 class="d-flex text-white pt-3 justify-content-center d-none d-sm-block d-md-none">Insta-Recharge</h3>
 
-  <form class="form-inline justify-content-center pb-3"
-        method="POST"
-        action="{{ url_for('index') }}">
-    {{ form.hidden_tag() }}
-    {{ render_inline_field_with_errors(form.user_id) }}
-    {{ render_submit_button_inline(form.submit)}}
-  </form>
+  <div class="d-flex justify-content-center p-3">
+    <h3 class="text-white pt-2 d-none d-md-block">Insta-Recharge</h3>
+
+    <form class="form-inline justify-content-center ml-2 pt-2"
+          method="POST"
+          action="{{ url_for('index') }}">
+      {{ form.hidden_tag() }}
+      {{ render_inline_field_with_errors(form.user_id) }}
+      {{ render_submit_button_inline(form.submit)}}
+    </form>
+  </div> <!-- flex -->
 
 </div> <!-- container -->
 
 <!-- SERVICES -->
-{% for service in services %}
-  <div class="container-fluid {{ loop.cycle('service-odd', 'service-even') }}">
-
-    <div class="d-flex flex-wrap justify-content-around {{ loop.cycle('flex-row', 'flex-row-reverse') }} service">
-      <!-- service features -->
-      <div class="d-flex flex-column p-3 justify-content-center">
-        <h1 class="service-name">{{ service.name }}</h1>
-        <h5 class="service-desc">{{ service.features | safe}}</h5>
-      </div>
-      <!-- service img -->
-      <div>
-        <img src="{{ url_for('static', filename='img/{}.svg'.format(service.logo_id)) }}"
-             class="img-fluid service-img">
-      </div>
-    </div>
-
-  </div> <!-- container -->
-{% endfor %}
+<div class="container-fluid border-bottom">
+  <div class="row text-center">
+    {% for service in services %}
+    <div class="col-sm-6 {{ loop.cycle('service-odd', 'service-even')}}">
+      <img src="{{ url_for('static', filename='img/{}.svg'.format(service.logo_id)) }}"
+           class="service-img">
+      <h1 class="service-name" align="center">{{ service.name }}</h1>
+      <h5>
+        <p class="service-desc" align="center">{{ service.features |safe }}</p>
+      </h5>
+    </div> <!-- col -->
+    {% endfor %}
+  </div> <!-- row -->
+</div> <!-- container -->
 
 <!-- BEST PLANS -->
 <div class="container-fluid">
-  <h3 class="d-flex p-3 justify-content-center">Best plans</h3>
+  <h3 class="d-flex p-3 pt-4 justify-content-center heading">PREFERRED PLANS</h3>
 
   <div class="card-deck p-1">
 
@@ -113,18 +113,18 @@
 
   <!-- View all plans -->
   <div class="d-flex pt-5 pb-4 justify-content-center">
-    <button type="button" class="btn btn-dark">Check all our plans</button>
+    <button type="button" class="btn text-white" id="plans-button">Browse Plans</button>
   </div>
 
 </div> <!-- container -->
 
 <!-- BROCHURES -->
 <div class="container-fluid" id="brochures">
-  <h3 class="d-flex p-3 justify-content-center">Downloads</h3>
+  <h3 class="d-flex p-3 pt-4 justify-content-center heading">DOWNLOADS</h3>
 
   <div class="d-flex justify-content-center">
 
-    <div class="card-deck pt-3 pb-5">
+    <div class="card-deck pt-3 pb-5 w-100">
 
       {% for download in downloads %}
         <div class="card shadow">
@@ -134,9 +134,11 @@
           <div class="card-body">
             <h5 class="card-title">{{ download.name }}</h5>
           </div>
+          <!-- Color bar at bottom -->
+          <div class="d-flex w-100" id="download-color-bar"></div>
           <div class="card-footer d-flex justify-content-center">
             <a href="{{ download.link }}"
-               class="btn btn-primary"
+               class="btn text-white download-button"
                download="{{ download.name }}">Download</a>
           </div>
         </div>
@@ -146,31 +148,5 @@
   </div> <!-- flex -->
 
 </div> <!-- container -->
-
-<!-- Other ventures -->
-<div class="container-fluid">
-  <h3 class="d-flex p-3 justify-content-center">Our other ventures</h3>
-</div> <!-- container -->
-
-{% for venture in ventures %}
-  <div class="container-fluid {{ loop.cycle('service-odd', 'service-even') }}">
-
-    <h3 class="d-flex p-3 justify-content-center">{{ venture.name }}</h3>
-
-    <div class="d-flex flex-wrap justify-content-around {{ loop.cycle('flex-row', 'flex-row-reverse') }}">
-      <!-- venture description -->
-      <div>
-        <h5 class="p-3 service">{{ venture.description | safe }}</h5>
-      </div>
-      <!-- venture img -->
-      <div>
-        <img src="{{ url_for('static', filename='img/{}.svg'.format(venture.pic)) }}"
-             class="service-img">
-      </div>
-    </div>
-
-  </div> <!-- container -->
-{% endfor %}
-
 
 {% endblock %}
