@@ -11,11 +11,11 @@ from flask import (
 from flask_wtf.csrf import CSRFProtect
 
 from website import app
-from website.forms import ContactForm, NewConnectionForm, RechargeForm
+from website.forms import NewConnectionForm, RechargeForm
 from website.models import (
     FAQ, BestPlans, Downloads, JobVacancy, NewConnection, Services, Ventures)
 from website.helpers import ActivePlan, ContractsByKey
-from website.paytm_generate_checksum import get_form_data
+from website.paytm_utils import get_form_data
 
 
 csrf = CSRFProtect(app)
@@ -50,7 +50,6 @@ def index():
     services = Services.query.all()
     best_plans = BestPlans.query.all()
     downloads = Downloads.query.all()
-    ventures = Ventures.query.all()
 
     return render_template(
         'index.html',
@@ -58,7 +57,6 @@ def index():
         services=services,
         plans=best_plans,
         downloads=downloads,
-        ventures=ventures
     )
 
 
@@ -70,9 +68,11 @@ def tariff():
     classes = [cls for cls in db.Model._decl_class_registry.values()
                if isinstance(cls, type) and issubclass(cls, db.Model)]
 
-    plans = [cls for cls in classes if cls.__name__.endswith('Plan')]
+    plan_classes = [cls for cls in classes if cls.__name__.endswith('Plan')]
 
-    return render_template('tariff.html', plans=plans)
+    # plans = [entry for plan in plan_classes for entry in plan.query.all()]
+
+    return render_template('tariff.html', plans=plan_classes)
 
 
 @app.route('/new_connection', methods=['GET', 'POST'])
@@ -96,6 +96,7 @@ def new_conn():
             location=form.location.data,
             postal_code=form.postal_code.data,
             phone_no=form.phone_no.data,
+            email=form.email_address.data,
             remark=form.remark.data,
         )
         db = current_app.extensions['sqlalchemy'].db
@@ -111,13 +112,7 @@ def new_conn():
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
     """Route for contact."""
-    form = ContactForm()
-
-    if form.validate_on_submit():
-        flash('Message sent successfully!', 'success')
-        return redirect(url_for('contact'))
-
-    return render_template('contact.html', form=form)
+    return render_template('contact.html')
 
 
 @app.route('/support')
@@ -138,7 +133,9 @@ def career():
 @app.route('/about')
 def about():
     """Route for about us."""
-    return render_template('about.html')
+    ventures = Ventures.query.all()
+
+    return render_template('about.html', ventures=ventures)
 
 
 @app.route('/login')
