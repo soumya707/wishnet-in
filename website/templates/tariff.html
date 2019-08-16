@@ -9,10 +9,10 @@
   <!-- PLAN TABS -->
   <div class="btn-group btn-group-toggle" data-toggle="buttons">
     {% for plan in plans %}
-      <label class="btn btn-primary {% if loop.first %}active{% endif %}">
-        <input type="radio" id="{{ plan.__name__ }}"
+      <label class="btn btn-secondary {% if loop.first %}active{% endif %} m-1 rounded">
+        <input type="radio"
                name="options" value="{{ plan.__name__ }}"
-               autocomplete="off" onchange="displayTable(this);"
+               autocomplete="off" onchange="displayCards(this);"
                {% if loop.first %}checked{% endif %}/>
         {{ plan.__name__.split('Plan')[0] }}
       </label>
@@ -21,49 +21,50 @@
 
 </div> <!-- container -->
 
-<!-- PLAN TABLES -->
-<div class="container">
+<div class="container p-3">
+
+  <!-- PLAN CARDS -->
   {% for plan in plans %}
-  <div class="tables" id="{{ plan.__name__ }}-table">
-    <table class="table table-bordered table-striped">
+  <div class="card-columns cards" id="{{ plan.__name__ }}-cards">
 
-      <!-- HEAD -->
-      <thead>
-        <tr>
-          <th scope="col">Plan Name</th>
-          <th scope="col">Bandwidth (in Mbps)</th>
-          <th scope="col">Validity (in days)</th>
-          <th scope="col">Price (in INR)</th>
-          {% if plan.__table__.columns.data_limit is defined %}
-          <th scope="col">Data Limit (in GB)</th>
-          {% endif %}
-          {% if plan.__table__.columns.speed_after_limit is defined %}
-          <th scope="col">Speed After Limit (in Mbps)</th>
-          {% endif %}
-        </tr>
-      </thead>
+    {% for entry in plan.query.all() %}
+    <div class="card shadow">
+      <!-- Color bar at top -->
+      <div class="d-flex w-100" id="plan-color-bar"></div>
+      <!-- Plan name -->
+      <div class="d-flex pt-3 pb-1 w-100 justify-content-center" id="plan-name">
+        <h3>{{ entry.plan_name }}</h3>
+      </div>
+      <!-- Package speed -->
+      <div class="d-flex p-1 justify-content-center">
+        <h5>{{ entry.bandwidth }} Mbps speed</h5>
+      </div>
+      <!-- Package price -->
+      <div class="d-flex p-1 justify-content-center">
+        <h5>&#8377 {{ entry.price }} / month</h5>
+      </div>
+      <!-- Package validity -->
+      <div class="d-flex p-1 justify-content-center">
+        <h5>{{ entry.validity }} days validity</h5>
+      </div>
+      <!-- Package data limit -->
+      {% if plan.data_limit is defined %}
+      <div class="d-flex p-1 justify-content-center">
+        <h5>{{ entry.data_limit }} GB limit</h5>
+      </div>
+      {% endif %}
+      <!-- Package speed after limit -->
+      {% if plan.speed_after_limit %}
+      <div class="d-flex p-1 justify-content-center">
+        <h5>{{ entry.speed_after_limit }} Mbps after limit</h5>
+      </div>
+      {% endif %}
+    </div> <!-- card -->
+    {% endfor %}
 
-      <tbody>
-        {% for entry in plan.query.all() %}
-        <tr>
-          <!-- <td>{{ entry.id }}</td> -->
-          <th scope="row">{{ entry.plan_name }}</th>
-          <td>{{ entry.bandwidth }}</td>
-          <td>{{ entry.validity }}</td>
-          <td>{{ entry.price }}</td>
-          {% if entry.data_limit is defined %}
-          <td>{{ entry.data_limit }}</td>
-          {% endif %}
-          {% if entry.speed_after_limit is defined %}
-          <td>{{ entry.speed_after_limit }}</td>
-          {% endif %}
-        </tr>
-        {% endfor %}
-      </tbody>
-
-    </table>
-  </div>
+  </div> <!-- card-columns -->
   {% endfor %}
+
 </div> <!-- container -->
 
 {% endblock %}
@@ -75,11 +76,11 @@
   <script>
 
     $(document).ready(function() {
-        $(".tables").eq(0).show();
+        $(".card-columns").eq(0).show();
     });
 
-    function displayTable(elem) {
-        $("#" + $(elem).val() + "-table").show().siblings().hide();
+    function displayCards(elem) {
+        $("#" + $(elem).val() + "-cards").show().siblings().hide();
     }
   </script>
 
