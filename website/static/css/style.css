@@ -3,11 +3,16 @@ body {
     font-family: 'Hind' !important;
 }
 
+.heading {
+    font-family: 'Hind' !important;
+    color: #4A4d4e;
+}
+
 /* contents above navbar on medium and large screens */
 #content-above-navbar {
     background-color: #4A4d4e;
-    height: 30px;
-    font-size: small;
+    height: 35px;
+    font-size: regular;
 }
 
 #content-above-navbar div.p div.a {
@@ -17,6 +22,10 @@ body {
 /* Navbar */
 nav {
     font-family: 'Raleway' !important;
+}
+
+.fa-user {
+    color: red;
 }
 
 /* Carousel */
@@ -121,6 +130,11 @@ nav {
 
 .venture-desc {
     line-height: 1.6;
+}
+
+/* Footer */
+.footer-img {
+    height: 5em;
 }
 
 /* Tariffs */

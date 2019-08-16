@@ -36,7 +36,7 @@
          id="content-above-navbar">
       <!-- Toll free number -->
       <div class="p-2">
-        <p class="text-white">1800-419-4244</p>
+        <h5 class="text-white">1800-419-4244</h5>
       </div>
       <!-- Careers -->
       <div class="p-2">
@@ -61,8 +61,9 @@
       <!-- Login (on small and medium screens) -->
       <ul class="navbar-nav ml-auto d-lg-none d-xl-none m-2">
         <li class="nav-item">
-          <a class="nav-link {% if request.path == url_for('login') %}active{% endif %}"
-             href="{{ url_for('login') }}"><i class="far fa-user fa-lg"></i></a>
+          <a class="nav-link" href="{{ url_for('login') }}">
+            <i class="far fa-user fa-lg"></i>
+          </a>
         </li>
       </ul>
 
@@ -90,16 +91,17 @@
             <a class="nav-link {% if request.path == url_for('new_conn') %}active{% endif %}"
                href="{{ url_for('new_conn') }}">NEW CONNECTION</a>
           </li>
-          <!-- Contact -->
-          <li class="nav-item">
-            <a class="nav-link {% if request.path == url_for('contact') %}active{% endif %}"
-               href="{{ url_for('contact') }}">CONTACT</a>
-          </li>
           <!-- Support -->
           <li class="nav-item">
             <a class="nav-link {% if request.path == url_for('support') %}active{% endif %}"
                href="{{ url_for('support') }}">SUPPORT</a>
           </li>
+          <!-- Locate us -->
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == url_for('contact') %}active{% endif %}"
+               href="{{ url_for('contact') }}">LOCATE US</a>
+          </li>
+
           <!-- Career (on small and medium screens) -->
           <li class="nav-item d-lg-none d-xl-none">
             <a class="nav-link" href="{{ url_for('career') }}">CAREER</a>
@@ -173,7 +175,9 @@
           </a>
         </div>
 
-      </div>
+      </div> <!-- flex -->
+
+      <img src="{{ url_for('static', filename='img/footer.png') }}" class="img-fluid w-100 footer-img">
     </footer>
 
     {% block scripts %}
