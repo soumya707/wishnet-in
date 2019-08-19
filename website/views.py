@@ -7,15 +7,17 @@ import random
 import string
 
 from flask import (
-    current_app, flash, redirect, render_template, request, url_for)
+    current_app, flash, redirect, render_template, request, session, url_for)
 from flask_wtf.csrf import CSRFProtect
+from flask_sqlalchemy_caching import FromCache
 
-from website import app
+from website import app, cache
 from website.forms import NewConnectionForm, RechargeForm
 from website.models import (
-    FAQ, BestPlans, Downloads, JobVacancy, NewConnection, Services, Ventures)
-from website.helpers import ActivePlan, ContractsByKey
-from website.paytm_utils import get_form_data
+    FAQ, BestPlans, Downloads, JobVacancy, NewConnection, RegionalOffices,
+    Services, Ventures)
+from website.helpers import ActivePlan, ContractsByKey, Recharge
+from website.paytm_utils import initiate_transaction, verify_transaction
 
 
 csrf = CSRFProtect(app)
@@ -35,21 +37,25 @@ def index():
         active_plan_objs = [ActivePlan(plan) for plan in
                             user_contracts.active_plans]
 
-        form_data = get_form_data(user_contracts.ref_no, user)
+        form_data = initiate_transaction(user_contracts.ref_no, user)
 
-        return render_template('payment.html', active_plans=active_plan_objs,
-                               paytm_data=form_data)
-        # return redirect(
-        #     url_for(
-        #         'payment',
-        #         cust_id=user,
-        #         ref_no=user_contracts.ref_no,
-        #      )
-        # )
+        session['active_plans'] = active_plan_objs
+        session['paytm_form'] = form_data
 
-    services = Services.query.all()
-    best_plans = BestPlans.query.all()
-    downloads = Downloads.query.all()
+        # return render_template('payment.html', active_plans=active_plan_objs,
+        #                        paytm_data=form_data)
+
+        return redirect(
+            url_for(
+                'payment',
+                cust_id=user,
+                ref_no=user_contracts.ref_no,
+            )
+        )
+
+    services = Services.query.options(FromCache(cache)).all()
+    best_plans = BestPlans.query.options(FromCache(cache)).all()
+    downloads = Downloads.query.options(FromCache(cache)).all()
 
     return render_template(
         'index.html',
@@ -109,16 +115,18 @@ def new_conn():
     return render_template('new_connection.html', form=form)
 
 
-@app.route('/contact', methods=['GET', 'POST'])
+@app.route('/contact')
 def contact():
     """Route for contact."""
-    return render_template('contact.html')
+    regional_offices = RegionalOffices.query.options(FromCache(cache)).all()
+
+    return render_template('contact.html', regional_offices=regional_offices)
 
 
 @app.route('/support')
 def support():
     """Route for support."""
-    faq = FAQ.query.all()
+    faq = FAQ.query.options(FromCache(cache)).all()
 
     return render_template('support.html', items=faq)
 
@@ -126,28 +134,51 @@ def support():
 @app.route('/career')
 def career():
     """Route for career."""
-    items = JobVacancy.query.all()
+    items = JobVacancy.query.options(FromCache(cache)).all()
+
     return render_template('careers.html', items=items)
 
 
 @app.route('/about')
 def about():
     """Route for about us."""
-    ventures = Ventures.query.all()
+    ventures = Ventures.query.options(FromCache(cache)).all()
 
     return render_template('about.html', ventures=ventures)
 
 
-@app.route('/login')
-def login():
-    """Route for login."""
-    return render_template('login.html')
+# @app.route('/login')
+# def login():
+#     """Route for login."""
+#     return render_template('login.html')
 
 
 @app.route('/payment/<int:cust_id>/<ref_no>/')
 def payment(cust_id, ref_no):
     """Route for payment."""
-    return render_template('payment.html', active_plans=None)
+    return render_template(
+        'payment.html',
+        active_plans=session['active_plans'],
+        paytm_data=session['paytm_form']
+    )
+
+
+@app.route('/verify', methods=['GET', 'POST'])
+def verify_response():
+    """Route for verifying response for payment."""
+    bank_txn_id = request.form['BANKTXNID']
+    checksumhash = request.form['CHECKSUMHASH']
+
+    verified = verify_transaction(checksumhash)
+
+    #TODO: add transaction status API call
+    if verified:
+        top_up = Recharge(app)
+        top_up.request()
+        top_up.response()
+        redirect(url_for('index'))
+    else:
+        redirect(url_for('payment'))
 
 
 @app.route('/privacy')

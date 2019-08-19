@@ -5,10 +5,13 @@
 import os.path as op
 
 from flask import Flask, url_for, redirect
-from flask_admin import Admin, AdminIndexView, expose
+from flask_admin import Admin
 from flask_admin import helpers as admin_helpers
 from flask_migrate import Migrate
+from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy_caching import CachingQuery
+from flask_caching import Cache
 from flask_security import Security, SQLAlchemyUserDatastore
 
 
@@ -22,35 +25,48 @@ app.config.from_pyfile('config.py')
 
 
 # Custom access-based Admin Index
-class AdminHomeView(AdminIndexView):
-    @expose('/')
-    def index(self):
-        if not current_user.is_authenticated:
-            return redirect(url_for('index'))
+# class AdminHomeView(AdminIndexView):
+#     @expose('/')
+#     def index(self):
+#         if not current_user.is_authenticated:
+#             return redirect(url_for('index'))
 
-        return self.render('admin/index.html')
+#         return self.render('admin/index.html')
 
 
 # initiate required objects
-db = SQLAlchemy(app)
+# setup DB
+db = SQLAlchemy(app, query_class=CachingQuery)
+
+# setup cache
+cache = Cache(app)
+
+# setup admin portal
 admin = Admin(
     app,
     name='Admin',
+    url='/admin',
+    endpoint='admin',
     base_template='admin/master.html',
-    # index_view=AdminHomeView(),
-    template_mode='bootstrap3'
+    template_mode='bootstrap3',
 )
+
+# setup DB migrate
 migrate = Migrate(app, db)
+
+# setup session storage
+Session(app)
 
 
 # import here to avoid cyclic import
 from website import views
-from website.models import BestPlans, Downloads, JobVacancy, FAQ, Services, \
-    Ventures
+from website.models import BestPlans, Downloads, JobVacancy, FAQ, \
+    RegionalOffices, Services, Ventures
 from website.models import  BizPlan, FUPPlan, FTTHPlan, UnlimitedPlan
 from website.security.models import Role, User
 from website.security.models import CustomFileView, EditorModelView, \
     SuperuserModelView, UserModelView
+from website.security.models import PortalView
 
 
 # Setup Flask-Security
@@ -73,8 +89,9 @@ admin.add_view(EditorModelView(UnlimitedPlan, db.session, category='Plans'))
 admin.add_view(EditorModelView(FTTHPlan, db.session, category='Plans'))
 admin.add_view(EditorModelView(BizPlan, db.session, category='Plans'))
 admin.add_view(EditorModelView(FUPPlan, db.session, category='Plans'))
-admin.add_view(EditorModelView(FAQ, db.session))
-admin.add_view(EditorModelView(JobVacancy, db.session))
+admin.add_view(EditorModelView(RegionalOffices, db.session, category='Info'))
+admin.add_view(EditorModelView(FAQ, db.session, category='Info'))
+admin.add_view(EditorModelView(JobVacancy, db.session, category='Info'))
 
 
 # define a context processor for merging flask-admin's template context into the
