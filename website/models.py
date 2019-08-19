@@ -40,7 +40,8 @@ class DataPlan(db.Model):
     bandwidth = db.Column(db.Integer, nullable=False)
     validity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Integer, nullable=False)
-    # terms = db.Column(db.Text, nullable=True)
+    contention_ratio = db.Column(db.String(5), nullable=False)
+    plan_type = db.Column(db.String(20), nullable=False)
 
     def __str__(self):
         return self.plan_name
@@ -62,6 +63,8 @@ class BizPlan(DataPlan):
     """Class for representing Biz Plan."""
 
     __bind_key__ = 'assets'
+
+    static_ip = db.Column(db.Integer, nullable=False)
 
 
 class LimitedPlan(DataPlan):
