@@ -6,7 +6,16 @@ body {
 .heading {
     font-family: 'Hind' !important;
     color: #4A4d4e;
+    text-align: center;
 }
+
+.heading-underline {
+    height:0.2rem;
+    width:3%;
+    background-image: linear-gradient(to right, transparent, red);
+}
+
+/* LAYOUT */
 
 /* contents above navbar on medium and large screens */
 #content-above-navbar {
@@ -28,6 +37,8 @@ nav {
     color: red;
 }
 
+/* INDEX */
+
 /* Carousel */
 .carousel-indicators li {
     background-color: #4A4D4E;
@@ -44,9 +55,6 @@ nav {
 
 #recharge-submit {
     background-color: red;
-}
-
-.btn {
     vertical-align: top;
 }
 
@@ -68,7 +76,8 @@ nav {
 }
 
 .service-img {
-    width: 25em;
+    width: 100%;
+    height: 20rem;
 }
 
 /* Best plans */
@@ -77,7 +86,7 @@ nav {
 }
 
 .plan-card:hover {
-    transform:scale(1.05);
+    transform: scale(1.05);
 }
 
 #plan-color-bar {
@@ -93,13 +102,17 @@ nav {
     background-color:red;
 }
 
-.card img {
+.plan-card img {
     height: 10rem;
 }
 
 /* Brochure section */
 #brochures {
     background-color: #eeeeee;
+}
+
+.download-cards img {
+    height: 20rem;
 }
 
 #download-color-bar {
@@ -109,6 +122,77 @@ nav {
 
 .download-button {
     background-color: #4A4d4e;
+}
+
+/* PLANS */
+
+/* Tariffs */
+.plan-labels {
+    font-family: 'Hind' !important;
+    background-color: red;
+    min-width: 70px;
+}
+
+.dropdown-toggle::after {
+    display:none !important;
+}
+
+@media (max-width: 34em) {
+    .dropdown-menu {
+        width: 15rem;
+    }
+}
+
+@media (min-width: 48em) {
+    .dropdown-menu {
+        width: 20rem;
+    }
+    .card-columns {
+        -webkit-column-count: 4;
+        -moz-column-count: 4;
+        column-count: 4;
+    }
+}
+
+@media (min-width: 96em) {
+    .card-columns {
+        -webkit-column-count: 5;
+        -moz-column-count: 5;
+        column-count: 5;
+    }
+}
+
+.card-columns .card {
+    /* width: 17rem; */
+    min-height: 20rem;
+    border-radius: 25px 0px;
+    border: 2px solid #4A4d4e;
+    transition: 0.1s;
+}
+
+.card-columns .card:hover {
+    border: 2px solid red;
+}
+
+.all-plan-card-underline {
+    height:0.2rem;
+    width:100%;
+    background-image: linear-gradient(to right, transparent, red);
+}
+
+/* LOCATE US */
+.hq-card img {
+    height: 15rem;
+}
+
+/* ABOUT US */
+
+#about-us-card-background {
+    background-color: #eeeeee;
+}
+
+.about-us-card-heading {
+    color: red;
 }
 
 /* Ventures */
@@ -132,28 +216,7 @@ nav {
     line-height: 1.6;
 }
 
-/* Footer */
-.footer-img {
-    height: 5em;
-}
-
-/* Tariffs */
-.cards {
-    display: none;
-
-    @include media-breakpoint-only(xl) {
-        column-count: 5;
-    }
-    @include media-breakpoint-only(lg) {
-        column-count: 4;
-    }
-    @include media-breakpoint-only(md) {
-        column-count: 4;
-    }
-    @include media-breakpoint-only(sm) {
-        column-count: 2;
-    }
-}
+/* PAYMENT */
 
 /* Payment */
 .customer-details {

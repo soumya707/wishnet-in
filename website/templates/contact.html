@@ -5,46 +5,48 @@
 
 {% block content %}
 
-<div class="container">
+<div class="container p-3">
 
-  <h2>Location map</h2>
-  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d651.1738392023512!2d88.39648879284367!3d22.5942273165435!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x832c7c68a84f0c2f!2sWish+Net+Pvt+Ltd!5e0!3m2!1sen!2sin!4v1516439379270" width="100%" height="350" frameborder="0" style="border:0"></iframe>
+  <h2 class="pb-3">Headquarters
+    <div style="height:0.2rem;width:3%;background-image: linear-gradient(to right, transparent, red);"></div>
+  </h2>
 
-  <div class="row">
+  <div class="card-deck">
+    <!-- address -->
+    <div class="card hq-card">
+      <img class="card-img-top"
+           src="{{ url_for('static', filename='img/wishnet.svg') }}">
+      <div class="card-body">
+        <h4 class="card-title">Wish Net Private Limited</h4>
+        <p class="card-text">86, Golaghata Road, Saraswati Apartment, 6th Floor</br>
+          Kolkata - 700 048</br>West Bengal</br>India</p>
+      </div>
+    </div> <!-- card -->
+    <!-- map -->
+    <div class="card embed-responsive">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d651.1738392023512!2d88.39648879284367!3d22.5942273165435!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x832c7c68a84f0c2f!2sWish+Net+Pvt+Ltd!5e0!3m2!1sen!2sin!4v1516439379270"></iframe>
+    </div> <!-- card -->
 
-    <div class="col-md-4">
-      <h4>Wish Net Private Limited</h4>
-      <p>86, Golaghata Road, Saraswati Apartment, 6th Floor</p>
-      <p>Kolkata - 700 048, West Bengal, India</p>
-    </div>
-
-  </div>
+  </div> <!-- card-deck -->
 
 </div> <!-- container -->
 
-<div class="container">
+<div class="container p-3">
 
-  <h2>Our regional offices</h2>
-  <div class="row">
+  <h2 class="pb-3">Our regional offices
+    <div style="height:0.2rem;width:3%;background-image: linear-gradient(to right, transparent, red);"></div>
+  </h2>
 
-    <div class="col-md-4">
-      <h3>Durgapur branch</h3>
-      <p>39, Uday Sankar Bithi, City Center Durgapur, Burdwan - 713216</p>
-      <p>durgapurro@wishnet.co.in</p>
-    </div>
-
-    <div class="col-md-4">
-      <h3>Malda branch</h3>
-      <p>Near Shanti Bharati Parisad, English Bazar, Malda</p>
-      <p>maldaro@wishnet.co.in</p>
-    </div>
-
-    <div class="col-md-4">
-      <h3>Siliguri branch</h3>
-      <p>2nd Mile, 2nd Floor Sevok Road, Opp. All India Radio, Siliguri - 734401, Darjeeling</p>
-    </div>
-
-  </div>
+  <div class="card-deck">
+    {% for office in regional_offices %}
+    <div class="card">
+      <div class="card-body">
+        <h3 class="card-title">{{ office.place }} branch</h3>
+        <p class="card-text">{{ office.address|safe }}</p>
+      </div>
+    </div> <!-- card -->
+    {% endfor %}
+  </div> <!-- card-deck -->
 
 </div> <!-- container -->
 {% endblock %}

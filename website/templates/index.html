@@ -80,7 +80,7 @@
 
 <!-- BEST PLANS -->
 <div class="container-fluid">
-  <h3 class="d-flex p-3 pt-4 justify-content-center heading">PREFERRED PLANS</h3>
+  <h3 class="d-flex p-3 pt-4 justify-content-center heading">FEATURED PLANS</h3>
 
   <div class="card-deck p-1">
 
@@ -98,14 +98,15 @@
       <div class="d-flex p-2 justify-content-center">
         <h5>{{ plan.speed }} Mbps speed</h5>
       </div>
-      <!-- Package price -->
-      <div class="d-flex p-2 justify-content-center">
-        <h5>&#8377 {{ plan.price }} / month</h5>
-      </div>
       <!-- Package validity -->
       <div class="d-flex p-2 justify-content-center">
         <h5>{{ plan.validity }} days validity</h5>
       </div>
+      <!-- Package price -->
+      <div class="d-flex p-2 justify-content-center">
+        <h5>&#8377 {{ plan.price }} / month</h5>
+      </div>
+
     </div>
     {% endfor %}
 
@@ -113,7 +114,9 @@
 
   <!-- View all plans -->
   <div class="d-flex pt-5 pb-4 justify-content-center">
-    <button type="button" class="btn text-white" id="plans-button">Browse Plans</button>
+    <a href="{{ url_for('tariff') }}" class="btn text-white" id="plans-button">
+      Browse Plans
+    </a>
   </div>
 
 </div> <!-- container -->
@@ -122,12 +125,10 @@
 <div class="container-fluid" id="brochures">
   <h3 class="d-flex p-3 pt-4 justify-content-center heading">DOWNLOADS</h3>
 
-  <div class="d-flex justify-content-center">
-
-    <div class="card-deck pt-3 pb-5 w-100">
+    <div class="card-deck pt-3 pb-5">
 
       {% for download in downloads %}
-        <div class="card shadow">
+        <div class="card shadow download-cards">
           <img class="card-img-top"
                src="{{ url_for('static', filename='img/{}.svg'.format(download.img)) }}"
                alt="{{ download.name }}">
@@ -145,7 +146,6 @@
       {% endfor %}
 
     </div>
-  </div> <!-- flex -->
 
 </div> <!-- container -->
 
