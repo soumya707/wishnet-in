@@ -18,6 +18,11 @@ suds-py3 = "*"
 lxml = "*"
 mysqlclient = "==1.4.1"
 pycryptodome = "*"
+flask-session = "*"
+requests = "*"
+redis = "*"
+flask-caching = "*"
+flask-sqlalchemy-caching = "*"
 
 [requires]
 python_version = "3.7"
