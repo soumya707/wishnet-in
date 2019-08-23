@@ -57,7 +57,6 @@ migrate = Migrate(app, db)
 # setup session storage
 Session(app)
 
-
 # import here to avoid cyclic import
 from website import views
 from website.models import BestPlans, Downloads, JobVacancy, FAQ, \

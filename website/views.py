@@ -8,15 +8,16 @@ import string
 
 from flask import (
     current_app, flash, redirect, render_template, request, session, url_for)
-from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy_caching import FromCache
+from flask_wtf.csrf import CSRFProtect
 
 from website import app, cache
-from website.forms import NewConnectionForm, RechargeForm
+from website.forms import AuthenticationForm, NewConnectionForm, RechargeForm
+from website.helpers import (
+    ActivePlan, AuthenticateUser, ContractsByKey, Recharge)
 from website.models import (
     FAQ, BestPlans, Downloads, JobVacancy, NewConnection, RegionalOffices,
     Services, Ventures)
-from website.helpers import ActivePlan, ContractsByKey, Recharge
 from website.paytm_utils import initiate_transaction, verify_transaction
 
 

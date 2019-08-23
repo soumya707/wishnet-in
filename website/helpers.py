@@ -6,7 +6,6 @@ import random
 import string
 
 from lxml import etree as et
-
 from suds.client import Client
 
 

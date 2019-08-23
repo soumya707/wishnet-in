@@ -4,11 +4,11 @@
 
 import json
 
-from flask import url_for
 import requests
+from flask import url_for
 
-from website.Checksum import generate_checksum, verify_checksum
 from website import app
+from website.Checksum import generate_checksum, verify_checksum
 
 
 def initiate_transaction(order_id, cust_id):
