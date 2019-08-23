@@ -24,12 +24,19 @@ from website.paytm_utils import initiate_transaction, verify_transaction
 csrf = CSRFProtect(app)
 
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    """Route for homepage."""
+@app.before_first_request
+def init_session_var():
+    """Initialize session variable for portal use."""
 
     # set user to be logged out
     session['user_logged_in'] = False
+
+
+# Routes
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    """Route for homepage."""
 
     form = RechargeForm()
 
@@ -47,9 +54,6 @@ def index():
 
         session['active_plans'] = active_plan_objs
         session['paytm_form'] = form_data
-
-        # return render_template('payment.html', active_plans=active_plan_objs,
-        #                        paytm_data=form_data)
 
         return redirect(
             url_for(
@@ -180,7 +184,7 @@ def portal():
 
         return render_template('portal.html', logged_in=False, form=form)
 
-    else:
+    elif session['user_logged_in']:
         return render_template('portal.html', logged_in=True)
 
 

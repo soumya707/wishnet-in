@@ -24,16 +24,6 @@ app.config.from_object('config')
 app.config.from_pyfile('config.py')
 
 
-# Custom access-based Admin Index
-# class AdminHomeView(AdminIndexView):
-#     @expose('/')
-#     def index(self):
-#         if not current_user.is_authenticated:
-#             return redirect(url_for('index'))
-
-#         return self.render('admin/index.html')
-
-
 # initiate required objects
 # setup DB
 db = SQLAlchemy(app, query_class=CachingQuery)
@@ -59,13 +49,13 @@ Session(app)
 
 # import here to avoid cyclic import
 from website import views
-from website.models import BestPlans, Downloads, JobVacancy, FAQ, \
-    RegionalOffices, Services, Ventures
-from website.models import  BizPlan, FUPPlan, FTTHPlan, UnlimitedPlan
+from website.models import (
+    BestPlans, Downloads, JobVacancy, FAQ, RegionalOffices, Services, Ventures)
+from website.models import  (
+    BizPlan, FUPPlan, FTTHPlan, UnlimitedPlan)
 from website.security.models import Role, User
-from website.security.models import CustomFileView, EditorModelView, \
-    SuperuserModelView, UserModelView
-from website.security.models import PortalView
+from website.security.models import (
+    CustomFileView, EditorModelView, SuperuserModelView, UserModelView)
 
 
 # Setup Flask-Security
