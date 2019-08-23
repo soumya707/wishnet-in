@@ -10,9 +10,16 @@ body {
 }
 
 .heading-underline {
-    height:0.2rem;
-    width:3%;
+    height: 0.2rem;
+    width: 2em;
     background-image: linear-gradient(to right, transparent, red);
+}
+
+.index-heading-underline {
+    height: 0.2rem;
+    width: 3em;
+    background-image: linear-gradient(to right, transparent, red);
+    margin: 0 auto;
 }
 
 /* LAYOUT */

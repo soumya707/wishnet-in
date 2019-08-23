@@ -69,9 +69,9 @@
     <div class="col-sm-6 {{ loop.cycle('service-odd', 'service-even')}}">
       <img src="{{ url_for('static', filename='img/{}.svg'.format(service.logo_id)) }}"
            class="service-img">
-      <h1 class="service-name" align="center">{{ service.name }}</h1>
+      <h1 class="service-name">{{ service.name }}</h1>
       <h5>
-        <p class="service-desc" align="center">{{ service.features |safe }}</p>
+        <p class="service-desc">{{ service.features |safe }}</p>
       </h5>
     </div> <!-- col -->
     {% endfor %}
@@ -80,7 +80,9 @@
 
 <!-- BEST PLANS -->
 <div class="container-fluid">
-  <h3 class="d-flex p-3 pt-4 justify-content-center heading">FEATURED PLANS</h3>
+  <h3 class="py-4 heading">Featured Plans
+    <div class="index-heading-underline"></div>
+  </h3>
 
   <div class="card-deck p-1">
 
@@ -123,7 +125,9 @@
 
 <!-- BROCHURES -->
 <div class="container-fluid" id="brochures">
-  <h3 class="d-flex p-3 pt-4 justify-content-center heading">DOWNLOADS</h3>
+  <h3 class="py-4 heading">Downloads
+    <div class="index-heading-underline"></div>
+  </h3>
 
     <div class="card-deck pt-3 pb-5">
 
