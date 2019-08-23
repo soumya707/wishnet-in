@@ -27,10 +27,15 @@ csrf = CSRFProtect(app)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     """Route for homepage."""
+
+    # set user to be logged out
+    session['user_logged_in'] = False
+
     form = RechargeForm()
 
     if form.validate_on_submit():
         user = request.form['user_id']
+
         user_contracts = ContractsByKey(app)
         user_contracts.request(user)
         user_contracts.response()
@@ -148,10 +153,35 @@ def about():
     return render_template('about.html', ventures=ventures)
 
 
-# @app.route('/login')
-# def login():
-#     """Route for login."""
-#     return render_template('login.html')
+@app.route('/portal', methods=['GET', 'POST'])
+def portal():
+    """Route for portal."""
+
+    # preliminary check whether user is already logged in
+    if not session['user_logged_in']:
+        form = AuthenticationForm()
+
+        if form.validate_on_submit():
+            username = request.form['username']
+            password = request.form['password']
+
+            authenticate_user = AuthenticateUser(app)
+            authenticate_user.request(username, password)
+
+            # if login is successful
+            if authenticate_user.response():
+                session['user_logged_in'] = True
+                return render_template('portal.html', logged_in=True)
+
+            # if login fails, display message
+            else:
+                flash('Could not log in due to invalid credentials', 'danger')
+                return redirect(url_for('portal'))
+
+        return render_template('portal.html', logged_in=False, form=form)
+
+    else:
+        return render_template('portal.html', logged_in=True)
 
 
 @app.route('/payment/<int:cust_id>/<ref_no>/')

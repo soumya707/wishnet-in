@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import render_field_with_errors_user_side, render_submit_button %}
+
+{% block title %}Self-care Portal{% endblock %}
+
+{% block content %}
+
+<div class="container p-3">
+
+  <!-- checks whether already logged in or not -->
+  {% if not logged_in %}
+
+  <h2>Log in
+    <div class="heading-underline"></div>
+  </h2>
+
+    <div class="content-section">
+
+      <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+
+          <div class="form-row">
+            <!-- USERNAME -->
+            {{ render_field_with_errors_user_side(form.username) }}
+          </div> <!-- form row -->
+
+          <div class="form-row">
+            <!-- PASSWORD -->
+            {{ render_field_with_errors_user_side(form.password) }}
+          </div> <!-- row -->
+
+        </fieldset>
+
+        <!-- SUBMIT -->
+        {{ render_submit_button(form.submit) }}
+
+      </form>
+    </div> <!-- content-section -->
+
+    {% else %}
+    <div>Logged in</div>
+
+    {% endif %}
+</div> <!-- container -->
+
+{% endblock %}

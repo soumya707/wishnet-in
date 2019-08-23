@@ -168,6 +168,87 @@ class ContractsByKey(MQSAPI):
                                  res_tree.iterfind('.//PlanCode')]
 
 
+class AuthenticateUser(MQSAPI):
+    """Define AuthenticateUser API."""
+
+    def __init__(self, app, **kwargs):
+        super(AuthenticateUser, self).__init__(app, **kwargs)
+        self.response_code = None
+        self.response_msg = None
+        self.txn_no = None
+        self.txn_msg = None
+
+    def request(self, username, password):
+        """Send request for AuthenticateUser."""
+
+        authenticate_user_xml = '''
+        <REQUESTINFO>
+            <AUTHENTICATEUSER>
+                <USERNAME>{}</USERNAME>
+                <PASSWORD>{}</PASSWORD>
+            </AUTHENTICATEUSER>
+        </REQUESTINFO>'''.format(username, password)
+
+        res = self.client.service.AuthenticateUser(
+            authenticate_user_xml, self.ref_no
+        )
+
+        self.response_code, self.response_msg = res[0], res[1]
+
+    def response(self):
+        """Parse response for AuthenticateUser."""
+
+        if self.response_code == 200:
+            res_tree = et.fromstring(self.response_msg)
+
+            self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
+            self.txn_msg = res_tree.findtext('.//MESSAGE')
+
+            if res_tree.findtext('.//ISVALIDUSER') == 'TRUE':
+                valid = True
+            else:
+                valid = False
+
+            return valid
+
+
+class Docket(MQSAPI):
+    """Define RegisterTicket API."""
+
+    def __init__(self, app, **kwargs):
+        super(Docket, self).__init__(app, **kwargs)
+        self.response_code = None
+        self.response_msg = None
+        self.txn_no = None
+        self.txn_msg = None
+
+    def request(self, cust_id):
+        """Send request for RegisterTicket."""
+
+        customer_info_xml = '''
+        <REQUESTINFO>
+            <KEY_NAMEVALUE>
+                <KEY_NAME>CUSTOMERNO</KEY_NAME>
+                <KEY_VALUE>{}</KEY_VALUE>
+            </KEY_NAMEVALUE>
+        </REQUESTINFO>'''.format(cust_id)
+
+        res = self.client.service.GetCustomerInfo(
+            customer_info_xml, self.ref_no
+        )
+
+        self.response_code, self.response_msg = res[0], res[1]
+
+    def response(self):
+        """Parse response for RegisterTicket."""
+
+        if self.response_code == 200:
+            res_tree = et.fromstring(self.response_msg)
+
+            self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
+            self.txn_msg = res_tree.findtext('.//MESSAGE')
+
+
 class ActivePlan():
     """Define basic functionality for active plan of the user."""
 

@@ -60,3 +60,10 @@ class NewConnectionForm(FlaskForm):
     )
     remark = TextAreaField('Remarks', validators=[Length(max=200)])
     submit = SubmitField('Submit')
+
+
+class AuthenticationForm(FlaskForm):
+    """Class for authentication form."""
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Sign in')
