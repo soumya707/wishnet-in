@@ -4,9 +4,9 @@
 
 {% block content %}
 
-<div class="container py-3">
+<div class="container p-3">
 
-  <h2>FAQs
+  <h2 class="py-3">FAQs
     <div class="heading-underline"></div>
   </h2>
 
@@ -34,7 +34,7 @@
            aria-labelledby="header_{{ item.id }}"
            data-parent="#accordion">
         <div class="card-body">
-          {{ item.answer }}
+          {{ item.answer |safe }}
         </div>
 
       </div> <!-- collapse -->
