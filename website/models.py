@@ -17,15 +17,24 @@ class JobVacancy(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     job_title = db.Column(db.String(200), nullable=False)
-    salary = db.Column(db.Integer, nullable=True)
-    experience = db.Column(db.String(200), nullable=True)
-    required = db.Column(db.String(10), nullable=True)
-    opening = db.Column(db.Integer, nullable=False)
-    posted_on = db.Column(db.Date, nullable=False)
-    description = db.Column(db.Text, nullable=False)
+    company = db.Column(db.String(200), nullable=False)
+    location = db.Column(db.String(50), nullable=False)
+    salary_range = db.Column(db.String(50), nullable=False)
+    job_type = db.Column(db.String(50), nullable=False)
+    job_description = db.Column(db.Text, nullable=False)
+    job_summary = db.Column(db.Text, nullable=False)
+    key_skills = db.Column(db.String(50), nullable=False)
+    experience = db.Column(db.String(200), nullable=False)
     education = db.Column(db.String(50), nullable=False)
-    education_requirements = db.Column(db.Text, nullable=False)
+    preferable = db.Column(db.String(20), nullable=False)
+    gender = db.Column(db.String(20), nullable=False)
+    posted_on = db.Column(db.Date, nullable=False)
     dept_email = db.Column(db.String(50), nullable=False)
+    no_of_opening = db.Column(db.Integer, nullable=False)
+    priority = db.Column(db.String(20), nullable=False)
+
+    def __str__(self):
+        return self.job_title
 
 
 # Tariff Plans
@@ -128,7 +137,6 @@ class Downloads(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    img = db.Column(db.String(20), nullable=False)
     link = db.Column(db.String(100), nullable=False)
 
 
