@@ -113,10 +113,10 @@
 
   <!-- PLAN CARDS -->
   {% for plan in plans %}
-  <div class="card-columns">
+  <div class="masonry justify-content-center">
 
     {% for entry in plan.query.all() %}
-    <div class="card shadow {{ plan.__name__ }}-cards">
+    <div class="masonry-brick shadow mt-3 mr-3 {{ plan.__name__ }}-cards">
       <!-- Plan name -->
       <h3 class="card-title heading pt-3">{{ entry.plan_name }}
         <div class="card-heading-underline"></div>
@@ -177,7 +177,7 @@
     });
 
     function displayCards(elem) {
-        $(".card").hide();
+        $(".masonry-brick").hide();
         $("." + $(elem).val() + "-cards").show();
     }
 

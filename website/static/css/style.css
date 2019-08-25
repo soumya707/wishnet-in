@@ -109,14 +109,15 @@ nav {
 
 /* PLANS */
 
+/* Filter */
+.dropdown-toggle::after {
+    display:none !important;
+}
+
 /* Tariffs */
 .plan-labels {
     font-family: 'Hind' !important;
     min-width: 70px;
-}
-
-.dropdown-toggle::after {
-    display:none !important;
 }
 
 @media (max-width: 34em) {
@@ -129,29 +130,22 @@ nav {
     .dropdown-menu {
         width: 20rem;
     }
-    .card-columns {
-        -webkit-column-count: 4;
-        -moz-column-count: 4;
-        column-count: 4;
-    }
 }
 
-@media (min-width: 96em) {
-    .card-columns {
-        -webkit-column-count: 5;
-        -moz-column-count: 5;
-        column-count: 5;
-    }
+.masonry {
+    display: flex;
+    flex-flow: row wrap;
 }
 
-.card-columns .card {
+.masonry-brick {
     min-height: 20rem;
+    width: 16rem;
     border-radius: 25px 0px;
     border: 2px solid #4A4d4e;
     transition: 0.1s;
 }
 
-.card-columns .card:hover {
+.masonry-brick:hover {
     border: 2px solid red;
 }
 
