@@ -137,8 +137,9 @@ def contact():
 def support():
     """Route for support."""
     faq = FAQ.query.options(FromCache(cache)).all()
+    categories = {item.category for item in faq}
 
-    return render_template('support.html', items=faq)
+    return render_template('support.html', categories=categories, items=faq)
 
 
 @app.route('/career')

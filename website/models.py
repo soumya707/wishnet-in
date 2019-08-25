@@ -101,6 +101,7 @@ class FAQ(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question = db.Column(db.String(200), nullable=False)
     answer = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(20), nullable=False)
 
 
 # Best plans
