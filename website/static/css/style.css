@@ -22,26 +22,36 @@ body {
     margin: 0 auto;
 }
 
+.bg-light-grey {
+    background-color: #eeeeee;
+}
+
+.bg-dark-grey {
+    background-color: #4A4D4E;
+}
+
+.bg-red {
+    background-color: red;
+}
+
+.text-red {
+    color: red;
+}
 /* LAYOUT */
 
 /* contents above navbar on medium and large screens */
 #content-above-navbar {
-    background-color: #4A4d4e;
     height: 35px;
     font-size: regular;
 }
 
-#content-above-navbar div.p div.a {
+#content-above-navbar h5 a {
     vertical-align: middle;
 }
 
 /* Navbar */
 nav {
     font-family: 'Raleway' !important;
-}
-
-.fa-user {
-    color: red;
 }
 
 /* INDEX */
@@ -66,18 +76,6 @@ nav {
 }
 
 /* Services */
-.service-odd {
-    background-color: #fff;
-}
-
-.service-even {
-    background-color: #eeeeee;
-}
-
-.service-name {
-    color: red;
-}
-
 .service-desc {
     line-height: 1.6;
 }
@@ -98,15 +96,6 @@ nav {
 
 #plan-color-bar {
     height: 0.2rem;
-    background-color: red;
-}
-
-#plan-name {
-    background-color: #eeeeee;
-}
-
-#plans-button {
-    background-color:red;
 }
 
 .plan-card img {
@@ -114,21 +103,8 @@ nav {
 }
 
 /* Brochure section */
-#brochures {
-    background-color: #eeeeee;
-}
-
-.download-cards img {
-    height: 20rem;
-}
-
-#download-color-bar {
-    height: 0.2rem;
-    background-color: red;
-}
-
-.download-button {
-    background-color: #4A4d4e;
+.download-cards {
+    width: 18rem;
 }
 
 /* PLANS */
@@ -136,7 +112,6 @@ nav {
 /* Tariffs */
 .plan-labels {
     font-family: 'Hind' !important;
-    background-color: red;
     min-width: 70px;
 }
 
@@ -170,7 +145,6 @@ nav {
 }
 
 .card-columns .card {
-    /* width: 17rem; */
     min-height: 20rem;
     border-radius: 25px 0px;
     border: 2px solid #4A4d4e;
@@ -181,7 +155,7 @@ nav {
     border: 2px solid red;
 }
 
-.all-plan-card-underline {
+.card-heading-underline {
     height:0.2rem;
     width:100%;
     background-image: linear-gradient(to right, transparent, red);
@@ -194,29 +168,9 @@ nav {
 
 /* ABOUT US */
 
-#about-us-card-background {
-    background-color: #eeeeee;
-}
-
-.about-us-card-heading {
-    color: red;
-}
-
 /* Ventures */
-.venture-odd {
-    background-color: #fff;
-}
-
-.venture-even {
-    background-color: #eeeeee;
-}
-
 .venture-img {
     height: 15em;
-}
-
-.venture-name {
-    color: red;
 }
 
 .venture-desc {
