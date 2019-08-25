@@ -4,58 +4,64 @@
 
 {% block content %}
 
-<div class="container py-3">
-  <h2>Current openings
+<div class="container p-3">
+  <h2 class="py-3">Careers
     <div class="heading-underline"></div>
   </h2>
 
-  <div id="accordion">
-    {% for item in items %}
-    <div class="card">
-      <div class="card-header" id="header_{{ item.id }}">
-        <h5>Job Title: {{ item.job_title }}</h5>
-        <p>Salary: {{ item.salary }}</p>
-        <p>Experience: {{ item.experience }}</p>
-        <p>Required: {{ item.required }}</p>
-        <p>Opening: {{ item.opening }}</p>
+  <div class="row border-top">
 
-        <button class="btn btn-link"
-                data-toggle="collapse"
-                data-target="#collapse_{{ item.id }}"
-                aria-expanded="false"
-                aria-controls="collapse_{{ item.id }}">+</button>
-      </div>
+    <div class="col-sm-4 pt-2">
+      <h3>Why work for Wishnet?</h3>
+      <p class="text-justify">We at Wishnet believe in providing equal opportunity for all. We are proud of our organization and offer:</p>
+      <ul>
+        <li>A stepping stone for the future</li>
+        <li>Opportunity to build yourself for the digital world</li>
+        <li>To be part of a young and agile workforce</li>
+        <li>A transparent evaluation system for growth, where every challenge is rewarding</li>
+      </ul>
+      <p>If you have the fire within, we will provide you the opportunity to learn, perform and shine.</p>
+    </div> <!-- col -->
 
-      <div id="collapse_{{ item.id }}"
-           class="collapse"
-           aria-labelledby="header_{{ item.id }}"
-           data-parent="#accordion">
-        <div class="card-body">
-          <h5>Job Description</h5>
-          <p>{{ item.description }}</p>
-          <h5>Education: {{ item.education }}</h5>
-          <p>{{ item.education_requirements }}</p>
-          <hr>
-          <p>To apply for the job, send your CV/Resume to {{ item.dept_email }} mentioning {{ item.job_title }} in the subject.</p>
+    <div class="col-sm-8 pt-2 grey-background">
+      <h3>Current openings</h3>
+
+      <div id="accordion">
+        {% for item in items %}
+        <div class="card">
+          <div class="card-header" id="header_{{ item.id }}">
+            <h5>Job Title: {{ item.job_title }}</h5>
+            <p>Salary: {{ item.salary }}</p>
+            <p>Experience: {{ item.experience }}</p>
+            <p>Required: {{ item.required }}</p>
+            <p>Opening: {{ item.opening }}</p>
+
+            <button class="btn btn-link"
+                    data-toggle="collapse"
+                    data-target="#collapse_{{ item.id }}"
+                    aria-expanded="false"
+                    aria-controls="collapse_{{ item.id }}">+</button>
+          </div>
+
+          <div id="collapse_{{ item.id }}"
+               class="collapse"
+               aria-labelledby="header_{{ item.id }}"
+               data-parent="#accordion">
+            <div class="card-body">
+              <h5>Job Description</h5>
+              <p>{{ item.description }}</p>
+              <h5>Education: {{ item.education }}</h5>
+              <p>{{ item.education_requirements }}</p>
+              <hr>
+              <p>To apply for the job, send your CV/Resume to {{ item.dept_email }} mentioning {{ item.job_title }} in the subject.</p>
+            </div>
+          </div>
         </div>
+        {% endfor %}
       </div>
-    </div>
-    {% endfor %}
-  </div>
-</div>
+    </div> <!-- col -->
 
-<div class="container py-3">
-  <h3>Why work for Wishnet?
-    <div class="heading-underline"></div>
-  </h3>
-  <p>We at Wishnet believe in providing equal opportunity for all. We are proud of our organization and offer:</p>
-    <ul>
-      <li>A stepping stone for the future</li>
-      <li>Opportunity to build yourself for the digital world</li>
-      <li>To be part of a young and agile workforce</li>
-      <li>A transparent evaluation system for growth, where every challenge is rewarding</li>
-    </ul>
-   <p>If you have the fire within, we will provide you the opportunity to learn, perform and shine.</p>
-</div>
 
+  </div> <!-- row -->
+</div> <!-- container -->
 {% endblock %}

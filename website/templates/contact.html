@@ -23,8 +23,10 @@
       </div>
     </div> <!-- card -->
     <!-- map -->
-    <div class="card embed-responsive">
-      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d651.1738392023512!2d88.39648879284367!3d22.5942273165435!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x832c7c68a84f0c2f!2sWish+Net+Pvt+Ltd!5e0!3m2!1sen!2sin!4v1516439379270"></iframe>
+    <div class="card">
+      <div class="embed-responsive">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d651.1738392023512!2d88.39648879284367!3d22.5942273165435!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x832c7c68a84f0c2f!2sWish+Net+Pvt+Ltd!5e0!3m2!1sen!2sin!4v1516439379270" class="embed-responsive-item"></iframe>
+      </div>
     </div> <!-- card -->
 
   </div> <!-- card-deck -->
@@ -39,7 +41,7 @@
 
   <div class="card-deck">
     {% for office in regional_offices %}
-    <div class="card">
+    <div class="card shadow">
       <div class="card-body">
         <h3 class="card-title">{{ office.place }} branch</h3>
         <p class="card-text">{{ office.address|safe }}</p>

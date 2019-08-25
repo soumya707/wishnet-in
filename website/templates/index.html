@@ -66,10 +66,10 @@
 <div class="container-fluid border-bottom">
   <div class="row text-center">
     {% for service in services %}
-    <div class="col-sm-6 {{ loop.cycle('service-odd', 'service-even')}}">
+    <div class="col-sm-6 {{ loop.cycle('bg-white', 'bg-light-grey')}}">
       <img src="{{ url_for('static', filename='img/{}.svg'.format(service.logo_id)) }}"
            class="service-img">
-      <h1 class="service-name">{{ service.name }}</h1>
+      <h1 class="service-name text-red">{{ service.name }}</h1>
       <h5>
         <p class="service-desc">{{ service.features |safe }}</p>
       </h5>
@@ -89,9 +89,9 @@
     {% for plan in plans %}
     <div class="card shadow plan-card">
       <!-- Color bar at top -->
-      <div class="d-flex w-100" id="plan-color-bar"></div>
+      <div class="d-flex w-100 bg-red" id="plan-color-bar"></div>
       <!-- Plan name -->
-      <div class="d-flex pt-3 pb-1 w-100 justify-content-center" id="plan-name">
+      <div class="d-flex pt-3 pb-1 w-100 justify-content-center bg-light-grey">
         <h3>{{ plan.name }}</h3>
       </div>
       <!-- Plan img -->
@@ -115,36 +115,30 @@
   </div> <!-- card-deck -->
 
   <!-- View all plans -->
-  <div class="d-flex pt-5 pb-4 justify-content-center">
-    <a href="{{ url_for('tariff') }}" class="btn text-white" id="plans-button">
-      Browse Plans
+  <div class="d-flex py-4 justify-content-center">
+    <a href="{{ url_for('tariff') }}" class="btn text-white bg-red">
+      <i class="far fa-list-alt"></i> Browse Plans
     </a>
-  </div>
+  </div> <!-- flex -->
 
 </div> <!-- container -->
 
 <!-- BROCHURES -->
-<div class="container-fluid" id="brochures">
+<div class="container-fluid bg-light-grey">
   <h3 class="py-4 heading">Downloads
     <div class="index-heading-underline"></div>
   </h3>
 
-    <div class="card-deck pt-3 pb-5">
+    <div class="card-deck p-3 text-center">
 
       {% for download in downloads %}
         <div class="card shadow download-cards">
-          <img class="card-img-top"
-               src="{{ url_for('static', filename='img/{}.svg'.format(download.img)) }}"
-               alt="{{ download.name }}">
           <div class="card-body">
-            <h5 class="card-title">{{ download.name }}</h5>
-          </div>
-          <!-- Color bar at bottom -->
-          <div class="d-flex w-100" id="download-color-bar"></div>
-          <div class="card-footer d-flex justify-content-center">
+            <h5 class="heading pb-1">{{ download.name }}</h5>
             <a href="{{ download.link }}"
-               class="btn text-white download-button"
-               download="{{ download.name }}">Download</a>
+               class="btn text-white bg-dark-grey"
+               download="{{ download.name }}">
+              <i class="fas fa-file-download"></i> Download</a>
           </div>
         </div>
       {% endfor %}

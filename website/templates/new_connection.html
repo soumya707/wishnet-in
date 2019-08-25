@@ -7,71 +7,83 @@
 
 <div class="container p-3">
 
-    <h2 class="pb-3">New Connection
-      <div class="heading-underline"></div>
-    </h2>
+  <h2 class="pb-3">New Connection
+    <div class="heading-underline"></div>
+  </h2>
 
-  <div class="content-section">
+  <div class="row border-top">
 
-    <form method="POST" action="">
-      {{ form.hidden_tag() }}
-      <fieldset class="form-group">
+    <div class="col-sm-4 grey-background p-3">
+      <h5 class="text-justify">
+        To avail a new connection, please fill in the form or you can also contact us at <strong><a href="tel:18004194244" class="text-red">1800-419-4244</a></strong>.
+      </h5>
+    </div> <!-- col -->
 
-        <div class="form-row">
-          <!-- FIRST NAME -->
-          <div class="col">
-            {{ render_field_with_errors_user_side(form.first_name) }}
-          </div> <!-- col -->
-          <!-- MIDDLE NAME -->
-          <div class="col">
-            {{ render_field_with_errors_user_side(form.middle_name) }}
-          </div> <!-- col -->
-          <!-- LAST NAME -->
-          <div class="col">
-            {{ render_field_with_errors_user_side(form.last_name) }}
-          </div> <!-- col -->
-        </div> <!-- form row -->
+    <div class="col-sm-8 p-3">
+      <div class="content-section">
 
-        <div class="form-row">
-          <!-- ADDRESS -->
-          <div class="col">
-            {{ render_field_with_errors_user_side(form.address) }}
-          </div> <!-- col -->
-        </div> <!-- row -->
+        <form method="POST" action="">
+          {{ form.hidden_tag() }}
+          <fieldset class="form-group">
 
-        <div class="form-row">
-          <!-- LOCATION -->
-          <div class="col">
-            {{ render_field_with_errors_user_side(form.location) }}
-          </div> <!-- col -->
-          <!-- PIN CODE -->
-          <div class="col">
-            {{ render_field_with_errors_user_side(form.postal_code )}}
-          </div> <!-- col -->
-          <!-- MOBILE NO. -->
-          <div class="col">
-            {{ render_field_with_errors_user_side(form.phone_no) }}
-          </div> <!-- col -->
-          <!-- E-MAIL ADDRESS -->
-          <div class="col">
-            {{ render_field_with_errors_user_side(form.email_address) }}
-          </div> <!-- col -->
-        </div> <!-- form-row -->
+            <div class="form-row">
+              <!-- FIRST NAME -->
+              <div class="col">
+                {{ render_field_with_errors_user_side(form.first_name) }}
+              </div> <!-- col -->
+              <!-- MIDDLE NAME -->
+              <div class="col">
+                {{ render_field_with_errors_user_side(form.middle_name) }}
+              </div> <!-- col -->
+              <!-- LAST NAME -->
+              <div class="col">
+                {{ render_field_with_errors_user_side(form.last_name) }}
+              </div> <!-- col -->
+            </div> <!-- form row -->
 
-        <div class="form-row">
-          <!-- REMARK -->
-          <div class="col">
-            {{ render_field_with_errors_user_side(form.remark) }}
-          </div> <!-- col -->
-        </div> <!-- row -->
+            <div class="form-row">
+              <!-- ADDRESS -->
+              <div class="col">
+                {{ render_field_with_errors_user_side(form.address) }}
+              </div> <!-- col -->
+            </div> <!-- row -->
 
-      </fieldset>
+            <div class="form-row">
+              <!-- LOCATION -->
+              <div class="col">
+                {{ render_field_with_errors_user_side(form.location) }}
+              </div> <!-- col -->
+              <!-- PIN CODE -->
+              <div class="col">
+                {{ render_field_with_errors_user_side(form.postal_code )}}
+              </div> <!-- col -->
+              <!-- MOBILE NO. -->
+              <div class="col">
+                {{ render_field_with_errors_user_side(form.phone_no) }}
+              </div> <!-- col -->
+              <!-- E-MAIL ADDRESS -->
+              <div class="col">
+                {{ render_field_with_errors_user_side(form.email_address) }}
+              </div> <!-- col -->
+            </div> <!-- form-row -->
 
-      <!-- SUBMIT -->
-      {{ render_submit_button(form.submit) }}
+            <div class="form-row">
+              <!-- REMARK -->
+              <div class="col">
+                {{ render_field_with_errors_user_side(form.remark) }}
+              </div> <!-- col -->
+            </div> <!-- row -->
 
-    </form>
-  </div>
+          </fieldset>
+
+          <!-- SUBMIT -->
+          {{ render_submit_button(form.submit) }}
+
+        </form>
+      </div> <!-- content-section -->
+    </div> <!-- col -->
+
+  </div> <!-- row -->
 
 </div> <!-- container -->
 

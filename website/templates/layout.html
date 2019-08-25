@@ -47,21 +47,15 @@
   <body>
 
     <!-- Extra content above Navbar -->
-    <div class="d-none d-lg-flex d-xl-flex justify-content-end align-middle"
+    <div class="d-none d-lg-flex d-xl-flex justify-content-end bg-dark-grey"
          id="content-above-navbar">
       <!-- Toll free number -->
-      <div class="p-2">
-        <h5 class="text-white">1800-419-4244</h5>
-      </div>
+      <h5 class="text-white p-2"><i class="fas fa-phone-alt"></i> 1800-419-4244</h5>
       <!-- Careers -->
-      <div class="p-2">
-        <a class="text-white" href="{{ url_for('career') }}">Career</a>
-      </div>
+      <a class="text-white p-2" href="{{ url_for('career') }}">Career</a>
       <!-- About us -->
-      <div class="p-2 mr-2">
-        <a class="text-white" href="{{ url_for('about') }}">About us</a>
-      </div>
-    </div>
+      <a class="text-white p-2 mr-2" href="{{ url_for('about') }}">About us</a>
+    </div> <!-- flex -->
 
 
     <!-- NAVBAR -->
@@ -73,11 +67,11 @@
              width="150px" height="50px" alt="Logo">
       </a>
 
-      <!-- Login (on small and medium screens) -->
+      <!-- Login logo (on small and medium screens) -->
       <ul class="navbar-nav ml-auto d-lg-none d-xl-none m-2">
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('portal') }}">
-            <i class="far fa-user fa-lg"></i>
+            <i class="far fa-user fa-lg text-red"></i>
           </a>
         </li>
       </ul>
@@ -127,11 +121,11 @@
           </li>
         </ul>
 
-        <!-- Login on large screens-->
+        <!-- Login logo (on large screens) -->
         <ul class="navbar-nav ml-auto d-none d-lg-block">
           <li class="nav-item">
             <a class="nav-link"
-               href="{{ url_for('portal') }}"><i class="far fa-user fa-2x"></i></a>
+               href="{{ url_for('portal') }}"><i class="far fa-user fa-2x text-red"></i></a>
           </li>
         </ul>
 
@@ -160,7 +154,6 @@
     </main>
 
     <!-- FOOTER -->
-    <!-- <footer class="pt-4 my-md-5 pt-md-5 border-top text-muted"> -->
     <footer class="border-top text-muted">
       <div class="d-flex justify-content-between m-3 p-3">
 

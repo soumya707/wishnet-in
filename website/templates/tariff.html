@@ -15,7 +15,7 @@
     <!-- PLAN TABS -->
     <div class="col-auto p-3 mr-auto btn-group btn-group-toggle" data-toggle="buttons">
       {% for plan in plans %}
-      <label class="btn btn-secondary {% if loop.first %}active{% endif %} m-1 rounded plan-labels">
+      <label class="btn btn-secondary bg-red {% if loop.first %}active{% endif %} m-1 rounded plan-labels">
         <input type="radio"
                name="options" value="{{ plan.__name__ }}"
                autocomplete="off" onchange="displayCards(this);"
@@ -119,49 +119,43 @@
     <div class="card shadow {{ plan.__name__ }}-cards">
       <!-- Plan name -->
       <h3 class="card-title heading pt-3">{{ entry.plan_name }}
-        <div class="all-plan-card-underline"></div>
+        <div class="card-heading-underline"></div>
       </h3>
       <!-- Package speed -->
       <h5 class="px-3 py-1 pt-3 heading">
-        <i class="fas fa-exchange-alt" style="color: red;"></i> {{ entry.bandwidth }} Mbps speed
+        <i class="fas fa-exchange-alt text-red"></i> {{ entry.bandwidth }} Mbps speed
       </h5>
       <!-- Package validity -->
       <h5 class="px-3 py-1 heading">
-        <i class="fas fa-calendar" style="color: red;"></i> {{ entry.validity }} days validity
+        <i class="fas fa-calendar text-red"></i> {{ entry.validity }} days validity
       </h5>
       <!-- Package data limit -->
       {% if entry.data_limit is defined %}
       <h5 class="px-3 py-1 heading">
-        <i class="fab fa-cloudscale" style="color: red;"></i> {{ entry.data_limit }} GB limit
+        <i class="fab fa-cloudscale text-red"></i> {{ entry.data_limit }} GB limit
       </h5>
       {% else %}
       <h5 class="px-3 py-1 heading">
-        <i class="fab fa-cloudscale" style="color: red;"></i> No data limit
+        <i class="fab fa-cloudscale text-red"></i> No data limit
       </h5>
       {% endif %}
       <!-- Package static IP -->
       {% if entry.static_ip is defined %}
-      <h5 class="px-3 py-1 heading">
-        {{ entry.static_ip }} static IP
-      </h5>
+      <h5 class="px-3 py-1 heading">{{ entry.static_ip }} static IP</h5>
       {% endif %}
       <!-- Package price -->
       <h5 class="px-3 py-1 heading">
-        <span style="color: red;">&#8377</span> {{ entry.price }} / month
+        <span class="text-red">&#8377</span> {{ entry.price }} / month
       </h5>
       <!-- Package speed after limit -->
       {% if plan.speed_after_limit %}
       <h5 class="px-3 py-1 heading">
-        <i class="fas fa-exchange-alt" style="color: red;"></i> {{ entry.speed_after_limit }} Mbps after limit</h5>
+        <i class="fas fa-exchange-alt text-red"></i> {{ entry.speed_after_limit }} Mbps after limit</h5>
       {% endif %}
       <!-- Package contention ratio -->
-      <h5 class="px-3 py-1 heading">
-        {{ entry.contention_ratio }} contention ratio
-      </h5>
+      <h5 class="px-3 py-1 heading">{{ entry.contention_ratio }} contention ratio</h5>
       <!-- Plan type -->
-      <h4 class="heading px-3 py-3" style="color: red;">
-        {{ entry.plan_type }} Plan
-      </h4>
+      <h4 class="heading px-3 py-3 text-red">{{ entry.plan_type }} Plan</h4>
     </div> <!-- card -->
     {% endfor %}
 
@@ -187,6 +181,9 @@
         $("." + $(elem).val() + "-cards").show();
     }
 
+    // function applyFilter() {
+    //     if $("input[name='planType']").val() === "unlimited"
+    // }
   </script>
 
 {% endblock %}
