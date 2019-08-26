@@ -7,7 +7,7 @@
 
 {% macro render_submit_button_inline(field) %}
 
-    {{ field(class_='btn mb-2 text-white', id='recharge-submit') }}
+    {{ field(class_='btn mb-2 text-white bg-red') }}
 
 {% endmacro %}
 
@@ -34,6 +34,6 @@
 
 {% macro render_submit_button(field) %}
   <div class="form-group">
-    {{ field(class_='btn btn-outline-info') }}
+    {{ field(class_='btn bg-red text-white') }}
   </div>
 {% endmacro %}

@@ -26,12 +26,6 @@
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
           crossorigin="anonymous">
 
-    <!-- Bootswatch -->
-    <!-- <link rel="stylesheet" -->
-    <!--       href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.3.1/materia/bootstrap.min.css" -->
-    <!--       integrity="sha256-8CkGrzjOaLKQcuIPUmdEEJQ07Q83rdadwUrePJTaI4I=" -->
-    <!--       crossorigin="anonymous" /> -->
-
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css?family=Hind&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
@@ -59,7 +53,7 @@
 
 
     <!-- NAVBAR -->
-    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light border-bottom">
 
       <!-- Brand logo -->
       <a class="navbar-brand" href="{{ url_for('index') }}">
@@ -91,32 +85,37 @@
         <ul class="navbar-nav mr-auto">
           <!-- Plans -->
           <li class="nav-item">
+            <div class="d-lg-none d-xl-none border-top"></div>
             <a class="nav-link {% if request.path == url_for('tariff') %}active{% endif %}"
                href="{{ url_for('tariff') }}">PLANS</a>
+
           </li>
           </li>
           <!-- New connection -->
           <li class="nav-item">
+            <div class="d-lg-none d-xl-none border-top"></div>
             <a class="nav-link {% if request.path == url_for('new_conn') %}active{% endif %}"
                href="{{ url_for('new_conn') }}">NEW CONNECTION</a>
           </li>
           <!-- Support -->
           <li class="nav-item">
+            <div class="d-lg-none d-xl-none border-top"></div>
             <a class="nav-link {% if request.path == url_for('support') %}active{% endif %}"
                href="{{ url_for('support') }}">SUPPORT</a>
           </li>
           <!-- Locate us -->
           <li class="nav-item">
+            <div class="d-lg-none d-xl-none border-top"></div>
             <a class="nav-link {% if request.path == url_for('contact') %}active{% endif %}"
                href="{{ url_for('contact') }}">LOCATE US</a>
           </li>
 
           <!-- Career (on small and medium screens) -->
-          <li class="nav-item d-lg-none d-xl-none">
+          <li class="nav-item d-lg-none d-xl-none border-top">
             <a class="nav-link" href="{{ url_for('career') }}">CAREER</a>
           </li>
           <!-- About us (on small and medium screens) -->
-          <li class="nav-item d-lg-none d-xl-none">
+          <li class="nav-item d-lg-none d-xl-none border-top">
             <a class="nav-link" href="{{ url_for('about') }}">ABOUT US</a>
           </li>
         </ul>

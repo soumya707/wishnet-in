@@ -37,6 +37,11 @@ body {
 .text-red {
     color: red;
 }
+
+.border-red {
+    border: 2px solid red;
+}
+
 /* LAYOUT */
 
 /* contents above navbar on medium and large screens */
@@ -66,13 +71,8 @@ nav {
 }
 
 /* Recharge section */
-#recharge {
-    background-color: #4A4D4E;
-}
-
-#recharge-submit {
-    background-color: red;
-    vertical-align: top;
+#recharge div {
+    flex-wrap: wrap;;
 }
 
 /* Services */
@@ -104,10 +104,17 @@ nav {
 
 /* Brochure section */
 .download-cards {
-    width: 18rem;
+    /* width: 18rem; */
+    border: 1px solid red;
 }
 
 /* PLANS */
+
+/* Plan category row */
+.plan-button-row {
+    position: sticky;
+    top: 0;
+}
 
 /* Filter */
 .dropdown-toggle::after {
