@@ -1,9 +1,6 @@
 # macOS specific
 .DS_STORE
 
-# Flask-Migrate
-migrations/
-
 # Pipfile
 Pipfile.lock
 
