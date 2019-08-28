@@ -20,23 +20,23 @@
   <!-- Images -->
   <div class="carousel-inner" role="listbox">
     <div class="carousel-item active">
-      <img src="{{ url_for('static', filename='img/banner_1.jpg') }}"
+      <img src="{{ url_for('static', filename='img/banners/banner_1.jpg') }}"
            class="d-block w-100" alt="Banner 1">
     </div>
     <div class="carousel-item">
-      <img src="{{ url_for('static', filename='img/banner_2.jpg') }}"
+      <img src="{{ url_for('static', filename='img/banners/banner_2.jpg') }}"
            class="d-block w-100" alt="Banner 2">
     </div>
     <div class="carousel-item">
-      <img src="{{ url_for('static', filename='img/banner_3.jpg') }}"
+      <img src="{{ url_for('static', filename='img/banners/banner_3.jpg') }}"
            class="d-block w-100" alt="Banner 3">
     </div>
     <div class="carousel-item">
-      <img src="{{ url_for('static', filename='img/banner_4.jpg') }}"
+      <img src="{{ url_for('static', filename='img/banners/banner_4.jpg') }}"
            class="d-block w-100" alt="Banner 4">
     </div>
     <div class="carousel-item">
-      <img src="{{ url_for('static', filename='img/banner_5.jpg') }}"
+      <img src="{{ url_for('static', filename='img/banners/banner_5.jpg') }}"
            class="d-block w-100" alt="Banner 5">
     </div>
   </div>
@@ -65,7 +65,7 @@
   <div class="row text-center">
     {% for service in services %}
     <div class="col-sm-6 {{ loop.cycle('bg-white', 'bg-light-grey')}}">
-      <img src="{{ url_for('static', filename='img/{}.svg'.format(service.logo_id)) }}"
+      <img src="{{ url_for('static', filename='img/services/{}.svg'.format(service.logo_id)) }}"
            class="service-img">
       <h1 class="service-name text-red">{{ service.name }}</h1>
       <h5>
@@ -93,7 +93,7 @@
         <h3>{{ plan.name }}</h3>
       </div>
       <!-- Plan img -->
-      <img src="{{ url_for('static', filename='img/{}.svg'.format(plan.logo_id)) }}">
+      <img src="{{ url_for('static', filename='img/best_plans/{}.svg'.format(plan.logo_id)) }}">
       <!-- Package speed -->
       <div class="d-flex p-2 justify-content-center">
         <h5>{{ plan.speed }} Mbps speed</h5>
@@ -135,9 +135,9 @@
             <h5 class="heading pb-1">{{ download.name }}</h5>
           </div> <!-- card-body -->
           <div class="card-footer bg-white border-0">
-            <a href="{{ download.link }}"
+            <a href="{{ url_for('static', filename='assets/{}.pdf'.format(download.link)) }}"
                class="btn text-white bg-dark-grey"
-               download="{{ download.name }}">
+               download="{{ download.name ~ '.pdf' }}">
               <i class="fas fa-file-download"></i> Download</a>
           </div> <!-- card-footer -->
         </div>

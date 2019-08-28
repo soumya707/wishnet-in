@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" image-rendering="optimizeQuality" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" viewBox="0 0 25.4 25.4">
+  <defs>
+    <style>
+      .str1{stroke:#e31e24;stroke-width:.4233}.str2,.str3{stroke:#2b2a29;stroke-width:.5927}.str3{stroke:#e31e24}.str0{stroke:#494d4e;stroke-width:.6773}.fil0{fill:none}
+    </style>
+  </defs>
+  <g id="Layer_x0020_1">
+    <path d="M4.8934 11.9206l.7539.425 1.2748-2.4812.1508-.1371 2.0563-.7711-.5484 4.5784 5.6614 2.056.3838 2.1248h1.1789l.0754-3.8725-3.7285-1.5216 1.1447-2.8033 1.4941 1.3022 3.3311.0548V9.8333l-2.4948-.3291-2.0083-2.4743h-1.2611l-.3153.8019-1.0487-1.0144H9.5816l-3.4681 1.412z" class="fil0 str0"/>
+    <path d="M9.3828 14.6172l-.4935 3.3721-1.4805 2.0288 1.0555.8636 2.6319-2.9335.5484-2.5633" class="fil0 str0"/>
+    <path d="M1.4884 12.8488s.4387-.754 1.5627-.3016l2.8238.987 1.3265.4635s.908.496.4557 1.7434l-.8909 2.1315s-.5757.5894-1.5078.2467L1.379 16.7211s-1.3159-.425-.7128-1.8917l.8222-1.9806z" class="fil0 str1"/>
+    <path d="M3.4377 12.6714l.4978-.5014s.2262-.2741.8293.048l1.4531.5894s.2638.0324.1833.9107" class="fil0 str1"/>
+    <path d="M6.9894 22.7752h6.5524" class="fil0 str2"/>
+    <path d="M10.7728 20.8013h6.5524" class="fil0 str3"/>
+    <path d="M14.2546 18.9233h6.5524" class="fil0 str2"/>
+    <path d="M18.3396 16.8536h6.5524" class="fil0 str3"/>
+    <circle cx="12.0201" cy="4.01974" r="1.89168" class="fil0 str0"/>
+  </g>
+</svg>
