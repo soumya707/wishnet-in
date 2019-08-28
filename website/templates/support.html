@@ -23,17 +23,20 @@
       <div id="accordion">
       {% for category in categories %}
       <div class="card">
+
         <div class="card-header" id="header-{{ category.replace(' ', '') }}">
-            <h2 class="mb-0">
-              <button class="btn btn-link"
+          <div class="d-flex align-items-center">
+            <div class="mr-auto">{{ category }}</div>
+
+              <button class="btn btn-link text-red"
                       type="button"
                       data-toggle="collapse"
                       data-target="#collapse-{{ category.replace(' ', '') }}"
                       aria-expanded="false"
                       aria-controls="collapse-{{ category.replace(' ', '') }}">
-                {{ category }}
+                <i class="fas"></i>
               </button>
-            </h2>
+            </div>
           </div> <!-- card-header -->
 
           <div id="collapse-{{ category.replace(' ', '') }}"
@@ -47,16 +50,18 @@
                 <div class="card">
 
                   <div class="card-header" id="header-{{ item.id }}">
-                    <h2 class="mb-0">
-                      <button class="btn btn-link"
+                    <div class="d-flex align-items-center">
+                      <div class="mr-auto">{{ item.question }}</div>
+
+                      <button class="btn btn-link text-red"
                               type="button"
                               data-toggle="collapse"
                               data-target="#collapse-{{ item.id }}"
                               aria-expanded="false"
                               aria-controls="collapse-{{ item.id }}">
-                        {{ item.question }}
+                        <i class="fas"></i>
                       </button>
-                    </h2>
+                    </div>
                   </div> <!-- card-header -->
 
                   <div id="collapse-{{ item.id }}"

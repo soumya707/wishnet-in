@@ -167,6 +167,19 @@ nav {
     background-image: linear-gradient(to right, transparent, red);
 }
 
+/* SUPPORT */
+[data-toggle="collapse"] .fas:before {
+    content: "\f078";
+}
+
+[aria-expanded="true"] .fas:before {
+    content: "\f077";
+}
+
+[data-toggle="collapse"].collapsed .fas:before {
+    content: "\f078";
+}
+
 /* LOCATE US */
 .hq-card img {
     height: 15rem;
