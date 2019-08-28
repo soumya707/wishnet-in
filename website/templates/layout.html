@@ -41,10 +41,14 @@
   <body>
 
     <!-- Extra content above Navbar -->
-    <div class="d-none d-lg-flex d-xl-flex justify-content-end bg-dark-grey"
+    <div class="d-flex justify-content-end bg-dark-grey"
          id="content-above-navbar">
       <!-- Toll free number -->
-      <h5 class="text-white p-2"><i class="fas fa-phone-alt"></i> 1800-419-4244</h5>
+      <h5 class="text-white p-2">
+        <a class="btn-call" href="tel:18004194244">
+          <i class="fas fa-phone-alt"></i>
+        </a>1800-419-4244
+      </h5>
       <!-- Careers -->
       <a class="text-white p-2" href="{{ url_for('career') }}">Career</a>
       <!-- About us -->
@@ -108,15 +112,6 @@
             <div class="d-lg-none d-xl-none border-top"></div>
             <a class="nav-link {% if request.path == url_for('contact') %}active{% endif %}"
                href="{{ url_for('contact') }}">LOCATE US</a>
-          </li>
-
-          <!-- Career (on small and medium screens) -->
-          <li class="nav-item d-lg-none d-xl-none border-top">
-            <a class="nav-link" href="{{ url_for('career') }}">CAREER</a>
-          </li>
-          <!-- About us (on small and medium screens) -->
-          <li class="nav-item d-lg-none d-xl-none border-top">
-            <a class="nav-link" href="{{ url_for('about') }}">ABOUT US</a>
           </li>
         </ul>
 
