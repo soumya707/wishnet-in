@@ -194,3 +194,19 @@ class RegionalOffices(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     place = db.Column(db.String(15), nullable=False)
     address = db.Column(db.Text, nullable=False)
+
+    def __str__(self):
+        return self.place
+
+
+# Carousel
+class CarouselImages(db.Model):
+    """Class for representing carousel images."""
+
+    __bind_key__ = 'assets'
+
+    id = db.Column(db.Integer, primary_key=True)
+    image_name = db.Column(db.String(20), nullable=False)
+
+    def __str__(self):
+        return self.image_name

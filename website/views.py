@@ -17,7 +17,7 @@ from website.helpers import (
     ActivePlan, AuthenticateUser, ContractsByKey, Recharge)
 from website.models import (
     FAQ, BestPlans, Downloads, JobVacancy, NewConnection, RegionalOffices,
-    Services, Ventures)
+    Services, Ventures, CarouselImages)
 from website.paytm_utils import initiate_transaction, verify_transaction
 
 
@@ -63,6 +63,7 @@ def index():
             )
         )
 
+    carousel_images = CarouselImages.query.options(FromCache(cache)).all()
     services = Services.query.options(FromCache(cache)).all()
     best_plans = BestPlans.query.options(FromCache(cache)).all()
     downloads = Downloads.query.options(FromCache(cache)).all()
@@ -70,6 +71,7 @@ def index():
     return render_template(
         'index.html',
         form=form,
+        carousel_images=carousel_images,
         services=services,
         plans=best_plans,
         downloads=downloads,

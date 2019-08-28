@@ -10,53 +10,35 @@
 
   <!-- Indicators -->
   <ol class="carousel-indicators">
-    <li data-target="#carouselDiv" data-slide-to="0" class="active"></li>
-    <li data-target="#carouselDiv" data-slide-to="1"></li>
-    <li data-target="#carouselDiv" data-slide-to="2"></li>
-    <li data-target="#carouselDiv" data-slide-to="3"></li>
-    <li data-target="#carouselDiv" data-slide-to="4"></li>
+    {% for _ in carousel_images %}
+    <li data-target="#carouselDiv"
+        data-slide-to="{{ loop.index0 }}"
+        {% if loop.first %}class="active"{% endif %}></li>
+    {% endfor %}
   </ol>
 
   <!-- Images -->
   <div class="carousel-inner" role="listbox">
-    <div class="carousel-item active">
-      <img src="{{ url_for('static', filename='img/banners/banner_1.jpg') }}"
-           class="d-block w-100" alt="Banner 1">
+    {% for img in carousel_images %}
+    <div class="carousel-item {% if loop.first %}active{% endif %}">
+      <img src="{{ url_for('static', filename='img/banners/{}.jpg'.format(img.image_name)) }}"
+           class="d-block w-100" alt="{{ img.image_name }}">
     </div>
-    <div class="carousel-item">
-      <img src="{{ url_for('static', filename='img/banners/banner_2.jpg') }}"
-           class="d-block w-100" alt="Banner 2">
-    </div>
-    <div class="carousel-item">
-      <img src="{{ url_for('static', filename='img/banners/banner_3.jpg') }}"
-           class="d-block w-100" alt="Banner 3">
-    </div>
-    <div class="carousel-item">
-      <img src="{{ url_for('static', filename='img/banners/banner_4.jpg') }}"
-           class="d-block w-100" alt="Banner 4">
-    </div>
-    <div class="carousel-item">
-      <img src="{{ url_for('static', filename='img/banners/banner_5.jpg') }}"
-           class="d-block w-100" alt="Banner 5">
-    </div>
+    {% endfor %}
   </div>
 
 </div> <!-- carousel -->
 
 <!-- RECHARGE FACILITY -->
-<div class="container-fluid bg-dark-grey" id="recharge">
+<div class="container-fluid bg-dark-grey p-2">
 
-  <div class="d-flex justify-content-center py-2">
-    <h3 class="text-white px-1 pt-1">Insta-Recharge</h3>
-
-    <form class="form-inline justify-content-center px-1 pt-1"
+    <form class="form-inline justify-content-center px-5 pt-2"
           method="POST"
           action="{{ url_for('index') }}">
       {{ form.hidden_tag() }}
       {{ render_inline_field_with_errors(form.user_id) }}
       {{ render_submit_button_inline(form.submit)}}
     </form>
-  </div> <!-- flex -->
 
 </div> <!-- container -->
 

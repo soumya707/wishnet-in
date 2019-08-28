@@ -50,7 +50,8 @@ Session(app)
 # import here to avoid cyclic import
 from website import views
 from website.models import (
-    BestPlans, Downloads, JobVacancy, FAQ, RegionalOffices, Services, Ventures)
+    BestPlans, CarouselImages, Downloads, JobVacancy, FAQ, RegionalOffices,
+    Services, Ventures)
 from website.models import  (
     BizPlan, FUPPlan, FTTHPlan, UnlimitedPlan)
 from website.security.models import Role, User
@@ -70,6 +71,7 @@ path = op.join(op.dirname(__file__), 'static')
 admin.add_view(CustomFileView(path, '/static/', name='Static Files'))
 admin.add_view(SuperuserModelView(User, db.session, category='Access'))
 admin.add_view(SuperuserModelView(Role, db.session, category='Access'))
+admin.add_view(EditorModelView(CarouselImages, db.session, category='Index'))
 admin.add_view(EditorModelView(Services, db.session, category='Index'))
 admin.add_view(EditorModelView(BestPlans, db.session, category='Index'))
 admin.add_view(EditorModelView(Downloads, db.session, category='Index'))
