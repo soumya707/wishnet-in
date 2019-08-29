@@ -23,7 +23,7 @@ class JobVacancy(db.Model):
     job_type = db.Column(db.String(50), nullable=False)
     job_description = db.Column(db.Text, nullable=False)
     job_summary = db.Column(db.Text, nullable=False)
-    key_skills = db.Column(db.String(50), nullable=False)
+    key_skills = db.Column(db.Text, nullable=False)
     experience = db.Column(db.String(200), nullable=False)
     education = db.Column(db.String(50), nullable=False)
     preferable = db.Column(db.String(20), nullable=False)
@@ -31,7 +31,7 @@ class JobVacancy(db.Model):
     posted_on = db.Column(db.Date, nullable=False)
     dept_email = db.Column(db.String(50), nullable=False)
     no_of_opening = db.Column(db.Integer, nullable=False)
-    priority = db.Column(db.String(20), nullable=False)
+    status = db.Column(db.String(10), nullable=False)
 
     def __str__(self):
         return self.job_title
@@ -139,6 +139,11 @@ class Downloads(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     link = db.Column(db.String(100), nullable=False)
+    text = db.Column(db.String(200), nullable=False)
+    img_id = db.Column(db.String(50), nullable=False)
+
+    def __str__(self):
+        return self.name
 
 
 # Ventures

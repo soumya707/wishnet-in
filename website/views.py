@@ -147,7 +147,8 @@ def support():
 @app.route('/career')
 def career():
     """Route for career."""
-    items = JobVacancy.query.options(FromCache(cache)).all()
+    items = JobVacancy.query.filter_by(status='Active')\
+                            .options(FromCache(cache)).all()
 
     return render_template('careers.html', items=items)
 
