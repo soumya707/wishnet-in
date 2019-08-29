@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "_macros.html" import render_inline_field_with_errors, render_submit_button_inline %}
+{% from "_macros.html" import render_field_inline, render_submit_inline %}
 
 {% block title %}Wishnet{% endblock %}
 
@@ -36,8 +36,8 @@
           method="POST"
           action="{{ url_for('index') }}">
       {{ form.hidden_tag() }}
-      {{ render_inline_field_with_errors(form.user_id) }}
-      {{ render_submit_button_inline(form.submit)}}
+      {{ render_field_inline(form.user_id) }}
+      {{ render_submit_inline(form.submit)}}
     </form>
 
 </div> <!-- container -->

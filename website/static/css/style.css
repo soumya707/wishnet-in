@@ -137,8 +137,7 @@ nav {
 
 /* Brochure section */
 .download-cards {
-    /* width: 18rem; */
-    /* border: 1px solid red; */
+    box-shadow: 5px 5px 2px grey !important;
 }
 
 /* Downloads */
@@ -164,10 +163,6 @@ nav {
 .plan-labels {
     font-family: 'Hind' !important;
     min-width: 70px;
-}
-
-.plan-labels .active {
-    background-color: #4A4D4e;
 }
 
 @media (max-width: 34em) {
@@ -205,17 +200,20 @@ nav {
     background-image: linear-gradient(to right, transparent, red);
 }
 
-/* SUPPORT */
+/* SUPPORT AND CAREER */
 [data-toggle="collapse"] .fas:before {
     content: "\f078";
+    color: red;
 }
 
 [aria-expanded="true"] .fas:before {
     content: "\f077";
+    color: red;
 }
 
 [data-toggle="collapse"].collapsed .fas:before {
     content: "\f078";
+    color: red;
 }
 
 /* LOCATE US */

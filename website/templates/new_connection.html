@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "_macros.html" import render_field_with_errors_user_side, render_submit_button %}
+{% from "_macros.html" import render_field, render_submit %}
 
 {% block title %}New connection{% endblock %}
 
@@ -31,55 +31,55 @@
             <div class="form-row">
               <!-- FIRST NAME -->
               <div class="col">
-                {{ render_field_with_errors_user_side(form.first_name) }}
+                {{ render_field(form.first_name) }}
               </div> <!-- col -->
               <!-- MIDDLE NAME -->
               <div class="col">
-                {{ render_field_with_errors_user_side(form.middle_name) }}
+                {{ render_field(form.middle_name) }}
               </div> <!-- col -->
               <!-- LAST NAME -->
               <div class="col">
-                {{ render_field_with_errors_user_side(form.last_name) }}
+                {{ render_field(form.last_name) }}
               </div> <!-- col -->
             </div> <!-- form row -->
 
             <div class="form-row">
               <!-- ADDRESS -->
               <div class="col">
-                {{ render_field_with_errors_user_side(form.address) }}
+                {{ render_field(form.address) }}
               </div> <!-- col -->
             </div> <!-- row -->
 
             <div class="form-row">
               <!-- LOCATION -->
               <div class="col">
-                {{ render_field_with_errors_user_side(form.location) }}
+                {{ render_field(form.location) }}
               </div> <!-- col -->
               <!-- PIN CODE -->
               <div class="col">
-                {{ render_field_with_errors_user_side(form.postal_code )}}
+                {{ render_field(form.postal_code )}}
               </div> <!-- col -->
               <!-- MOBILE NO. -->
               <div class="col">
-                {{ render_field_with_errors_user_side(form.phone_no) }}
+                {{ render_field(form.phone_no) }}
               </div> <!-- col -->
               <!-- E-MAIL ADDRESS -->
               <div class="col">
-                {{ render_field_with_errors_user_side(form.email_address) }}
+                {{ render_field(form.email_address) }}
               </div> <!-- col -->
             </div> <!-- form-row -->
 
             <div class="form-row">
               <!-- REMARK -->
               <div class="col">
-                {{ render_field_with_errors_user_side(form.remark) }}
+                {{ render_field(form.remark) }}
               </div> <!-- col -->
             </div> <!-- row -->
 
           </fieldset>
 
           <!-- SUBMIT -->
-          {{ render_submit_button(form.submit) }}
+          {{ render_submit(form.submit) }}
 
         </form>
       </div> <!-- content-section -->
