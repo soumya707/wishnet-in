@@ -38,6 +38,10 @@ body {
     color: red;
 }
 
+.text-dark-grey {
+    color: #4A4d4e;
+}
+
 .border-red {
     border: 2px solid red;
 }
@@ -48,7 +52,15 @@ body {
 }
 
 .btn-red:hover {
-    background-color: #4A4D4E !important;
+    background-color: #880000 !important;
+}
+
+.logo-red {
+    color: red !important;
+}
+
+.logo-red:hover {
+    color: #880000 !important;
 }
 
 .btn-call {
@@ -103,7 +115,7 @@ nav {
 
 .service-img {
     width: 100%;
-    height: 20rem;
+    height: 15rem;
 }
 
 /* Best plans */
@@ -126,7 +138,13 @@ nav {
 /* Brochure section */
 .download-cards {
     /* width: 18rem; */
-    border: 1px solid red;
+    /* border: 1px solid red; */
+}
+
+/* Downloads */
+.download-img {
+    height: 100%;
+    width: 5em;
 }
 
 /* PLANS */
@@ -146,6 +164,10 @@ nav {
 .plan-labels {
     font-family: 'Hind' !important;
     min-width: 70px;
+}
+
+.plan-labels .active {
+    background-color: #4A4D4e;
 }
 
 @media (max-width: 34em) {
@@ -198,7 +220,7 @@ nav {
 
 /* LOCATE US */
 .hq-card img {
-    height: 15rem;
+    height: 10rem;
 }
 
 /* ABOUT US */
