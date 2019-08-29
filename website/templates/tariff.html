@@ -15,7 +15,7 @@
     <!-- PLAN TABS -->
     <div class="col-auto p-3 mr-auto btn-group btn-group-toggle plan-button-row" data-toggle="buttons">
       {% for plan in plans %}
-      <label class="btn btn-secondary bg-red {% if loop.first %}active{% endif %} m-1 rounded plan-labels shadow">
+      <label class="btn btn-red {% if loop.first %}active{% endif %} m-1 rounded plan-labels shadow">
         <input type="radio"
                name="options" value="{{ plan.__name__ }}"
                autocomplete="off" onchange="displayCards(this);"
@@ -159,11 +159,19 @@
     </div> <!-- card -->
     {% endfor %}
 
-  </div> <!-- card-columns -->
+    <div class="masonry-brick bg-light-grey shadow mt-3 mr-3 {{ plan.__name__ }}-cards">
+      <h3 class="card-title heading pt-3">T&Cs
+        <div class="card-heading-underline"></div>
+      </h3>
+      <p class="text-justify px-3 py-1">Installation, activation and network maintenance (if any) are not included in the tariff.</p>
+      <p class="text-justify px-3 py-1">Availability of the plans for a specific region is subject to capacity of the netwrok.</p>
+      <p class="text-justify px-3 py-1">GST and other taxes (if any) are not included in the tariff.</p>
+    </div>
+
+  </div> <!-- masonry -->
   {% endfor %}
 
 </div> <!-- container -->
-
 {% endblock %}
 
 {% block scripts %}

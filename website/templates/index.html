@@ -48,7 +48,7 @@
     {% for service in services %}
     <div class="col-sm-6 {{ loop.cycle('bg-white', 'bg-light-grey')}}">
       <img src="{{ url_for('static', filename='img/services/{}.svg'.format(service.logo_id)) }}"
-           class="service-img">
+           class="service-img py-3">
       <h1 class="service-name text-red">{{ service.name }}</h1>
       <h5>
         <p class="service-desc">{{ service.features |safe }}</p>
@@ -109,20 +109,34 @@
     <div class="index-heading-underline"></div>
   </h3>
 
-    <div class="card-deck p-3 text-center">
+    <div class="card-deck p-3 pb-5 text-center">
 
       {% for download in downloads %}
-        <div class="card shadow-lg download-cards">
-          <div class="card-body">
-            <h5 class="heading pb-1">{{ download.name }}</h5>
-          </div> <!-- card-body -->
-          <div class="card-footer bg-white border-0">
-            <a href="{{ url_for('static', filename='assets/{}.pdf'.format(download.link)) }}"
-               class="btn text-white bg-dark-grey"
-               download="{{ download.name ~ '.pdf' }}">
-              <i class="fas fa-file-download"></i> Download</a>
-          </div> <!-- card-footer -->
-        </div>
+      <div class="card shadow-lg download-cards">
+        <div class="row no-gutters">
+
+          <div class="col-md-4">
+            <img src="{{ url_for('static', filename='img/downloads/{}.svg'.format(download.img_id)) }}"
+                 class="card-img download-img pt-2">
+          </div> <!-- col -->
+
+          <div class="col-md-8">
+            <div class="card-body">
+              <h4 class="text-red pb-1 text-left">{{ download.name }}</h4>
+              <p class="card-text text-justify">{{ download.text }}</p>
+            </div> <!-- card-body -->
+
+            <div class="card-footer bg-white border-0 text-left pt-0">
+              <a href="{{ url_for('static', filename='assets/{}'.format(download.link)) }}"
+                 class="text-red"
+                 download="{{ download.link }}">
+                <i class="fas fa-download"></i> Download
+              </a>
+            </div> <!-- card-footer -->
+          </div> <!-- col -->
+
+        </div> <!-- row -->
+      </div> <!-- card -->
       {% endfor %}
 
     </div>

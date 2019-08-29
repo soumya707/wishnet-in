@@ -25,34 +25,61 @@
     </div> <!-- col -->
 
     <div class="col-sm-8 pt-2 grey-background">
-      <h3>Current openings</h3>
+      <h3 class="py-2 text-red">Current openings</h3>
 
       <div id="accordion">
         {% for item in items %}
         <div class="card">
-          <div class="card-header" id="header_{{ item.id }}">
-            <h5>Job Title: {{ item.job_title }}</h5>
-            <p>Salary: {{ item.salary }}</p>
-            <p>Experience: {{ item.experience }}</p>
-            <p>Required: {{ item.required }}</p>
-            <p>Opening: {{ item.opening }}</p>
+          <div class="card-header bg-light-grey" id="header_{{ item.id }}">
+            <div class="d-flex align-items-center">
+              <div class="mr-auto text-red">{{ item.job_title }}</div>
 
-            <button class="btn btn-link"
-                    data-toggle="collapse"
-                    data-target="#collapse_{{ item.id }}"
-                    aria-expanded="false"
-                    aria-controls="collapse_{{ item.id }}">+</button>
-          </div>
+              <button class="btn btn-link text-red"
+                      type="button"
+                      data-toggle="collapse"
+                      data-target="#collapse_{{ item.id }}"
+                      aria-expanded="false"
+                      aria-controls="collapse_{{ item.id }}">
+                <i class="fas"></i>
+              </button>
+            </div> <!-- flex -->
+
+            <div class="d-flex justify-content-between">
+              <div>Salary: {{ item.salary_range }}</div>
+              <div>Qualification: {{ item.education }}</div>
+              <div>Experience: {{ item.experience }}</div>
+            </div> <!-- flex -->
+          </div> <!--card -->
 
           <div id="collapse_{{ item.id }}"
                class="collapse"
                aria-labelledby="header_{{ item.id }}"
                data-parent="#accordion">
             <div class="card-body">
-              <h5>Job Description</h5>
-              <p>{{ item.description }}</p>
-              <h5>Education: {{ item.education }}</h5>
-              <p>{{ item.education_requirements }}</p>
+              <!-- Company -->
+              <h5 class="text-dark-grey">Company</h5>
+              <p>{{ item.company }}</p>
+              <!-- Job Location -->
+              <h5 class="text-dark-grey">Job Location</h5>
+              <p>{{ item.location }}</p>
+              <!-- Job Type -->
+              <h5 class="text-dark-grey">Job Type</h5>
+              <p>{{ item.job_type }}</p>
+              <!-- Job Description -->
+              <h5 class="text-dark-grey">Job Description</h5>
+              <p>{{ item.job_description |safe }}</p>
+              <!-- Job Summary -->
+              <h5 class="text-dark-grey">Job Summary</h5>
+              <p>{{ item.job_summary }}</p>
+              <!-- Key Skills -->
+              <h5 class="text-dark-grey">Key Skills</h5>
+              <p>{{ item.key_skills }}</p>
+              <!-- Preferable -->
+              <h5 class="text-dark-grey">Preferred Qualification</h5>
+              <p>{{ item.preferable }}</p>
+              <!-- Gender -->
+              <h5 class="text-dark-grey">Gender</h5>
+              <p>{{ item.gender }}</p>
               <hr>
               <p>To apply for the job, send your CV/Resume to {{ item.dept_email }} mentioning {{ item.job_title }} in the subject.</p>
             </div>
