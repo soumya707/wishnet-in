@@ -25,86 +25,87 @@
       {% endfor %}
     </div>
 
-  <!-- FILTER -->
-    <div class="col-auto p-3">
-      <div class="dropright">
-        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-           <!-- data-display="static"> -->
-          <i class="fas fa-filter fa-lg"></i>
-        </a>
+  {# add when filter is ready #}
+  {# <!-- FILTER --> #}
+  {#   <div class="col-auto p-3"> #}
+  {#     <div class="dropright"> #}
+  {#       <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" #}
+  {#          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> #}
+  {#          <!-- data-display="static"> --> #}
+  {#         <i class="fas fa-filter fa-lg"></i> #}
+  {#       </a> #}
 
-        <div class="dropdown-menu dropdown-menu-md-left p-4" aria-labelledby="dropdownMenuLink">
+  {#       <div class="dropdown-menu dropdown-menu-md-left p-4" aria-labelledby="dropdownMenuLink"> #}
 
-          <form onsubmit="applyFilter()">
-            <!-- Plan type -->
-            <fieldset class="form-group">
-              <div class="row">
-                <legend class="col-form-label col">Plan Type</legend>
+  {#         <form onsubmit="applyFilter()"> #}
+  {#           <!-- Plan type --> #}
+  {#           <fieldset class="form-group"> #}
+  {#             <div class="row"> #}
+  {#               <legend class="col-form-label col">Plan Type</legend> #}
 
-                <div class="col">
+  {#               <div class="col"> #}
 
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="planType" id="unlimitedPlan"
-                           value="unlimited" checked>
-                    <label class="form-check-label" for="unlimitedPlan">
-                      Unlimited Plan
-                    </label>
-                  </div>
+  {#                 <div class="form-check"> #}
+  {#                   <input class="form-check-input" type="radio" name="planType" id="unlimitedPlan" #}
+  {#                          value="unlimited" checked> #}
+  {#                   <label class="form-check-label" for="unlimitedPlan"> #}
+  {#                     Unlimited Plan #}
+  {#                   </label> #}
+  {#                 </div> #}
 
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="planType" id="limitedPlan"
-                           value="limited">
-                    <label class="form-check-label" for="limitedPlan">
-                      Limited Plan
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </fieldset> <!-- form-group -->
+  {#                 <div class="form-check"> #}
+  {#                   <input class="form-check-input" type="radio" name="planType" id="limitedPlan" #}
+  {#                          value="limited"> #}
+  {#                   <label class="form-check-label" for="limitedPlan"> #}
+  {#                     Limited Plan #}
+  {#                   </label> #}
+  {#                 </div> #}
+  {#               </div> #}
+  {#             </div> #}
+  {#           </fieldset> <!-- form-group --> #}
 
-            <!-- Plan validity -->
-            <fieldset class="form-group">
-              <div class="row">
-                <legend class="col-form-label col">Plan Validity</legend>
-                <div class="col">
+  {#           <!-- Plan validity --> #}
+  {#           <fieldset class="form-group"> #}
+  {#             <div class="row"> #}
+  {#               <legend class="col-form-label col">Plan Validity</legend> #}
+  {#               <div class="col"> #}
 
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="validity" id="30daysValidity"
-                           value="30days" checked>
-                    <label class="form-check-label" for="30daysValidity">
-                      30 days
-                    </label>
-                  </div>
+  {#                 <div class="form-check"> #}
+  {#                   <input class="form-check-input" type="radio" name="validity" id="30daysValidity" #}
+  {#                          value="30days" checked> #}
+  {#                   <label class="form-check-label" for="30daysValidity"> #}
+  {#                     30 days #}
+  {#                   </label> #}
+  {#                 </div> #}
 
-                </div>
-              </div>
-            </fieldset> <!-- form-group -->
+  {#               </div> #}
+  {#             </div> #}
+  {#           </fieldset> <!-- form-group --> #}
 
-            <!-- Plan price -->
-            <div class="form-group">
-              <label for="priceRange">Price</label>
-              <input type="range" name="priceInput" class="form-control-range" id="priceRange"
-                     min="200" max="3000" oninput="priceOutput.value = priceInput.value">
-              <output name="priceOutput" id="priceRangeOutput">1600</output>
-            </div> <!-- form-group -->
+  {#           <!-- Plan price --> #}
+  {#           <div class="form-group"> #}
+  {#             <label for="priceRange">Price</label> #}
+  {#             <input type="range" name="priceInput" class="form-control-range" id="priceRange" #}
+  {#                    min="200" max="3000" oninput="priceOutput.value = priceInput.value"> #}
+  {#             <output name="priceOutput" id="priceRangeOutput">1600</output> #}
+  {#           </div> <!-- form-group --> #}
 
-            <!-- Plan speed -->
-            <div class="form-group">
-              <label for="speedRange">Speed</label>
-              <input type="range" name="speedInput" class="form-control-range" id="speedRange"
-                     min="20" max="100" oninput="speedOutput.value = speedInput.value">
-              <output name="speedOutput" id="speedRangeOutput">60</output>
-            </div> <!-- form-group -->
+  {#           <!-- Plan speed --> #}
+  {#           <div class="form-group"> #}
+  {#             <label for="speedRange">Speed</label> #}
+  {#             <input type="range" name="speedInput" class="form-control-range" id="speedRange" #}
+  {#                    min="20" max="100" oninput="speedOutput.value = speedInput.value"> #}
+  {#             <output name="speedOutput" id="speedRangeOutput">60</output> #}
+  {#           </div> <!-- form-group --> #}
 
-            <!-- submit -->
-            <input type="submit" class="btn btn-primary" value="Apply">
-          </form>
-        </div> <!-- dropdown-menu -->
+  {#           <!-- submit --> #}
+  {#           <input type="submit" class="btn btn-primary" value="Apply"> #}
+  {#         </form> #}
+  {#       </div> <!-- dropdown-menu --> #}
 
-      </div> <!-- dropdown -->
+  {#     </div> <!-- dropdown --> #}
 
-    </div> <!-- col -->
+  {#   </div> <!-- col --> #}
 
   </div> <!-- row -->
 </div> <!-- container -->
@@ -189,9 +190,10 @@
         $("." + $(elem).val() + "-cards").show();
     }
 
-    // function applyFilter() {
-    //     if $("input[name='planType']").val() === "unlimited"
-    // }
+    {# add when filter is ready #}
+    {# // function applyFilter() { #}
+    {# //     if $("input[name='planType']").val() === "unlimited" #}
+    {# // } #}
   </script>
 
 {% endblock %}

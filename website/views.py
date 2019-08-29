@@ -23,13 +23,13 @@ from website.paytm_utils import initiate_transaction, verify_transaction
 
 csrf = CSRFProtect(app)
 
+#TODO: add when self-care portal is ready
+# @app.before_first_request
+# def init_session_var():
+#     """Initialize session variable for portal use."""
 
-@app.before_first_request
-def init_session_var():
-    """Initialize session variable for portal use."""
-
-    # set user to be logged out
-    session['user_logged_in'] = False
+#     # set user to be logged out
+#     session['user_logged_in'] = False
 
 
 # Routes
@@ -161,35 +161,36 @@ def about():
     return render_template('about.html', ventures=ventures)
 
 
-@app.route('/portal', methods=['GET', 'POST'])
-def portal():
-    """Route for portal."""
+#TODO: add when self-care portal is ready
+# @app.route('/portal', methods=['GET', 'POST'])
+# def portal():
+#     """Route for portal."""
 
-    # preliminary check whether user is already logged in
-    if not session['user_logged_in']:
-        form = AuthenticationForm()
+#     # preliminary check whether user is already logged in
+#     if not session['user_logged_in']:
+#         form = AuthenticationForm()
 
-        if form.validate_on_submit():
-            username = request.form['username']
-            password = request.form['password']
+#         if form.validate_on_submit():
+#             username = request.form['username']
+#             password = request.form['password']
 
-            authenticate_user = AuthenticateUser(app)
-            authenticate_user.request(username, password)
+#             authenticate_user = AuthenticateUser(app)
+#             authenticate_user.request(username, password)
 
-            # if login is successful
-            if authenticate_user.response():
-                session['user_logged_in'] = True
-                return render_template('portal.html', logged_in=True)
+#             # if login is successful
+#             if authenticate_user.response():
+#                 session['user_logged_in'] = True
+#                 return render_template('portal.html', logged_in=True)
 
-            # if login fails, display message
-            else:
-                flash('Could not log in due to invalid credentials', 'danger')
-                return redirect(url_for('portal'))
+#             # if login fails, display message
+#             else:
+#                 flash('Could not log in due to invalid credentials', 'danger')
+#                 return redirect(url_for('portal'))
 
-        return render_template('portal.html', logged_in=False, form=form)
+#         return render_template('portal.html', logged_in=False, form=form)
 
-    elif session['user_logged_in']:
-        return render_template('portal.html', logged_in=True)
+#     elif session['user_logged_in']:
+#         return render_template('portal.html', logged_in=True)
 
 
 @app.route('/payment/<int:cust_id>/<ref_no>/')
