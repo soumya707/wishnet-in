@@ -61,7 +61,7 @@ def send_async_new_connection_mail(recipient_mail, query_no):
                  'Please feel free to contact us at 1800 419 4244 at any time.'
                  '</br></br>Thanking you and with warm regards,</br></br>'
                  'Team Wishnet</br>'
-                 '<img src="162.241.200.22/static/img/logo/wishnet.svg" '
+                 '<img src="static/img/logo/wishnet.svg" '
                  'style="width: 150px; height: 50px">').format(query_no)
 
     msg = Message(
