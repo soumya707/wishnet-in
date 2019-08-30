@@ -8,7 +8,8 @@ from flask import Flask, url_for, redirect
 from flask_admin import Admin
 from flask_admin import helpers as admin_helpers
 from flask_migrate import Migrate
-from flask_session import Session
+#TODO: use when portal is ready
+# from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy_caching import CachingQuery
 from flask_caching import Cache
@@ -45,7 +46,8 @@ admin = Admin(
 migrate = Migrate(app, db)
 
 # setup session storage
-Session(app)
+#TODO: use when portal is ready
+# Session(app)
 
 # import here to avoid cyclic import
 from website import views
