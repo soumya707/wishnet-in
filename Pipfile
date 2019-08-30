@@ -23,6 +23,7 @@ requests = "*"
 redis = "*"
 flask-caching = "*"
 flask-sqlalchemy-caching = "*"
+celery = "*"
 
 [requires]
 python_version = "3.6"
