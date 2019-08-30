@@ -189,6 +189,9 @@ class NewConnection(db.Model):
     time = db.Column(db.Time(), nullable=False,
                      default=datetime.now().astimezone().time())
 
+    def __str__(self):
+        return self.query_no
+
 
 # Regional offices
 class RegionalOffices(db.Model):

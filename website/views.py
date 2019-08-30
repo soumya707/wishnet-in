@@ -12,11 +12,13 @@ from flask_sqlalchemy_caching import FromCache
 from flask_wtf.csrf import CSRFProtect
 
 from website import app, cache
+from website.tasks import (
+    add_new_connection_data_to_db, send_async_new_connection_mail)
 from website.forms import AuthenticationForm, NewConnectionForm, RechargeForm
 from website.helpers import (
     ActivePlan, AuthenticateUser, ContractsByKey, Recharge)
 from website.models import (
-    FAQ, BestPlans, Downloads, JobVacancy, NewConnection, RegionalOffices,
+    FAQ, BestPlans, Downloads, JobVacancy, RegionalOffices,
     Services, Ventures, CarouselImages)
 from website.paytm_utils import initiate_transaction, verify_transaction
 
@@ -88,8 +90,6 @@ def tariff():
 
     plan_classes = [cls for cls in classes if cls.__name__.endswith('Plan')]
 
-    # plans = [entry for plan in plan_classes for entry in plan.query.all()]
-
     return render_template('tariff.html', plans=plan_classes)
 
 
@@ -99,27 +99,32 @@ def new_conn():
     form = NewConnectionForm()
 
     if form.validate_on_submit():
-        connection = NewConnection(
-            query_no=''.join(
-                random.choices(
-                    string.ascii_letters + string.digits, k=8
-                )
-            ),
-            name='{} {} {}'.format(
+        query_no = ''.join(
+            random.choices(
+                string.ascii_letters + string.digits, k=8
+            )
+        )
+
+        form_data = {
+            'query_no': query_no,
+            'name': '{} {} {}'.format(
                 form.first_name.data,
                 form.middle_name.data,
                 form.last_name.data
             ),
-            address=form.address.data,
-            location=form.location.data,
-            postal_code=form.postal_code.data,
-            phone_no=form.phone_no.data,
-            email=form.email_address.data,
-            remark=form.remark.data,
-        )
-        db = current_app.extensions['sqlalchemy'].db
-        db.session.add(connection)
-        db.session.commit()
+            'address': form.address.data,
+            'location': form.location.data,
+            'postal_code': form.postal_code.data,
+            'phone_no': form.phone_no.data,
+            'email': form.email_address.data,
+            'remark': form.remark.data,
+        }
+
+        # add data to db async
+        add_new_connection_data_to_db.delay(form_data)
+
+        # send mail async
+        send_async_new_connection_mail.delay(form.email_address.data, query_no)
 
         flash('Request sent successfully!', 'success')
         return redirect(url_for('new_conn'))

@@ -13,26 +13,26 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy_caching import CachingQuery
 from flask_caching import Cache
+from flask_mail import Mail
 from flask_security import Security, SQLAlchemyUserDatastore
 
 
-# initiate app
+# initiate Flask application
 app = Flask(__name__, instance_relative_config=True)
-
 
 # load config
 app.config.from_object('config')
 app.config.from_pyfile('config.py')
 
-
 # initiate required objects
-# setup DB
+
+# setup Flask-SQLAlchemy
 db = SQLAlchemy(app, query_class=CachingQuery)
 
-# setup cache
+# setup Flask-Caching
 cache = Cache(app)
 
-# setup admin portal
+# setup Flask-Admin
 admin = Admin(
     app,
     name='Admin',
@@ -42,10 +42,13 @@ admin = Admin(
     template_mode='bootstrap3',
 )
 
-# setup DB migrate
+# setup Flask-MIgrate
 migrate = Migrate(app, db)
 
-# setup session storage
+# setup Flask-Mail
+mail = Mail(app)
+
+# setup Flask-Session
 #TODO: use when portal is ready
 # Session(app)
 
