@@ -81,7 +81,7 @@
               <h5 class="text-dark-grey">Gender</h5>
               <p>{{ item.gender }}</p>
               <hr>
-              <p>To apply for the job, send your CV/Resume to {{ item.dept_email }} mentioning {{ item.job_title }} in the subject.</p>
+              <p>To apply for the job, send your CV/Resume to <a href="mailto:{{ item.dept_email }}?subject={{ item.job_title }}">{{ item.dept_email }}</a> mentioning <strong>{{ item.job_title }}</strong> in the subject.</p>
             </div>
           </div>
         </div>

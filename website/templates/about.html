@@ -55,7 +55,7 @@ Wish Net today is present in Kolkata and across many cities and towns in Bengal.
       <img src="{{ url_for('static', filename='img/logo/{}.svg'.format(venture.pic)) }}"
            class="venture-img">
       <h1 class="text-red text-center">{{ venture.name }}</h1>
-      <p class="venture-desc text-justify px-3">{{ venture.description |safe }}</p>
+      <p class="description text-justify px-3">{{ venture.description |safe }}</p>
     </div> <!-- col -->
     {% endfor %}
 

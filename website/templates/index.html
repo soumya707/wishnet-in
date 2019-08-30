@@ -51,7 +51,7 @@
            class="service-img py-3">
       <h1 class="service-name text-red">{{ service.name }}</h1>
       <h5>
-        <p class="service-desc">{{ service.features |safe }}</p>
+        <p class="description">{{ service.features |safe }}</p>
       </h5>
     </div> <!-- col -->
     {% endfor %}
@@ -61,7 +61,7 @@
 <!-- BEST PLANS -->
 <div class="container-fluid">
   <h3 class="py-4 heading">Featured Plans
-    <div class="index-heading-underline"></div>
+    <div class="heading-underline-center"></div>
   </h3>
 
   <div class="card-deck p-1">
@@ -69,7 +69,7 @@
     {% for plan in plans %}
     <div class="card shadow plan-card">
       <!-- Color bar at top -->
-      <div class="d-flex w-100 bg-red" id="plan-color-bar"></div>
+      <div class="d-flex w-100 bg-red color-bar"></div>
       <!-- Plan name -->
       <div class="d-flex pt-3 pb-1 w-100 justify-content-center bg-light-grey">
         <h3>{{ plan.name }}</h3>
@@ -106,7 +106,7 @@
 <!-- BROCHURES -->
 <div class="container-fluid bg-light-grey">
   <h3 class="py-4 heading">Downloads
-    <div class="index-heading-underline"></div>
+    <div class="heading-underline-center"></div>
   </h3>
 
     <div class="card-deck p-3 pb-5 text-center">
@@ -115,14 +115,14 @@
       <div class="card shadow-lg download-cards">
         <div class="row no-gutters">
 
-          <div class="col-md-4">
+          <div class="col-4">
             <img src="{{ url_for('static', filename='img/downloads/{}.svg'.format(download.img_id)) }}"
                  class="card-img download-img pt-2">
           </div> <!-- col -->
 
-          <div class="col-md-8">
+          <div class="col-8">
             <div class="card-body">
-              <h4 class="text-red pb-1 text-left">{{ download.name }}</h4>
+              <h4 class="text-red text-left">{{ download.name }}</h4>
               <p class="card-text text-justify">{{ download.text }}</p>
             </div> <!-- card-body -->
 

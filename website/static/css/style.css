@@ -3,6 +3,11 @@ body {
     font-family: 'Hind' !important;
 }
 
+a:hover {
+    color: #880000;
+    text-decoration: none !important;
+}
+
 .heading {
     font-family: 'Hind' !important;
     color: #4A4d4e;
@@ -12,14 +17,20 @@ body {
 .heading-underline {
     height: 0.2rem;
     width: 2em;
-    background-image: linear-gradient(to right, transparent, red);
+    background-image: linear-gradient(to right, transparent, #FF0000);
 }
 
-.index-heading-underline {
+.heading-underline-center {
     height: 0.2rem;
     width: 3em;
-    background-image: linear-gradient(to right, transparent, red);
+    background-image: linear-gradient(to right, transparent, #FF0000);
     margin: 0 auto;
+}
+
+.heading-underline-100 {
+    height:0.2rem;
+    width:100%;
+    background-image: linear-gradient(to right, transparent, #FF0000);
 }
 
 .bg-light-grey {
@@ -31,11 +42,11 @@ body {
 }
 
 .bg-red {
-    background-color: red;
+    background-color: #FF0000;
 }
 
 .text-red {
-    color: red;
+    color: #FF0000;
 }
 
 .text-dark-grey {
@@ -43,37 +54,59 @@ body {
 }
 
 .border-red {
-    border: 2px solid red;
+    border: 2px solid #FF0000;
 }
 
 .btn-red {
-    color: white !important;
-    background-color: red !important;
+    color: #fff;
+    background-color: #FF0000;
+    border-color: #FF0000;
 }
 
 .btn-red:hover {
-    background-color: #880000 !important;
+    color: #fff;
+    background-color: #880000;
+    border-color: #880000
 }
 
-.logo-red {
-    color: red !important;
+.btn-red:focus, .btn-red.focus {
+    color: #fff;
+    background-color: #880000;
+    broder-color: #880000;
+    box-shadow: 0 0 0 0.2rem rgba(136, 0, 0, 0.5);
 }
 
-.logo-red:hover {
-    color: #880000 !important;
+.btn-red:not(:disabled):not(.disabled):active, .btn-red:not(:disabled):not(.disabled).active, .show > .btn-red.dropdown-toggle {
+    color: #fff;
+    background-color: #880000;
+    border-color: ##d60000;
 }
 
-.btn-call {
-    color: white !important;
+.btn-red:not(:disabled):not(.disabled):active:focus, .btn-red:not(:disabled):not(.disabled).active:focus, .show > .btn-red.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem rgba(136, 0, 0, 0.5);
 }
 
-.btn-call:hover {
-    color: red !important;
+.btn-above-nav {
+    color: #fff !important;
+    text-decoration: none;
+}
+
+.btn-above-nav:hover {
+    color: #FF0000 !important;
+    text-decoration: none !important;
 }
 
 .sidebar-img {
     width: 100%;
     height: 10em;
+}
+
+.description {
+    line-height: 1.6;
+}
+
+.color-bar {
+    height: 0.2rem;
 }
 
 /* LAYOUT */
@@ -94,7 +127,15 @@ nav {
 }
 
 .nav-item:hover .nav-link {
-    color: red !important;
+    color: #FF0000 !important;
+}
+
+.login-logo {
+    color: #FF0000;
+}
+
+.login-logo:hover {
+    color: #880000;
 }
 
 /* INDEX */
@@ -105,14 +146,10 @@ nav {
 }
 
 .carousel-indicators .active {
-    background-color: red;
+    background-color: #FF0000;
 }
 
 /* Services */
-.service-desc {
-    line-height: 1.6;
-}
-
 .service-img {
     width: 100%;
     height: 15rem;
@@ -127,54 +164,44 @@ nav {
     transform: scale(1.05);
 }
 
-#plan-color-bar {
-    height: 0.2rem;
-}
-
 .plan-card img {
     height: 10rem;
 }
 
-/* Brochure section */
+/* Downloads */
 .download-cards {
-    box-shadow: 5px 5px 2px grey !important;
+    box-shadow: 3px 3px 2px #808080 !important;
 }
 
-/* Downloads */
 .download-img {
     height: 100%;
     width: 5em;
+    vertical-align: middle;
 }
 
 /* PLANS */
 
-/* Plan category row */
-.plan-button-row {
-    position: sticky;
-    top: 0;
-}
+/* /\* Filter *\/ */
+/* .dropdown-toggle::after { */
+/*     display:none !important; */
+/* } */
 
-/* Filter */
-.dropdown-toggle::after {
-    display:none !important;
-}
+/* @media (max-width: 34em) { */
+/*     .dropdown-menu { */
+/*         width: 15rem; */
+/*     } */
+/* } */
+
+/* @media (min-width: 48em) { */
+/*     .dropdown-menu { */
+/*         width: 20rem; */
+/*     } */
+/* } */
 
 /* Tariffs */
 .plan-labels {
     font-family: 'Hind' !important;
     min-width: 70px;
-}
-
-@media (max-width: 34em) {
-    .dropdown-menu {
-        width: 15rem;
-    }
-}
-
-@media (min-width: 48em) {
-    .dropdown-menu {
-        width: 20rem;
-    }
 }
 
 .masonry {
@@ -191,29 +218,23 @@ nav {
 }
 
 .masonry-brick:hover {
-    border: 2px solid red;
-}
-
-.card-heading-underline {
-    height:0.2rem;
-    width:100%;
-    background-image: linear-gradient(to right, transparent, red);
+    border: 2px solid #FF0000;
 }
 
 /* SUPPORT AND CAREER */
 [data-toggle="collapse"] .fas:before {
     content: "\f078";
-    color: red;
+    color: #FF0000;
 }
 
 [aria-expanded="true"] .fas:before {
     content: "\f077";
-    color: red;
+    color: #FF0000;
 }
 
 [data-toggle="collapse"].collapsed .fas:before {
     content: "\f078";
-    color: red;
+    color: #FF0000;
 }
 
 /* LOCATE US */
@@ -226,10 +247,6 @@ nav {
 /* Ventures */
 .venture-img {
     height: 15em;
-}
-
-.venture-desc {
-    line-height: 1.6;
 }
 
 /* PAYMENT */

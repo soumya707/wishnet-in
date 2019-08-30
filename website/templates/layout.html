@@ -44,15 +44,15 @@
     <div class="d-flex justify-content-end bg-dark-grey"
          id="content-above-navbar">
       <!-- Toll free number -->
-      <h5 class="text-white p-2">
-        <a class="btn-call" href="tel:18004194244">
+      <h5 class="p-2">
+        <a class="btn-above-nav" href="tel:18004194244">
           <i class="fas fa-phone-alt"></i> 1800-419-4244
         </a>
       </h5>
       <!-- Careers -->
-      <a class="text-white p-2" href="{{ url_for('career') }}">Career</a>
+      <a class="btn-above-nav p-2" href="{{ url_for('career') }}">Career</a>
       <!-- About us -->
-      <a class="text-white p-2 mr-2" href="{{ url_for('about') }}">About us</a>
+      <a class="btn-above-nav p-2 mr-2" href="{{ url_for('about') }}">About us</a>
     </div> <!-- flex -->
 
 
@@ -62,7 +62,7 @@
       <!-- Brand logo -->
       <a class="navbar-brand" href="{{ url_for('index') }}">
         <img src="{{ url_for('static', filename='img/logo/brand.svg') }}"
-             width="150px" height="50px" alt="Brand logo">
+             width="150px" height="50px">
       </a>
 
       <!-- Login logo (on small and medium screens) -->
@@ -71,7 +71,7 @@
           <a class="nav-link"
              href="https://wishnet-bcrm.magnaquest.com/SelfcareLogin.aspx"
              target="_blank">
-            <i class="far fa-user fa-lg text-red"></i>
+            <i class="far fa-user fa-lg login-logo"></i>
           </a>
         </li>
       </ul>
@@ -123,7 +123,7 @@
             <a class="nav-link"
                href="https://wishnet-bcrm.magnaquest.com/SelfcareLogin.aspx"
                target="_blank">
-              <i class="far fa-user fa-2x logo-red"></i>
+              <i class="far fa-user fa-2x login-logo"></i>
             </a>
           </li>
         </ul>
@@ -154,31 +154,31 @@
 
     <!-- FOOTER -->
     <footer class="border-top text-muted">
-      <div class="d-flex justify-content-between m-3 p-3">
+      <div class="d-flex justify-content-between m-3 p-1">
 
         <div>
           <!-- Copyright -->
           &copy; 2019 Wish Net Pvt. Ltd. &middot;
           <!-- Privacy -->
-          <a href="{{ url_for('privacy') }}">Privacy</a> &middot;
+          <a href="{{ url_for('privacy') }}" class="text-red">Privacy</a> &middot;
           <!-- Facebook -->
           <a href="https://www.facebook.com/wishnetisp">
-            <i class="fab fa-facebook-square fa-lg"></i>
+            <i class="fab fa-facebook-square fa-lg" style="color: #3b5998"></i>
           </a> &middot;
           <!-- Instagram -->
           <a href="https://www.instagram.com/wishnet_broadband/">
-            <i class="fab fa-instagram fa-lg"></i>
+            <i class="fab fa-instagram fa-lg" style="color: #E1306C"></i>
           </a> &middot;
           <!-- Twitter -->
           <a href="https://www.twitter.com/WishnetB">
-            <i class="fab fa-twitter-square fa-lg"></i>
+            <i class="fab fa-twitter-square fa-lg" style="color: #007bff"></i>
           </a>
         </div>
 
         <!--  Back to top -->
         <div>
-          <a href="#">
-            <i class="fas fa-caret-square-up fa-lg"></i>
+          <a href="#" class="text-red">
+            <i class="fas fa-chevron-circle-up fa-lg"></i>
           </a>
         </div>
 
