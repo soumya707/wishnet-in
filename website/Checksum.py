@@ -1,1 +1,1 @@
-payments/paytm-python-sdk/Python v3.x/Checksum.py
+payments/paytm-python-sdk/Checksum.py
