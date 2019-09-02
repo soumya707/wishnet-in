@@ -91,6 +91,37 @@ def index():
     )
 
 
+@app.route('/payment/<int:cust_id>/<ref_no>')
+def payment(cust_id, ref_no):
+    """Route for payment."""
+    return render_template(
+        'payment.html',
+        cust_data=session['cust_data'],
+        active_plans=session['active_plans'],
+        paytm_data=session['paytm_form'],
+    )
+
+
+@app.route('/verify', methods=['POST'])
+@csrf.exempt
+def verify_response():
+    """Route for verifying response for payment."""
+    if request.method == 'POST':
+
+        verified = verify_transaction(request.form)
+
+        if verified:
+            final_status = verify_final_status(session['order_id'])
+            # top_up = Recharge(app)
+            # top_up.request()
+            # top_up.response()
+            flash('{}'.format(final_status), 'info')
+        else:
+            flash('Recharge failed! Please try again.', 'danger')
+
+        return redirect(url_for('index'))
+
+
 @app.route('/tariff')
 def tariff():
     """Route for tariff."""
@@ -207,34 +238,6 @@ def about():
 
 #     elif session['user_logged_in']:
 #         return render_template('portal.html', logged_in=True)
-
-
-@app.route('/payment/<int:cust_id>/<ref_no>/')
-def payment(cust_id, ref_no):
-    """Route for payment."""
-    return render_template(
-        'payment.html',
-        active_plans=session['active_plans'],
-        paytm_data=session['paytm_form']
-    )
-
-
-@app.route('/verify', methods=['GET', 'POST'])
-def verify_response():
-    """Route for verifying response for payment."""
-    bank_txn_id = request.form['BANKTXNID']
-    checksumhash = request.form['CHECKSUMHASH']
-
-    verified = verify_transaction(checksumhash)
-
-    #TODO: add transaction status API call
-    if verified:
-        top_up = Recharge(app)
-        top_up.request()
-        top_up.response()
-        redirect(url_for('index'))
-    else:
-        redirect(url_for('payment'))
 
 
 @app.route('/privacy')
