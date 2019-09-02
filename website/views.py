@@ -15,12 +15,14 @@ from website import app, cache
 from website.tasks import (
     add_new_connection_data_to_db, send_async_new_connection_mail)
 from website.forms import AuthenticationForm, NewConnectionForm, RechargeForm
-from website.helpers import (
-    ActivePlan, AuthenticateUser, ContractsByKey, Recharge)
+from website.mqs_api import (
+    AuthenticateUser, CustomerInfo, ContractsByKey, Recharge)
+from website.utils import ActivePlan
 from website.models import (
     FAQ, BestPlans, Downloads, JobVacancy, RegionalOffices,
     Services, Ventures, CarouselImages)
-from website.paytm_utils import initiate_transaction, verify_transaction
+from website.paytm_utils import (
+    initiate_transaction, verify_transaction, verify_final_status)
 
 
 csrf = CSRFProtect(app)
@@ -45,6 +47,7 @@ def index():
     if form.validate_on_submit():
         user = request.form['user_id']
 
+        # Get active plans (reference no. of this API call is passed forward)
         user_contracts = ContractsByKey(app)
         user_contracts.request(user)
         user_contracts.response()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Define helper functions for the application."""
+"""Define helper functions for accessing MQS API."""
 
 import random
 import string
@@ -17,6 +17,12 @@ class MQSAPI():
         self.app = app
         self.ref_no = self._generate_reference_no()
         self.client = self._generate_mqs_username_token()
+
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__ = state
 
     def _generate_reference_no(self):
         """Generate Reference number for transactions."""
@@ -99,6 +105,13 @@ class CustomerInfo(MQSAPI):
         self.response_msg = None
         self.txn_no = None
         self.txn_msg = None
+        self.name = None
+        self.cust_no = None
+        self.address = None
+        self.pincode = None
+        self.partner = None
+        self.contact_no = None
+        self.email = None
 
     def request(self, cust_id):
         """Send request for GetCustomerInfo."""
@@ -125,6 +138,34 @@ class CustomerInfo(MQSAPI):
 
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
+            self.name = '{} {} {}'.format(
+                res_tree.findtext('.//FIRSTNAME').capitalize(),
+                res_tree.findtext('.//MIDDLENAME').capitalize(),
+                res_tree.findtext('.//LASTNAME').capitalize()
+            )
+            self.cust_no = res_tree.findtext('.//CUSTOMERNO')
+            self.address = '{}, {}, {}, {}, {}'.format(
+                res_tree.findtext('.//ADDRESS1'),
+                res_tree.findtext('.//AREA'),
+                res_tree.findtext('.//CITY'),
+                res_tree.findtext('.//STATE'),
+                res_tree.findtext('.//ZIPCODE')
+            )
+            self.partner = ' '.join(res_tree.findtext('.//OPENTITYNAME')
+                                    .split('_'))
+            self.contact_no = res_tree.findtext('.//MOBILEPHONE')
+            self.email = res_tree.findtext('.//EMAIL')
+
+    def to_dict(self):
+        """Define interface to dict."""
+        return {
+            'name': self.name,
+            'cust_no': self.cust_no,
+            'address': self.address,
+            'partner': self.partner,
+            'contact_no': self.contact_no,
+            'email': self.email,
+        }
 
 
 class ContractsByKey(MQSAPI):
@@ -156,7 +197,7 @@ class ContractsByKey(MQSAPI):
         self.response_code, self.response_msg = res[0], res[1]
 
     def response(self):
-        """Parse response for GetCustomerInfo."""
+        """Parse response for GetContractsByKey."""
 
         if self.response_code == 200:
             res_tree = et.fromstring(self.response_msg)
@@ -247,22 +288,3 @@ class Docket(MQSAPI):
 
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
-
-
-class ActivePlan():
-    """Define basic functionality for active plan of the user."""
-
-    def __init__(self, mqs_name, **kwds):
-        super(ActivePlan, self).__init__(**kwds)
-        self._mqs_name = mqs_name
-        # TODO: obtain data from cache
-        self.name = self._get_name()
-        self.price = self._get_price()
-
-    def _get_name(self):
-        """Get the registered name for the plan."""
-        pass
-
-    def _get_price(self):
-        """Get the price for the plan."""
-        pass
