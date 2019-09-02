@@ -4,54 +4,81 @@
 
 {% block content %}
 
-<div class="container-fluid">
-  <div class="row text-center">
+<div class="container p-3">
 
-    <div class="col-sm-8">
-      <h3 class="py-2 heading">Active Plans
-        <div class="index-heading-underline"></div>
-      </h3>
+  <h2 class="pb-3">Insta Recharge
+    <div class="heading-underline"></div>
+  </h2>
 
-      <form method="POST" action="https://securegw.paytm.in/theia/processTransaction"
-            id="payment-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="row border-top">
 
-        {% for name, value in paytm_data.items() %}
-        <input type="hidden" name="{{ name }}" value="{{ value }}">
-        {% endfor %}
+    <div class="col-sm-4 bg-light-grey p-3">
+      <img class="sidebar-img p-1"
+           src="{{ url_for('static', filename='img/etc/recharge.svg') }}">
+      <h5 class="text-justify"></h5>
+    </div> <!-- col -->
 
-        <!-- ACTIVE PLAN TABS -->
-        <div class="form-group">
-          <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            {% for plan in active_plans %}
-            <label class="btn btn-light {% if loop.first %}active{% endif %} m-1 rounded">
-              <input type="radio"
-                     name="plan" value="{{ plan._mqs_name }}"
-                     autocomplete="off"
-                     {% if loop.first %}checked{% endif %}>
-              {{ plan._mqs_name }}
-            </label>
-            {% endfor %}
-          </div>
+    <div class="col-sm-8 p-3">
+
+      <!-- CUSTOMER DETAILS -->
+      <div class="border-bottom py-2">
+        <h3 class="py-2 text-red">Customer Details</h3>
+
+        <div>
+          <ul>
+            <li>Customer name: {{ cust_data.name }}</li>
+            <li>Customer no.: {{ cust_data.cust_no }}</li>
+            <li>Address: {{ cust_data.address }}</li>
+            <li>Channel Partner: {{ cust_data.partner }}</li>
+            <li>Contact no.: {{ cust_data.contact_no }}</li>
+            <li>E-mail: {{ cust_data.email }}</li>
+          </ul>
         </div>
+      </div> <!-- customer-details -->
 
-      </form>
-    </div> <!-- column -->
+      <!-- ACTIVE PLANS -->
+      <div class="border-bottom py-2">
+        <h3 class="py-2 text-red">Active Plans</h3>
 
-    <div class="col-sm-4 customer-details">
-      <h3 class="d-flex p-3 justify-content-center">Customer Details</h3>
+        <form method="POST" action="https://securegw.paytm.in/order/process"
+              id="payment-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-      <div>
-        <h5>Customer ID: </h5>{{ paytm_data['CUST_ID'] }}
-        <h5>Contact no.: </h5>{{ phone_no }}
-        <h5>E-mail address: </h5>{{ email_id }}
-        <h5>Selected Plan: </h5>{{ plan }}
-        <h5>Total Price: </h5>{{ price }}
-        <input type="submit" class="btn btn-info" name="pay" value="Pay" form="payment-form">
-      </div>
-    </div> <!-- column -->
+              <!-- Paytm form details -->
+              {% for name, value in paytm_data.items() %}
+                <input type="hidden" name="{{ name }}" value="{{ value }}">
+              {% endfor %}
+
+              <!-- Active Plans -->
+                <div class="form-group">
+                  <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    {% for plan in active_plans %}
+                      <label class="btn btn-red {% if loop.first %}active{% endif %} m-1 rounded">
+                        <input type="radio"
+                               name="plan" value="{{ plan._mqs_name }}"
+                               autocomplete="off" onchange="fillForm(this);"
+                               {% if loop.first %}checked{% endif %}/>
+                               {{ plan._mqs_name }}
+                               {# {{ plan.validity }} #}
+                               {# {{ plan.price }} #}
+                      </label>
+                    {% endfor %}
+                  </div>
+                </div> <!-- form-group -->
+
+        </form>
+      </div> <!-- active-plans -->
+
+      <!-- PAYMENT -->
+      <h3 class="py-2 text-red">Payment</h3>
+
+      <input type="submit" class="btn btn-red" name="pay" value="Pay" form="payment-form">
+
+    </div> <!-- col -->
 
   </div> <!-- row -->
+
 </div> <!-- container -->
 
 {% endblock %}
+

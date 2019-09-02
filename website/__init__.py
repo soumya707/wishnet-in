@@ -8,8 +8,7 @@ from flask import Flask, url_for, redirect
 from flask_admin import Admin
 from flask_admin import helpers as admin_helpers
 from flask_migrate import Migrate
-#TODO: use when portal is ready
-# from flask_session import Session
+from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy_caching import CachingQuery
 from flask_caching import Cache
@@ -49,8 +48,7 @@ migrate = Migrate(app, db)
 mail = Mail(app)
 
 # setup Flask-Session
-#TODO: use when portal is ready
-# Session(app)
+Session(app)
 
 # import here to avoid cyclic import
 from website import views
@@ -94,6 +92,7 @@ admin.add_view(EditorModelView(JobVacancy, db.session, category='Info'))
 # flask-security views.
 @security.context_processor
 def security_context_processor():
+    """Use Flask-Admin's template."""
     return dict(
         admin_base_template=admin.base_template,
         admin_view=admin.index_view,

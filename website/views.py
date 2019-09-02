@@ -55,9 +55,17 @@ def index():
         active_plan_objs = [ActivePlan(plan) for plan in
                             user_contracts.active_plans]
 
-        form_data = initiate_transaction(user_contracts.ref_no, user)
+        # Get customer info
+        user_info = CustomerInfo(app)
+        user_info.request(user)
+        user_info.response()
 
+        # Get Paytm payment form
+        form_data = initiate_transaction(user_contracts.ref_no, user_info)
+
+        session['order_id'] = user_contracts.ref_no
         session['active_plans'] = active_plan_objs
+        session['cust_data'] = user_info.to_dict()
         session['paytm_form'] = form_data
 
         return redirect(
