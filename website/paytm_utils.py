@@ -2,10 +2,7 @@
 
 """Define functions for Paytm transactions."""
 
-import json
-
 import requests
-from flask import url_for
 
 from website import app
 from website.Checksum import generate_checksum, verify_checksum
@@ -66,16 +63,13 @@ def verify_final_status(order_id):
         app.config['PAYTM_MKEY']
     )
 
-    # prepare JSON string for request
-    post_data = json.dumps(paytm_params)
-
     # for Production
-    url = "https://securegw.paytm.in/order/status"
+    url = 'https://securegw.paytm.in/order/status'
 
     response = requests.post(
         url,
-        data=post_data,
-        headers={"Content-type": "application/json"}
+        json=paytm_params,
+        headers={'Content-type': 'application/json'}
     ).json()
 
     response_code_dict = {

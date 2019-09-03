@@ -15,7 +15,7 @@
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <!-- Paytm form details -->
       {% for name, value in paytm_form.items() %}
-        <input type="hidden" name="{{ name }}" value="{{ value }}">
+        <input type="hidden" name="{{ name }}" value="{{ value }}" />
       {% endfor %}
     </form>
     <script type="text/javascript">
