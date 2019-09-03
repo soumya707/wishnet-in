@@ -73,15 +73,6 @@ class EditorModelView(ModelView):
         )
 
 
-class UserModelView(ModelView):
-    def is_accessible(self):
-        return (
-            current_user.is_active and
-            current_user.is_authenticated and
-            current_user.hasrole('end-user')
-        )
-
-
 class CustomFileView(FileAdmin):
 
     allowed_extensions = (

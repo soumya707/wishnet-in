@@ -17,7 +17,6 @@ from website.tasks import (
 from website.forms import AuthenticationForm, NewConnectionForm, RechargeForm
 from website.mqs_api import (
     AuthenticateUser, CustomerInfo, ContractsByKey, Recharge)
-# from website.utils import ActivePlan
 from website.models import (
     FAQ, BestPlans, Downloads, JobVacancy, RegionalOffices,
     Services, Ventures, CarouselImages)

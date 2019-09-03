@@ -58,12 +58,13 @@ plans = AvailablePlans('website/plans_with_tariff.csv')
 from website import views
 from website.models import (
     BestPlans, CarouselImages, Downloads, JobVacancy, FAQ, RegionalOffices,
-    Services, Ventures)
-from website.models import  (
-    BizPlan, FUPPlan, FTTHPlan, UnlimitedPlan)
+    Services, Ventures, BizPlan, FUPPlan, FTTHPlan, UnlimitedPlan)
 from website.security.models import Role, User
 from website.security.models import (
-    CustomFileView, EditorModelView, SuperuserModelView, UserModelView)
+    CustomFileView, EditorModelView, SuperuserModelView)
+
+
+
 
 
 # Setup Flask-Security
