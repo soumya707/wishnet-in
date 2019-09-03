@@ -29,28 +29,28 @@
         <table class="table table-borderless">
           <tbody>
             <tr>
-              <th scope="row">Customer name</th>
-              <td>{{ cust_data.name }}</td>
+              <th scope="row">Name</th>
+              <td>: {{ cust_data.name }}</td>
             </tr>
             <tr>
-              <th scope="row">Customer no.</th>
-              <td>{{ cust_data.cust_no }}</td>
+              <th scope="row">Customer No.</th>
+              <td>: {{ cust_data.cust_no }}</td>
             </tr>
             <tr>
               <th scope="row">Address</th>
-              <td>{{ cust_data.address }}</td>
+              <td>: {{ cust_data.address }}</td>
             </tr>
             <tr>
-              <th scope="row">Contact no.</th>
-              <td>{{ cust_data.contact_no }}</td>
+              <th scope="row">Contact No.</th>
+              <td>: {{ cust_data.contact_no }}</td>
             </tr>
             <tr>
               <th scope="row">E-mail</th>
-              <td>{{ cust_data.email }}</td>
+              <td>: {{ cust_data.email }}</td>
             </tr>
             <tr>
-              <th scope="row">Channel Partner</th>
-              <td>{{ cust_data.partner }}</td>
+              <th scope="row">LCO</th>
+              <td>: {{ cust_data.partner }}</td>
             </tr>
           </tbody>
         </table>
@@ -90,6 +90,24 @@
       <h3 class="py-2 text-red">Payment</h3>
 
       <p>Total Price (including 18% GST): &#8377 <span id="total-price-span"></span></p>
+
+      <!-- PAYMENT GATEWAY -->
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="gateway" id="paytm-gatway"
+               value="paytm" form="payment-form" checked>
+        <label class="form-check-label" for="paytm-gateway">
+          Paytm
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="gateway" id="razorpay-gateway"
+               value="razorpay" form="payment-form">
+        <label class="form-check-label" for="razorpay-gateway">
+          Razorpay
+        </label>
+      </div>
+      </br>
+      <!-- PAY -->
       <input type="submit" class="btn btn-red" name="pay" value="Pay" form="payment-form">
 
     </div> <!-- col -->

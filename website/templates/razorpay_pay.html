@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Razorpay Payment Check Out Page</title>
+  </head>
+  <body>
+    <center>
+      <h1>Please do not refresh this page...</h1>
+    </center>
+    <form method="POST" action="https://api.razorpay.com/v1/checkout/embedded" name="razorpay">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <!-- Razorpay form details -->
+      {% for name, value in razorpay_form.items() %}
+        <input type="hidden" name="{{ name }}" value="{{ value }}" />
+      {% endfor %}
+    </form>
+    <script type="text/javascript">
+      document.razorpay.submit();
+    </script>
+  </body>
+</html>

@@ -22,6 +22,7 @@ from website.models import (
     Services, Ventures, CarouselImages)
 from website.paytm_utils import (
     initiate_transaction, verify_transaction, verify_final_status)
+from website.razorpay_utils import make_order, verify_signature
 
 
 csrf = CSRFProtect(app)
@@ -95,17 +96,32 @@ def payment(cust_id, ref_no):
 
     if request.method == 'POST':
 
-        # Get Paytm form data
-        form_data = initiate_transaction(
-            order_id=ref_no,
-            cust_info=session['cust_data'],
-            amount=request.form['amount']
-        )
+        # Check payment gateway
+        if request.form['gateway'] == 'paytm':
+            # Get Paytm form data
+            form_data = initiate_transaction(
+                order_id=ref_no,
+                cust_info=session['cust_data'],
+                amount=request.form['amount']
+            )
 
-        return render_template(
-            'paytm_pay.html',
-            paytm_form=form_data,
-        )
+            return render_template(
+                'paytm_pay.html',
+                paytm_form=form_data,
+            )
+
+        elif request.form['gateway'] == 'razorpay':
+            # Get Razorpay form data
+            razorpay_order, form_data = make_order(
+                order_id=ref_no,
+                cust_info=session['cust_data'],
+                amount=request.form['amount']
+            )
+
+            return render_template(
+                'razorpay_pay.html',
+                razorpay_form=form_data,
+            )
 
     elif request.method == 'GET':
 
@@ -116,22 +132,31 @@ def payment(cust_id, ref_no):
         )
 
 
-@app.route('/verify', methods=['POST'])
+@app.route('/verify/<gateway>', methods=['POST'])
 @csrf.exempt
-def verify_response():
+def verify_response(gateway):
     """Route for verifying response for payment."""
     if request.method == 'POST':
 
-        verified = verify_transaction(request.form)
+        if gateway == 'paytm':
+            verified = verify_transaction(request.form)
 
-        if verified:
-            final_status = verify_final_status(session['order_id'])
-            # top_up = Recharge(app)
-            # top_up.request()
-            # top_up.response()
-            flash('{}'.format(final_status), 'info')
-        else:
-            flash('Recharge failed! Please try again.', 'danger')
+            if verified:
+                final_status = verify_final_status(session['order_id'])
+                # top_up = Recharge(app)
+                # top_up.request()
+                # top_up.response()
+                flash('{}'.format(final_status), 'info')
+            else:
+                flash('Recharge failed! Please try again.', 'danger')
+
+        elif gateway == 'razorpay':
+            verified = verify_signature(request.form)
+            if verified:
+                # TopUp
+                flash('Recharge successful', 'info')
+            else:
+                flash('Recharge failed! Please try again.', 'danger')
 
         return redirect(url_for('index'))
 

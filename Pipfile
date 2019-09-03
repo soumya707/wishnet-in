@@ -24,6 +24,7 @@ redis = "*"
 flask-caching = "*"
 flask-sqlalchemy-caching = "*"
 celery = "*"
+razorpay = "*"
 
 [requires]
 python_version = "3.6"
