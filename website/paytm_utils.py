@@ -11,25 +11,27 @@ from website import app
 from website.Checksum import generate_checksum, verify_checksum
 
 
-def initiate_transaction(order_id, cust_info):
+def initiate_transaction(order_id, cust_info, amount):
     """Generate checksum and form data for making transactions via Paytm."""
 
     paytm_params = {
         'MID' : app.config['PAYTM_MID'],
         'ORDER_ID' : order_id,
-        'CUST_ID' : cust_info.cust_no,
+        'CUST_ID' : cust_info['cust_no'],
         'CHANNEL_ID' : app.config['PAYTM_CHANNELID'],
         'WEBSITE' : app.config['PAYTM_WEBSITE'],
-        "MOBILE_NO" : cust_info.contact_no,
-        "EMAIL" : cust_info.email,
+        "MOBILE_NO" : cust_info.get('contact_no'),
+        "EMAIL" : cust_info.get('email'),
         'INDUSTRY_TYPE_ID' : app.config['PAYTM_INDUSTRYTYPE'],
-        'TXN_AMOUNT' : '1.00',
+        'TXN_AMOUNT' : amount,
         'CALLBACK_URL' : app.config['PAYTM_CALLBACKURL'],
     }
 
     # Generate checksum for parameters we have
-    checksum = generate_checksum(paytm_params, app.config['PAYTM_MKEY'])
-    paytm_params['CHECKSUMHASH'] = str(checksum)
+    paytm_params['CHECKSUMHASH'] = generate_checksum(
+        paytm_params,
+        app.config['PAYTM_MKEY']
+    )
 
     return paytm_params
 
@@ -59,9 +61,10 @@ def verify_final_status(order_id):
         'ORDER_ID' : order_id,
     }
 
-    checksum = generate_checksum(paytm_params, app.config['PAYTM_MKEY'])
-
-    paytm_params['CHECKSUMHASH'] = checksum
+    paytm_params['CHECKSUMHASH'] = generate_checksum(
+        paytm_params,
+        app.config['PAYTM_MKEY']
+    )
 
     # prepare JSON string for request
     post_data = json.dumps(paytm_params)

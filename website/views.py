@@ -90,15 +90,31 @@ def index():
     )
 
 
-@app.route('/payment/<int:cust_id>/<ref_no>')
+@app.route('/payment/<int:cust_id>/<ref_no>', methods=['GET', 'POST'])
 def payment(cust_id, ref_no):
     """Route for payment."""
-    return render_template(
-        'payment.html',
-        cust_data=session['cust_data'],
-        active_plans=session['active_plans'],
-        paytm_data=session['paytm_form'],
-    )
+
+    if request.method == 'POST':
+
+        # Get Paytm form data
+        form_data = initiate_transaction(
+            order_id=ref_no,
+            cust_info=session['cust_data'],
+            amount=request.form['amount']
+        )
+
+        return render_template(
+            'paytm_pay.html',
+            paytm_form=form_data,
+        )
+
+    elif request.method == 'GET':
+
+        return render_template(
+            'payment.html',
+            cust_data=session['cust_data'],
+            active_plans=session['active_plans'],
+        )
 
 
 @app.route('/verify', methods=['POST'])
