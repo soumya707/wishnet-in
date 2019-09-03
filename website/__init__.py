@@ -2,6 +2,7 @@
 
 """Initiate the application."""
 
+import csv
 import os.path as op
 
 from flask import Flask, url_for, redirect
@@ -51,6 +52,9 @@ mail = Mail(app)
 Session(app)
 
 # import here to avoid cyclic import
+from website.utils import AvailablePlans
+plans = AvailablePlans('website/plans_with_tariff.csv')
+
 from website import views
 from website.models import (
     BestPlans, CarouselImages, Downloads, JobVacancy, FAQ, RegionalOffices,

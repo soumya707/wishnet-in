@@ -15,7 +15,9 @@
     <div class="col-sm-4 bg-light-grey p-3">
       <img class="sidebar-img p-1"
            src="{{ url_for('static', filename='img/etc/recharge.svg') }}">
-      <h5 class="text-justify"></h5>
+      <h5 class="text-justify">
+        Recharge your active plans, for any help call <strong><a href="tel:18004194244" class="text-red">1800-419-4244</a></strong>
+      </h5>
     </div> <!-- col -->
 
     <div class="col-sm-8 p-3">
@@ -24,43 +26,58 @@
       <div class="border-bottom py-2">
         <h3 class="py-2 text-red">Customer Details</h3>
 
-        <div>
-          <ul>
-            <li>Customer name: {{ cust_data.name }}</li>
-            <li>Customer no.: {{ cust_data.cust_no }}</li>
-            <li>Address: {{ cust_data.address }}</li>
-            <li>Channel Partner: {{ cust_data.partner }}</li>
-            <li>Contact no.: {{ cust_data.contact_no }}</li>
-            <li>E-mail: {{ cust_data.email }}</li>
-          </ul>
-        </div>
+        <table class="table table-borderless">
+          <tbody>
+            <tr>
+              <th scope="row">Customer name</th>
+              <td>{{ cust_data.name }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Customer no.</th>
+              <td>{{ cust_data.cust_no }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Address</th>
+              <td>{{ cust_data.address }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Contact no.</th>
+              <td>{{ cust_data.contact_no }}</td>
+            </tr>
+            <tr>
+              <th scope="row">E-mail</th>
+              <td>{{ cust_data.email }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Channel Partner</th>
+              <td>{{ cust_data.partner }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div> <!-- customer-details -->
 
       <!-- ACTIVE PLANS -->
       <div class="border-bottom py-2">
         <h3 class="py-2 text-red">Active Plans</h3>
 
-        <form method="POST" action="https://securegw.paytm.in/order/process"
-              id="payment-form">
+        <form method="POST" id="payment-form">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-              <!-- Paytm form details -->
-              {% for name, value in paytm_data.items() %}
-                <input type="hidden" name="{{ name }}" value="{{ value }}">
-              {% endfor %}
+              <!-- Transaction amount -->
+              <input type="hidden" name="amount" value="" id="total-price-input">
 
               <!-- Active Plans -->
                 <div class="form-group">
                   <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    {% for plan in active_plans %}
+                    {% for name, (price, validity) in active_plans.items() %}
                       <label class="btn btn-red {% if loop.first %}active{% endif %} m-1 rounded">
                         <input type="radio"
-                               name="plan" value="{{ plan._mqs_name }}"
+                               name="plan" value="{{ price }}"
                                autocomplete="off" onchange="fillForm(this);"
-                               {% if loop.first %}checked{% endif %}/>
-                               {{ plan._mqs_name }}
-                               {# {{ plan.validity }} #}
-                               {# {{ plan.price }} #}
+                               {% if loop.first %}checked{% endif %}>
+                               {{ name }}</br>
+                               {{ validity }}</br>
+                               &#8377 {{ price }}
                       </label>
                     {% endfor %}
                   </div>
@@ -72,6 +89,7 @@
       <!-- PAYMENT -->
       <h3 class="py-2 text-red">Payment</h3>
 
+      <p>Total Price (including 18% GST): &#8377 <span id="total-price-span"></span></p>
       <input type="submit" class="btn btn-red" name="pay" value="Pay" form="payment-form">
 
     </div> <!-- col -->
@@ -82,3 +100,23 @@
 
 {% endblock %}
 
+{% block scripts %}
+
+{{ super() }}
+
+<script>
+
+  $(document).ready(function() {
+      fillForm('input[name=plan]:checked');
+  });
+
+  function fillForm(elem) {
+    // add GST
+    var totalPrice = (parseFloat($(elem).val()) * 1.18).toFixed(2).toString();
+    $("#total-price-span").text(totalPrice);
+    $("#total-price-input").val(totalPrice);
+  }
+
+</script>
+
+{% endblock %}

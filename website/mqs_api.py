@@ -205,8 +205,14 @@ class ContractsByKey(MQSAPI):
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
 
-            self.active_plans = [plan.text for plan in
-                                 res_tree.iterfind('.//PlanCode')]
+            plans = [plan.text for plan in res_tree.iterfind('.//PlanCode')]
+            start_dates = [plan.text
+                           for plan in res_tree.iterfind('.//StartDate')]
+            end_dates = [plan.text
+                         for plan in res_tree.iterfind('.//EndDate')]
+            validities = [' - '.join(dates)
+                          for dates in zip(start_dates, end_dates)]
+            self.active_plans = [entry for entry in zip(plans, validities)]
 
 
 class AuthenticateUser(MQSAPI):

@@ -11,13 +11,13 @@ from flask import (
 from flask_sqlalchemy_caching import FromCache
 from flask_wtf.csrf import CSRFProtect
 
-from website import app, cache
+from website import app, cache, plans
 from website.tasks import (
     add_new_connection_data_to_db, send_async_new_connection_mail)
 from website.forms import AuthenticationForm, NewConnectionForm, RechargeForm
 from website.mqs_api import (
     AuthenticateUser, CustomerInfo, ContractsByKey, Recharge)
-from website.utils import ActivePlan
+# from website.utils import ActivePlan
 from website.models import (
     FAQ, BestPlans, Downloads, JobVacancy, RegionalOffices,
     Services, Ventures, CarouselImages)
@@ -52,21 +52,20 @@ def index():
         user_contracts.request(user)
         user_contracts.response()
 
-        active_plan_objs = [ActivePlan(plan) for plan in
-                            user_contracts.active_plans]
+        active_plans = {
+            plans.all_plans[plan][0]: (plans.all_plans[plan][1], validity)
+            for (plan, validity) in user_contracts.active_plans
+            if plan in plans.all_plans
+        }
 
         # Get customer info
         user_info = CustomerInfo(app)
         user_info.request(user)
         user_info.response()
 
-        # Get Paytm payment form
-        form_data = initiate_transaction(user_contracts.ref_no, user_info)
-
-        session['order_id'] = user_contracts.ref_no
-        session['active_plans'] = active_plan_objs
+        session['active_plans'] = active_plans
         session['cust_data'] = user_info.to_dict()
-        session['paytm_form'] = form_data
+        session['order_id'] = user_contracts.ref_no
 
         return redirect(
             url_for(
