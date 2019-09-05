@@ -13,7 +13,6 @@ from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy_caching import CachingQuery
 from flask_caching import Cache
-from flask_mail import Mail
 from flask_security import Security, SQLAlchemyUserDatastore
 
 
@@ -44,9 +43,6 @@ admin = Admin(
 
 # setup Flask-MIgrate
 migrate = Migrate(app, db)
-
-# setup Flask-Mail
-mail = Mail(app)
 
 # setup Flask-Session
 Session(app)
