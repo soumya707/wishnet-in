@@ -177,6 +177,7 @@ class ContractsByKey(MQSAPI):
         self.response_msg = None
         self.txn_no = None
         self.txn_msg = None
+        self.valid_user = None
         self.active_plans = None
 
     def request(self, cust_id):
@@ -205,14 +206,31 @@ class ContractsByKey(MQSAPI):
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
 
-            plans = [plan.text for plan in res_tree.iterfind('.//PlanCode')]
-            start_dates = [plan.text
-                           for plan in res_tree.iterfind('.//StartDate')]
-            end_dates = [plan.text
-                         for plan in res_tree.iterfind('.//EndDate')]
-            validities = [' - '.join(dates)
-                          for dates in zip(start_dates, end_dates)]
-            self.active_plans = [entry for entry in zip(plans, validities)]
+            # check if user is valid or not
+            if self.txn_msg == 'Success':
+                self.valid_user = True
+                plans = [plan.text for plan in res_tree.iterfind('.//PlanCode')]
+                end_dates = [
+                    plan.text for plan in res_tree.iterfind('.//EndDate')
+                ]
+                fmt_fixed_end_dates = self._fix_date_fmt(end_dates)
+                self.active_plans = [
+                    entry for entry in zip(plans, fmt_fixed_end_dates)
+                ]
+            elif self.txn_msg == 'Failed':
+                self.valid_user = False
+
+    def _fix_date_fmt(self, dates):
+        """Fix the date formats to be readable."""
+        final_dates = []
+        for date in dates:
+            date_list = date.split('/')
+            final_dates.append(
+                '-'.join(
+                    [date_list[1], date_list[0], date_list[2]]
+                )
+            )
+        return final_dates
 
 
 class AuthenticateUser(MQSAPI):
