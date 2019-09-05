@@ -26,37 +26,21 @@
       <div class="border-bottom py-2">
         <h3 class="py-2 text-red">Customer Details</h3>
 
-        <table class="table table-borderless">
-          <tbody>
-            <tr>
-              <th scope="row">Name</th>
-              <td>: {{ cust_data.name }}</td>
-            </tr>
-            <tr>
-              <th scope="row">Customer No.</th>
-              <td>: {{ cust_data.cust_no }}</td>
-            </tr>
-            <tr>
-              <th scope="row">Address</th>
-              <td>: {{ cust_data.address }}</td>
-            </tr>
-            <tr>
-              <th scope="row">Contact No.</th>
-              <td>: {{ cust_data.contact_no }}</td>
-            </tr>
-            <tr>
-              <th scope="row">E-mail</th>
-              <td>: {{ cust_data.email }}</td>
-            </tr>
-            <tr>
-              <th scope="row">LCO</th>
-              <td>: {{ cust_data.partner }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div>
+          <!-- Customer No. -->
+          <h5 class="text-dark-grey">Customer No.</h5>
+          <p>{{ cust_data.cust_no }}</p>
+          <!-- Customer name -->
+          <h5 class="text-dark-grey">Customer Name</h5>
+          <p>{{ cust_data.name }}</p>
+        </div>
       </div> <!-- customer-details -->
 
       <!-- ACTIVE PLANS -->
+      <!-- conditional viewing of content here -->
+      {% if not active_plans %}
+      <h5 class="py-4 text-red">This facility is not available through Insta-Recharge.</h5>
+      {% elif active_plans %}
       <div class="border-bottom py-2">
         <h3 class="py-2 text-red">Active Plans</h3>
 
@@ -70,19 +54,22 @@
                 <div class="form-group">
                   <div class="btn-group btn-group-toggle" data-toggle="buttons">
                     {% for name, (price, validity) in active_plans.items() %}
-                      <label class="btn btn-red {% if loop.first %}active{% endif %} m-1 rounded">
+                      <label class="btn payment-plans shadow {% if loop.first %}active{% endif %} m-1 rounded">
                         <input type="radio"
                                name="plan" value="{{ price }}"
                                autocomplete="off" onchange="fillForm(this);"
-                               {% if loop.first %}checked{% endif %}>
+                               {% if loop.first %}checked{% endif %} />
+
+                               <div class="plan-choice">
+                                 <i class="far fa-check-circle fa-2x" style="color: green;"></i>
+                               </div>
                                {{ name }}</br>
-                               {{ validity }}</br>
+                               Valid Till: {{ validity }}</br>
                                &#8377 {{ price }}
                       </label>
                     {% endfor %}
                   </div>
                 </div> <!-- form-group -->
-
         </form>
       </div> <!-- active-plans -->
 
@@ -92,24 +79,26 @@
       <p>Total Price (including 18% GST): &#8377 <span id="total-price-span"></span></p>
 
       <!-- PAYMENT GATEWAY -->
-      <div class="form-check">
+      <div class="form-check form-check-inline">
         <input class="form-check-input" type="radio" name="gateway" id="paytm-gatway"
                value="paytm" form="payment-form" checked>
-        <label class="form-check-label" for="paytm-gateway">
+        <label class="form-check-label pt-1" for="paytm-gateway">
           Paytm
         </label>
       </div>
-      <div class="form-check">
+      <div class="form-check form-check-inline">
         <input class="form-check-input" type="radio" name="gateway" id="razorpay-gateway"
                value="razorpay" form="payment-form">
-        <label class="form-check-label" for="razorpay-gateway">
+        <label class="form-check-label pt-1" for="razorpay-gateway">
           Razorpay
         </label>
       </div>
-      </br>
       <!-- PAY -->
-      <input type="submit" class="btn btn-red" name="pay" value="Pay" form="payment-form">
-
+      <div class="pt-3">
+        <input type="submit" class="btn btn-red" name="pay" value="Pay"
+               form="payment-form">
+      </div>
+      {% endif %}
     </div> <!-- col -->
 
   </div> <!-- row -->
@@ -129,10 +118,13 @@
   });
 
   function fillForm(elem) {
-    // add GST
-    var totalPrice = (parseFloat($(elem).val()) * 1.18).toFixed(2).toString();
-    $("#total-price-span").text(totalPrice);
-    $("#total-price-input").val(totalPrice);
+      // change label view
+      $(".plan-choice").hide();
+      $(elem).siblings("div").show();
+      // add GST
+      var totalPrice = (parseFloat($(elem).val()) * 1.18).toFixed(2).toString();
+      $("#total-price-span").text(totalPrice);
+      $("#total-price-input").val(totalPrice);
   }
 
 </script>
