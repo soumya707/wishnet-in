@@ -218,3 +218,36 @@ class CarouselImages(db.Model):
 
     def __str__(self):
         return self.image_name
+
+
+# Recharge
+class RechargeEntry(db.Model):
+    """Class for representing recharge data."""
+
+    __bind_key__ = 'recharge'
+
+    id = db.Column(db.Integer, primary_key=True)
+    wishnet_payment_order_id = db.Column(db.String(20), nullable=False)
+    payment_gateway = db.Column(db.String(10), nullable=False)
+    payment_gateway_order_id = db.Column(db.String(20), nullable=False)
+    payment_status = db.Column(db.String(10), nullable=False)
+    mq_topup_reference_id = db.Column(db.String(20), nullable=True)
+    mq_topup_status = db.Column(db.String(10), nullable=True)
+
+    def __str__(self):
+        return self.wishnet_payment_order_id
+
+
+# Retrieve customer number
+class CustomerInfo(db.Model):
+    """Class for representing customer basic info."""
+
+    __bind_key__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_no = db.Column(db.String(20), nullable=False)
+    user_name = db.Column(db.String(20), nullable=False)
+    mobile_no = db.Column(db.String(15), nullable=False)
+
+    def __str__(self):
+        return self.customer_no
