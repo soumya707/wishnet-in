@@ -52,28 +52,37 @@ def index():
         user_contracts.request(user)
         user_contracts.response()
 
-        active_plans = {
-            plans.all_plans[plan][0]: (plans.all_plans[plan][1], validity)
-            for (plan, validity) in user_contracts.active_plans
-            if plan in plans.all_plans
-        }
+        # user exists
+        if user_contracts.valid_user:
+            # Get active plans for the user
+            active_plans = {
+                plans.all_plans[plan][0]: (plans.all_plans[plan][1], validity)
+                for (plan, validity) in user_contracts.active_plans
+                if plan in plans.all_plans
+            }
 
-        # Get customer info
-        user_info = CustomerInfo(app)
-        user_info.request(user)
-        user_info.response()
+            # Get customer info
+            user_info = CustomerInfo(app)
+            user_info.request(user)
+            user_info.response()
 
-        session['active_plans'] = active_plans
-        session['cust_data'] = user_info.to_dict()
-        session['order_id'] = user_contracts.ref_no
+            session['active_plans'] = active_plans
+            session['cust_data'] = user_info.to_dict()
+            session['order_id'] = user_contracts.ref_no
 
-        return redirect(
-            url_for(
-                'payment',
-                cust_id=user,
-                ref_no=user_contracts.ref_no,
+            return redirect(
+                url_for(
+                    'payment',
+                    cust_id=user,
+                    ref_no=user_contracts.ref_no,
+                )
             )
-        )
+        # user does not exist
+        elif not user_contracts.valid_user:
+            flash('Invalid customer number! Please try again.', 'danger')
+            return redirect(
+                url_for('index')
+            )
 
     carousel_images = CarouselImages.query.options(FromCache(cache)).all()
     services = Services.query.options(FromCache(cache)).all()
