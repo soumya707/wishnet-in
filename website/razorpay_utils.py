@@ -2,9 +2,8 @@
 
 """Define functions for Razorpay transactions."""
 
-import requests
-
 import razorpay
+import requests
 
 from website import app
 

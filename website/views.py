@@ -12,17 +12,17 @@ from flask_sqlalchemy_caching import FromCache
 from flask_wtf.csrf import CSRFProtect
 
 from website import app, cache, plans
+from website.forms import AuthenticationForm, NewConnectionForm, RechargeForm
+from website.models import (
+    FAQ, BestPlans, CarouselImages, Downloads, JobVacancy, RegionalOffices,
+    Services, Ventures)
+from website.mqs_api import (
+    AuthenticateUser, ContractsByKey, CustomerInfo, Recharge)
+from website.paytm_utils import (
+    initiate_transaction, verify_final_status, verify_transaction)
+from website.razorpay_utils import make_order, verify_signature
 from website.tasks import (
     add_new_connection_data_to_db, send_async_new_connection_mail)
-from website.forms import AuthenticationForm, NewConnectionForm, RechargeForm
-from website.mqs_api import (
-    AuthenticateUser, CustomerInfo, ContractsByKey, Recharge)
-from website.models import (
-    FAQ, BestPlans, Downloads, JobVacancy, RegionalOffices,
-    Services, Ventures, CarouselImages)
-from website.paytm_utils import (
-    initiate_transaction, verify_transaction, verify_final_status)
-from website.razorpay_utils import make_order, verify_signature
 
 
 csrf = CSRFProtect(app)
