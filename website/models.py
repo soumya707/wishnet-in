@@ -245,9 +245,34 @@ class CustomerInfo(db.Model):
     __bind_key__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    customer_no = db.Column(db.String(20), nullable=False)
+    customer_no = db.Column(db.String(100), nullable=False)
     user_name = db.Column(db.String(20), nullable=False)
-    mobile_no = db.Column(db.String(15), nullable=False)
+    mobile_no = db.Column(db.String(15), nullable=True)
+    ip_addr = db.Column(db.String(20), nullable=True)
 
     def __str__(self):
         return self.customer_no
+
+
+# Get self-login details
+class GetCustomerAuth(db.Model):
+    """Class definition for getting customer login authentication."""
+
+    __bind_key__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_no = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(50), nullable=True)
+
+    def __str__(self):
+        return self.customer_no
+
+
+# Register new user
+class RegisterNewUser(db.Model):
+    """Class definition for registering new user."""
+
+    __bind_key__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_no = db.Column(db.String(100), nullable=True)
