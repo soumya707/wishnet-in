@@ -12,10 +12,12 @@ from flask_sqlalchemy_caching import FromCache
 from flask_wtf.csrf import CSRFProtect
 
 from website import app, cache, plans
-from website.forms import AuthenticationForm, NewConnectionForm, RechargeForm
+from website.forms import (
+    AuthenticationForm, GetCustomerNumberForm, NewConnectionForm, RechargeForm,
+    RegistrationForm, ForgotPasswordForm)
 from website.models import (
     FAQ, BestPlans, CarouselImages, Downloads, JobVacancy, RegionalOffices,
-    Services, Ventures)
+    Services, Ventures, GetCustomerAuth)
 from website.mqs_api import (
     AuthenticateUser, ContractsByKey, CustomerInfo, Recharge)
 from website.paytm_utils import (
@@ -99,11 +101,83 @@ def index():
     )
 
 
+@app.route('/portal', methods=['GET', 'POST'])
+def portal():
+    """Route for self-care portal."""
+
+    form = AuthenticationForm()
+
+    if form.validate_on_submit():
+        pass
+
+    return render_template(
+        'portal.html',
+        form=form
+    )
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """Route for registering self-care."""
+
+    form = RegistrationForm()
+
+    if form.validate_on_submit():
+        pass
+
+    return render_template(
+        'register.html',
+        form=form
+    )
+
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot():
+    """Route for generating new password."""
+
+    form = ForgotPasswordForm()
+
+    if form.validate_on_submit():
+        return render_template('enter_otp.html')
+
+    return render_template(
+        'forgot_password.html',
+        form=form
+    )
+
+
+@app.route('/get_customer_number', methods=['GET', 'POST'])
+def get_cust_no():
+    """Route for getting customer number."""
+
+    form = GetCustomerNumberForm()
+
+    if form.validate_on_submit():
+        user = form.username.data
+        ip_addr = form.ip_address.data
+        #TODO: query db
+        # CustomerInfo.query.filter()
+
+        flash(
+            'Customer Number has been sent to your Registered Mobile Number',
+            'success'
+        )
+        return redirect(url_for('get_cust_no'))
+
+    return render_template(
+        'customer_no.html',
+        form=form,
+    )
+
+
 @app.route('/payment/<int:cust_id>/<ref_no>', methods=['GET', 'POST'])
 def payment(cust_id, ref_no):
     """Route for payment."""
 
     if request.method == 'POST':
+
+        # store amount in session
+        session['amount'] = request.form['amount']
 
         # Check payment gateway
         if request.form['gateway'] == 'paytm':
@@ -147,27 +221,86 @@ def verify_response(gateway):
     """Route for verifying response for payment."""
     if request.method == 'POST':
 
+        # check payment gateway
         if gateway == 'paytm':
+            # initial checksum verification
             verified = verify_transaction(request.form)
 
             if verified:
-                final_status = verify_final_status(session['order_id'])
-                # top_up = Recharge(app)
-                # top_up.request()
-                # top_up.response()
-                flash('{}'.format(final_status), 'info')
+                # final status verification
+                final_status_code, final_status_msg = \
+                    verify_final_status(session['order_id'])
+
+                # check if transaction successful
+                if final_status_code in ('1', '400', '402'):
+                    #TODO: add sms for successful transaction
+
+                    # TopUp in MQS
+                    # top_up = Recharge(app)
+                    # top_up.request(session['cust_data']['cust_no'])
+                    # top_up.response()
+                    # check if recharge done in MQS
+                    if top_up.txn_msg == 'Success':
+                        status = 'successful'
+                        flash('Recharge successful.', 'success')
+                        #TODO: add sms for successful recharge
+                    else:
+                        status = 'unsuccessful'
+                        flash('Recharge unsuccessful.', 'danger')
+                        #TODO: add sms for unsuccessful recharge
+                else:
+                    #TODO: add sms for unsuccessful transaction
+                    status = 'unsuccessful'
+                    flash(
+                        'Payment incomplete! Please check with {}.'.\
+                        format(gateway.capitalize()), 'danger'
+                    )
             else:
-                flash('Recharge failed! Please try again.', 'danger')
+                status = 'unsuccessful'
+                flash('Payment failed! Please try again.', 'danger')
 
         elif gateway == 'razorpay':
             verified = verify_signature(request.form)
             if verified:
-                # TopUp
-                flash('Recharge successful', 'info')
+                # TopUp in MQS
+                # top_up = Recharge(app)
+                # top_up.request()
+                # top_up.response()
+                # check if recharge done in MQS
+                if top_up.txn_msg == 'Success':
+                    status = 'successful'
+                    flash('Recharge successful.', 'success')
+                    #TODO: add sms for successful recharge
+                else:
+                    status = 'unsuccessful'
+                    flash('Recharge unsuccessful.', 'danger')
+                    #TODO: add sms for unsuccessful recharge
             else:
+                status = 'failure'
                 flash('Recharge failed! Please try again.', 'danger')
 
-        return redirect(url_for('index'))
+        return redirect(
+            url_for(
+                'receipt',
+                cust_id=session['cust_data']['cust_no'],
+                ref_no=session['order_id'],
+                status=status
+            )
+        )
+
+
+@app.route('/receipt/<int:cust_id>/<ref_no>/<status>')
+def receipt(cust_id, ref_no, status):
+    """Route to transaction receipt."""
+
+    return render_template(
+        'receipt.html',
+        cust_data=session['cust_data'],
+        amount=session['amount'],
+        # datetime=None,
+        txn_status=status,
+        txn_no=session['order_id']
+    )
 
 
 @app.route('/tariff')
