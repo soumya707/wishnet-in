@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block title %}Enter OTP{% endblock %}
+
+{% block content %}
+
+<div class="container p-3">
+
+  <h2 class="pb-3">Self-Care
+    <div class="heading-underline"></div>
+  </h2>
+
+  <div class="row border-top">
+
+    <div class="col-sm-4 bg-light-grey p-3">
+      <img class="sidebar-img p-1" src="{{ url_for('static', filename='img/etc/login.svg') }}">
+      <h5 class="text-justiy">
+        Be independent, do it yourself</br>For any queries, please contact us at <strong><a href="tel:18004194244" class="text-red">1800-419-4244</a></strong>
+      </h5>
+    </div> <!-- col -->
+
+    <div class="col-sm-4 p-3">
+      <h3 class="py-2 text-red">Enter OTP</h3>
+    </div> <!-- col -->
+
+    <div class="col-sm-4 bg-light-grey pt-4">
+
+      <!-- LIST GROUP -->
+      <div class="list-group">
+        <a class="list-group-item list-group-item-action outline" href="{{ url_for('get_cust_no') }}">Know your Customer Number</a>
+        <a class="list-group-item list-group-item-action outline" href="{{ url_for('portal') }}">Self-care Login</a>
+        <a class="list-group-item list-group-item-action outline" href="{{ url_for('register') }}">Self-care Registration</a>
+      </div> <!-- list-group -->
+
+      <!-- DESCRIPTION -->
+      <h5 class="description text-red text-center p-3">Only our existing broadband customers can avail self-care facility</h5>
+
+    </div> <!-- col -->
+
+  </div> <!-- row>
+
+</div> <!-- container -->
+
+{% endblock %}
