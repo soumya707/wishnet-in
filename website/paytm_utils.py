@@ -91,4 +91,4 @@ def verify_final_status(order_id):
         '810': 'Transaction failed.',
     }
 
-    return response_code_dict.get(response['RESPCODE'])
+    return response['RESPCODE'], response_code_dict.get(response['RESPCODE'])
