@@ -56,7 +56,7 @@
                     {% for name, (price, validity) in active_plans.items() %}
                       <label class="btn payment-plans shadow {% if loop.first %}active{% endif %} m-1 rounded">
                         <input type="radio"
-                               name="plan" value="{{ price }}"
+                               name="plan" value="{{ price }}" id="{{ name }}"
                                autocomplete="off" onchange="fillForm(this);"
                                {% if loop.first %}checked{% endif %} />
 
@@ -76,7 +76,8 @@
       <!-- PAYMENT -->
       <h3 class="py-2 text-red">Payment</h3>
 
-      <p>Total Price (including 18% GST): &#8377 <span id="total-price-span"></span></p>
+      <p>Selected Plan: <span class="text-red" id="chosen-plan-span"><span></p>
+      <p>Total Price (18% GST): <span class="text-red">&#8377 <span id="total-price-span"></span></span></p>
 
       <!-- PAYMENT GATEWAY -->
       <div class="form-check form-check-inline">
@@ -121,6 +122,8 @@
       // change label view
       $(".plan-choice").hide();
       $(elem).siblings("div").show();
+      // change selected plan
+      $("#chosen-plan-span").text($(elem).attr("id"));
       // add GST
       var totalPrice = (parseFloat($(elem).val()) * 1.18).toFixed(2).toString();
       $("#total-price-span").text(totalPrice);

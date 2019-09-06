@@ -32,17 +32,29 @@
 <!-- RECHARGE FACILITY -->
 <div class="container-fluid bg-dark-grey p-2">
 
-  <form class="form-inline justify-content-center px-5 pt-2" method="POST" id="recharge-form">
-    {{ form.hidden_tag() }}
-    {{ render_field_inline(form.user_id) }}
-    {{ render_submit_inline(form.submit, id="recharge-submit-btn")}}
-  </form>
+  <div class="d-flex justify-content-center" style="flex-wrap: wrap;">
 
-</div> <!-- container -->
+    <div>
+      <form class="form-inline justify-content-center px-5 pt-2" method="POST" id="recharge-form">
+        {{ form.hidden_tag() }}
+        {{ render_field_inline(form.user_id) }}
+        {{ render_submit_inline(form.submit, id="recharge-submit-btn")}}
+      </form>
+    </div>
 
-<!-- SERVICES -->
-<div class="container-fluid border-bottom">
-  <div class="row text-center">
+    <div class="align-self-center">
+      <a href="{{ url_for('get_cust_no') }}" class="text-white" data-toggle="tooltip"
+         title="Know your customer number">
+        <i class="fas fa-info-circle fa-2x"></i>
+      </a>
+    </div>
+
+</div>
+    </div> <!-- container -->
+
+    <!-- SERVICES -->
+    <div class="container-fluid border-bottom">
+    <div class="row text-center">
     {% for service in services %}
     <div class="col-sm-6 {{ loop.cycle('bg-white', 'bg-light-grey')}}">
       <img src="{{ url_for('static', filename='img/services/{}.svg'.format(service.logo_id)) }}"
@@ -150,9 +162,15 @@
   <script>
 
     $(document).ready(function() {
+
+       // enable tooltip
+       $('[data-toggle="tooltip"]').tooltip();
+
+        // loading stage for recharge request
         $("#recharge-form").submit(function(event) {
-            $("#recharge-submit-btn").val("Loading...");
-        })
+                $("#recharge-submit-btn").val("Loading...");
+        });
+
     })
 
   </script>
