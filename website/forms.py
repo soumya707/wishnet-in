@@ -8,7 +8,7 @@ import re
 from flask_wtf import FlaskForm
 from wtforms import (
     PasswordField, SelectField, StringField, SubmitField, TextAreaField)
-from wtforms.validators import DataRequired, Email, Length, Regexp
+from wtforms.validators import DataRequired, Email, IPAddress, Length, Regexp
 
 
 def get_sorted_location(filepath):
@@ -23,7 +23,7 @@ class RechargeForm(FlaskForm):
     user_id = StringField(
         'User ID',
         validators=[DataRequired()],
-        render_kw={'placeholder': 'Customer ID/ Customer No.'})
+        render_kw={'placeholder': 'Customer Number'})
     submit = SubmitField('Insta-Recharge')
 
 
@@ -67,8 +67,33 @@ class NewConnectionForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
+class GetCustomerNumberForm(FlaskForm):
+    """Class for getting customer number."""
+    username = StringField('Username')
+    ip_address = StringField(
+        'IP Address',
+        validators=[
+            IPAddress()
+        ]
+    )
+
+    submit = SubmitField('Get')
+
+
 class AuthenticationForm(FlaskForm):
     """Class for authentication form."""
-    username = StringField('Username', validators=[DataRequired()])
+    customer_no = StringField('Customer Number', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Sign in')
+
+
+class RegistrationForm(FlaskForm):
+    """Class for registration form."""
+    customer_no = StringField('Customer Number', validators=[DataRequired()])
+    submit = SubmitField('Get OTP')
+
+
+class ForgotPasswordForm(FlaskForm):
+    """Class for forgot password form."""
+    customer_no = StringField('Customer Number', validators=[DataRequired()])
+    submit = SubmitField('Get OTP')
