@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" image-rendering="optimizeQuality" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" viewBox="0 0 25.4 25.4">
+  <defs>
+    <style>
+      .str0{stroke:#2b2a29;stroke-width:1.1841}.fil0{fill:none}.fil1{fill:red}
+    </style>
+  </defs>
+  <g id="Layer_x0020_1">
+    <g id="_472309968">
+      <path id="_472313376" d="M10.0377 3.0348c4.9633 0 8.9868 4.0236 8.9868 8.9868 0 .5779-.0552 1.1429-.1594 1.6904-1.9001.4847-3.3051 2.2075-3.3051 4.2584 0 .3591.0434.7079.1246 1.042-1.5432 1.2481-3.5076 1.9961-5.6469 1.9961-4.9633 0-8.9869-4.0235-8.9869-8.9869 0-4.9632 4.0236-8.9868 8.9869-8.9868z" class="fil0 str0"/>
+      <circle id="_472310688" cx="19.9547" cy="17.9704" r="4.39466" class="fil0 str0"/>
+    </g>
+    <circle cx="12.151" cy="9.4792" r="1.20261" class="fil1"/>
+    <circle cx="7.59955" cy="9.4792" r="1.20261" class="fil1"/>
+    <path d="M5.518 13.9563c1.926 4.1271 7.6015 3.6825 9.1767-.074 0 0 .8883-.2589.8142.6291-1.3848 4.602-9.5702 4.7226-10.99-.296 0 0 .3516-.74.9991-.2591zM17.8695 17.6003l1.1387 1.0603 3.0556-2.8134.5655.7829-3.4874 3.4874-1.6839-1.6839z" class="fil1"/>
+  </g>
+</svg>

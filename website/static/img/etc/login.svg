@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" image-rendering="optimizeQuality" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" viewBox="0 0 25.4 25.4">
+  <defs>
+    <style>
+      .str0{stroke:red;stroke-width:.3387}.fil0{fill:none}
+    </style>
+  </defs>
+  <g id="Layer_x0020_1">
+    <path d="M8.8868 10.7953l-.0182-3.7357 5.5466.0114 2.2641-1.385-9.1889-.0045-.0045 4.0865zM8.88 13.7112l-.0068 3.7061 3.132.0001.0047 1.3894-4.5192-.0023-.0022-4.083zM18.2208 5.609l-.0365 13.2151-5.0205 3.1856s-.4156.2278-.431-.4311l.0028-12.604 5.4852-3.3656z" class="fil0 str0"/>
+    <rect width=".583131" height="1.56719" x="13.4642" y="13.4394" class="fil0 str0" rx=".2916" ry=".2916"/>
+    <path d="M2.8208 13.2628h3.2163s.1093.0614.1367.2163l.0022 1.0183s-.0069.2141.2938.0774l2.8906-2.1798.024-.0177-.0006-.2768-2.9271-2.1843s-.3098-.2096-.287.1412l.0091 1.016s-.0205.1571-.1458.1412l-3.1344.0046h-.0734l-.0044 2.0436z" class="fil0 str0"/>
+    <circle cx="12.7" cy="12.7" r="11.9426" stroke="#2b2a29" stroke-width=".6773" class="fil0"/>
+  </g>
+</svg>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" image-rendering="optimizeQuality" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" viewBox="0 0 25.4 25.4">
+  <defs>
+    <style>
+      .str0{stroke:#2b2a29;stroke-width:1.1887}.fil0{fill:none}.fil1{fill:red}
+    </style>
+  </defs>
+  <g id="Layer_x0020_1">
+    <g id="_472306656">
+      <path id="_472307016" d="M10.0272 2.9971c4.9827 0 9.022 4.0393 9.022 9.022 0 .5802-.0555 1.1473-.1601 1.697-1.9075.4865-3.318 2.216-3.318 4.2751 0 .3604.0436.7106.1251 1.046-1.5493 1.253-3.5213 2.0039-5.669 2.0039-4.9827 0-9.022-4.0393-9.022-9.022s4.0393-9.022 9.022-9.022z" class="fil0 str0"/>
+      <circle id="_472310232" cx="19.983" cy="17.9912" r="4.41185" class="fil0 str0"/>
+    </g>
+    <circle cx="12.1348" cy="9.24474" r="1.20731" class="fil1"/>
+    <circle cx="7.56563" cy="9.24474" r="1.20731" class="fil1"/>
+    <path d="M5.9331 17.0491c1.6648-3.5674 6.5706-3.1831 7.9323.064 0 0 .7677.2238.7037-.5439-1.197-3.9778-8.2724-4.082-9.4995.2559 0 0 .3038.6397.8635.224z" class="fil1"/>
+    <path fill="red" fill-rule="nonzero" d="M22.085 15.7811l-1.3414 2.0663 1.419 1.8503-1.2646.0441-.7308-1.0516-.6923 1.1013-1.2167.0425 1.2627-1.8998-1.5202-2.0104 1.2709-.0444.8388 1.1851.7617-1.241z"/>
+  </g>
+</svg>
