@@ -69,8 +69,7 @@
       <ul class="navbar-nav ml-auto d-lg-none d-xl-none m-2">
         <li class="nav-item">
           <a class="nav-link"
-             href="https://wishnet-bcrm.magnaquest.com/SelfcareLogin.aspx"
-             target="_blank">
+             href="{{ url_for('portal') }}">
             <i class="far fa-user fa-lg login-logo"></i>
           </a>
         </li>
@@ -121,8 +120,7 @@
         <ul class="navbar-nav ml-auto d-none d-lg-block">
           <li class="nav-item">
             <a class="nav-link"
-               href="https://wishnet-bcrm.magnaquest.com/SelfcareLogin.aspx"
-               target="_blank">
+               href="{{ url_for('portal') }}">
               <i class="far fa-user fa-2x login-logo"></i>
             </a>
           </li>
@@ -139,7 +137,7 @@
             {% if messages %}
               {% for category, message in messages %}
                 <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                  {{ message }}
+                  <h5 class="alert-heading text-center"><strong>{{ message }}</strong></h5>
                   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                   </button>
