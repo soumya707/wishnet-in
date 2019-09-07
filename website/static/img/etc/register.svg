@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" image-rendering="optimizeQuality" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" viewBox="0 0 25.4 25.4">
+  <defs>
+    <style>
+      .fil2{fill:none}.fil1{fill:#2b2a29;fill-rule:nonzero}
+    </style>
+  </defs>
+  <g id="Layer_x0020_1">
+    <path fill="red" d="M15.7752 15.2088l1.1387 1.0603 3.0556-2.8134.5655.7829-3.4874 3.4874-1.6839-1.6839z"/>
+    <path d="M21.4191 8.9685h-7.55v-.4388h7.55zM21.4191 10.4498h-7.55v-.4388h7.55z" class="fil1"/>
+    <path stroke="red" stroke-width=".6361" d="M13.1182 18.7374c.9879-9.4368-10.4653-8.6163-8.9294-.0303l8.9294.0303z" class="fil2"/>
+    <circle cx="8.63596" cy="8.62528" r="3.07089" stroke="red" stroke-width=".4179" class="fil2"/>
+    <circle cx="12.7" cy="12.7" r="11.9426" stroke="#2b2a29" stroke-width=".6773" class="fil2"/>
+    <circle cx="18.161" cy="15.5061" r="3.49525" stroke="#2b2a29" stroke-width=".1982" class="fil2"/>
+  </g>
+</svg>
