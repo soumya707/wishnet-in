@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>Paytm Payment Check Out Page</title>
+    <title>Wishnet Payment Check Out Page</title>
   </head>
   <body>
     <center>
@@ -14,7 +14,7 @@
     <form method="POST" action="https://securegw.paytm.in/order/process" name="paytm">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <!-- Paytm form details -->
-      {% for name, value in paytm_form.items() %}
+      {% for name, value in form.items() %}
         <input type="hidden" name="{{ name }}" value="{{ value }}" />
       {% endfor %}
     </form>
