@@ -10,14 +10,15 @@ from flask import (
     current_app, flash, redirect, render_template, request, session, url_for)
 from flask_sqlalchemy_caching import FromCache
 from flask_wtf.csrf import CSRFProtect
+from sqlalchemy import or_
 
 from website import app, cache, plans
 from website.forms import (
-    AuthenticationForm, GetCustomerNumberForm, NewConnectionForm, RechargeForm,
-    RegistrationForm, ForgotPasswordForm)
+    AuthenticationForm, ForgotPasswordForm, GetCustomerNumberForm,
+    NewConnectionForm, RechargeForm, RegistrationForm)
 from website.models import (
-    FAQ, BestPlans, CarouselImages, Downloads, JobVacancy, RegionalOffices,
-    Services, Ventures, GetCustomerAuth)
+    FAQ, BestPlans, CarouselImages, Downloads, JobVacancy,
+    RegionalOffices, Services, Ventures)
 from website.mqs_api import (
     AuthenticateUser, ContractsByKey, CustomerInfo, Recharge)
 from website.paytm_utils import (
@@ -25,6 +26,8 @@ from website.paytm_utils import (
 from website.razorpay_utils import make_order, verify_signature
 from website.tasks import (
     add_new_connection_data_to_db, send_async_new_connection_mail)
+# important to import here
+from website.models import CustomerInfo
 
 
 csrf = CSRFProtect(app)
@@ -155,18 +158,46 @@ def get_cust_no():
     if form.validate_on_submit():
         user = form.username.data
         ip_addr = form.ip_address.data
-        #TODO: query db
-        # CustomerInfo.query.filter()
 
-        flash(
-            'Customer Number has been sent to your Registered Mobile Number',
-            'success'
-        )
+        customer = CustomerInfo.query.filter(
+            or_(
+                CustomerInfo.user_name == user,
+                CustomerInfo.ip_addr == ip_addr
+            )
+        ).first()
+
+        if customer is not None and customer.mobile_no is not str():
+            #TODO: add SMS API
+            flash(
+                (
+                    'Customer Number has been sent to your Registered Mobile '
+                    'Number.'
+                )
+                , 'success'
+            )
+        elif customer is not None and customer.mobile_no is str():
+            flash(
+                (
+                    'No registered mobile number found. '
+                    'Please get your mobile number registered with us.'
+                )
+                , 'danger'
+            )
+        elif customer is None:
+            flash(
+                (
+                    'Couldn\'t retrieve details with the provided '
+                    'credentials. Try again with valid credentials or '
+                    'contact us.'
+                )
+                , 'danger'
+            )
+
         return redirect(url_for('get_cust_no'))
 
     return render_template(
         'customer_no.html',
-        form=form,
+        form=form
     )
 
 

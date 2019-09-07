@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "_macros.html" import render_field, render_submit %}
+{% from "_macros.html" import render_field_inline, render_submit_inline %}
 
 {% block title %}Customer Number{% endblock %}
 
@@ -30,20 +30,20 @@
 
             <!-- USERNAME -->
             <div class="form-row">
-              {{ render_field(form.username) }}
+              {{ render_field_inline(form.username) }}
             </div>
 
-            <span class="pb-2"><strong>Or</strong></span>
+            <div class="pb-2"><strong>Or</strong></div>
 
             <!-- IP ADDRESS -->
             <div class="form-row">
-              {{ render_field(form.ip_address) }}
+              {{ render_field_inline(form.ip_address) }}
             </div>
 
           </fieldset> <!-- fieldset -->
 
           <!-- SUBMIT -->
-          {{ render_submit(form.submit) }}
+          {{ render_submit_inline(form.submit) }}
 
         </form>
 

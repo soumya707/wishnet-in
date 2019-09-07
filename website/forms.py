@@ -8,7 +8,8 @@ import re
 from flask_wtf import FlaskForm
 from wtforms import (
     PasswordField, SelectField, StringField, SubmitField, TextAreaField)
-from wtforms.validators import DataRequired, Email, IPAddress, Length, Regexp
+from wtforms.validators import (
+    DataRequired, Email, IPAddress, Length, Optional, Regexp)
 
 
 def get_sorted_location(filepath):
@@ -69,11 +70,17 @@ class NewConnectionForm(FlaskForm):
 
 class GetCustomerNumberForm(FlaskForm):
     """Class for getting customer number."""
-    username = StringField('Username')
+    username = StringField(
+        'Username',
+        render_kw={'placeholder': 'Username'},
+        validators=[Optional()]
+    )
     ip_address = StringField(
         'IP Address',
+        render_kw={'placeholder': 'IP Address'},
         validators=[
-            IPAddress()
+            Optional(),
+            IPAddress(message='Invalid IP address'),
         ]
     )
 
