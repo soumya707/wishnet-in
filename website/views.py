@@ -3,6 +3,7 @@
 """Views for the website."""
 
 
+from datetime import datetime
 import random
 import string
 
@@ -292,11 +293,17 @@ def verify_response(gateway):
 @app.route('/receipt/<ref_no>/<status>')
 def receipt(ref_no, status):
     """Route to transaction receipt."""
+    # remove data from session storage
+    session.pop('active_plans', None)
+    session.pop('order_id', None)
+
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     return render_template(
         'receipt.html',
         cust_data=session.get('cust_data'),
         amount=session.get('amount'),
-        # datetime=None,
+        date_and_time=current_time,
         txn_status=status,
         txn_no=ref_no,
     )
