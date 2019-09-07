@@ -6,7 +6,7 @@ from celery import Celery
 from flask_mail import Mail, Message
 
 from website import app, db
-from website.models import NewConnection
+from website.models import NewConnection, RechargeEntry
 
 
 # setup Flask-Mail
@@ -51,23 +51,6 @@ def add_new_connection_data_to_db(data):
 
 
 @celery.task
-def add_recharge_data_to_db(data):
-    """Asynchronously add new connection data to database."""
-    connection = NewConnection(
-        query_no=data['query_no'],
-        name=data['name'],
-        address=data['address'],
-        location=data['location'],
-        postal_code=data['postal_code'],
-        phone_no=data['phone_no'],
-        email=data['email'],
-        remark=data['remark'],
-    )
-    db.session.add(connection)
-    db.session.commit()
-
-
-@celery.task
 def send_async_new_connection_mail(recipient_mail, query_no):
     """Asynchronously send mail for new connection request."""
 
@@ -82,11 +65,26 @@ def send_async_new_connection_mail(recipient_mail, query_no):
                  'Please feel free to contact us at 1800 419 4244 at any time.'
                  '</br></br>Thanking you and with warm regards,</br></br>'
                  'Team Wishnet').format(query_no)
-
     msg = Message(
         subject='Acknowledgement of receipt of enquiry - Wishnet',
         html=html_body,
         recipients=[recipient_mail]
     )
-
     mail.send(msg)
+
+
+@celery.task
+def add_recharge_data_to_db(data):
+    """Asynchronously add recharge data to database."""
+    recharge = RechargeEntry(
+        wishnet_payment_order_id=data['wishnet_order_id'],
+        payment_gateway=data['payment_gateway'],
+        payment_gateway_order_id=data['txn_order_id'],
+        payment_datetime=data['txn_datetime'],
+        payment_status=data['txn_status'],
+        mq_topup_reference_id=data['topup_ref_id'],
+        mq_topup_datetime=data['topup_datetime'],
+        mq_topup_status=data['topup_status'],
+    )
+    db.session.add(recharge)
+    db.session.commit()
