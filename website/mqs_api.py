@@ -67,6 +67,7 @@ class Recharge(MQSAPI):
         self.response_msg = None
         self.txn_no = None
         self.txn_msg = None
+        self.error_no = None
 
     def request(self, cust_id):
         """Send request for TopUp."""
@@ -94,6 +95,7 @@ class Recharge(MQSAPI):
 
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
+            self.error_no = res_tree.findtext('.//ERRORNO')
 
 
 class GetCustomerInfo(MQSAPI):
