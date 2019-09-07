@@ -88,6 +88,7 @@ def run_migrations_offline():
                 output_buffer=buffer,
                 target_metadata=get_metadata(name),
                 literal_binds=True,
+                compare_type=True,
             )
             with context.begin_transaction():
                 context.run_migrations(engine_name=name)
@@ -152,6 +153,7 @@ def run_migrations_online():
                 downgrade_token="%s_downgrades" % name,
                 target_metadata=get_metadata(name),
                 process_revision_directives=process_revision_directives,
+                comapre_type=True,
                 **current_app.extensions['migrate'].configure_args
             )
             context.run_migrations(engine_name=name)
