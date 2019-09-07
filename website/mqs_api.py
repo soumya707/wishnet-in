@@ -96,11 +96,11 @@ class Recharge(MQSAPI):
             self.txn_msg = res_tree.findtext('.//MESSAGE')
 
 
-class CustomerInfo(MQSAPI):
+class GetCustomerInfo(MQSAPI):
     """Define GetCustomerInfo API."""
 
     def __init__(self, app, **kwargs):
-        super(CustomerInfo, self).__init__(app, **kwargs)
+        super(GetCustomerInfo, self).__init__(app, **kwargs)
         self.response_code = None
         self.response_msg = None
         self.txn_no = None
