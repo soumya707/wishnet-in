@@ -32,13 +32,12 @@ def make_order(order_id, cust_info, amount):
         'key_id': app.config['RAZORPAY_KEY'],
         'name': 'Wish Net Pvt. Ltd.',
         'order_id': razorpay_order_id,
-        # 'prefill[email]': cust_info.get('email'),
+        'prefill[email]': cust_info.get('email'),
         'prefill[contact]': cust_info.get('contact_no'),
         'callback_url': app.config['RAZORPAY_CALLBACKURL'],
-        'cancel_url': app.config['RAZORPAY_CANCELURL'],
     }
 
-    return razorpay_order_id, razorpay_params
+    return razorpay_params
 
 
 def verify_signature(response):

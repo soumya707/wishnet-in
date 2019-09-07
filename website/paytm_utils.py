@@ -72,23 +72,4 @@ def verify_final_status(order_id):
         headers={'Content-type': 'application/json'}
     ).json()
 
-    response_code_dict = {
-        '1': 'Transaction success.',
-        '227': ('Your payment has been declined by your bank. Please contact '
-                'your bank for any queries. If money has been deducted from '
-                'your account, you will receive a refund within 48 hrs.'),
-        '235': 'Wallet balance insufficient',
-        '295': ('Your payment failed as the UPI ID entered is incorrect. '
-                'Please try again by entering a valid VPA or use a different '
-                'method to complete the payment.'),
-        '334': 'Invalid Order ID.',
-        '400': 'Transaction status not confirmed yet.',
-        '401': ('Your payment has been declined by your bank. Please contact '
-                'your bank for any queries. If money has been deducted from '
-                'your account, you will receive a refund within 48 hrs.'),
-        '402': ('Looks like the payment is not complete. Please wait while we '
-                'confirm the status with your bank.'),
-        '810': 'Transaction failed.',
-    }
-
-    return response['RESPCODE'], response_code_dict.get(response['RESPCODE'])
+    return response['RESPCODE']
