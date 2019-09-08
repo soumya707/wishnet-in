@@ -11,15 +11,16 @@ from flask import (
     current_app, flash, redirect, render_template, request, session, url_for)
 from flask_sqlalchemy_caching import FromCache
 from flask_wtf.csrf import CSRFProtect
+from passlib.hash import pbkdf2_sha256
 from sqlalchemy import or_
 
 from website import app, cache, plans
 from website.forms import (
-    AuthenticationForm, ForgotPasswordForm, GetCustomerNumberForm,
-    NewConnectionForm, RechargeForm, RegistrationForm)
+    ForgotPasswordForm, GetCustomerNumberForm, LoginForm, NewConnectionForm,
+    RechargeForm, RegistrationForm)
 from website.models import (
     FAQ, BestPlans, CarouselImages, CustomerInfo, Downloads, JobVacancy,
-    RechargeEntry, RegionalOffices, Services, Ventures)
+    RechargeEntry, RegionalOffices, Services, Ventures, CustomerLogin)
 from website.mqs_api import (
     AuthenticateUser, ContractsByKey, GetCustomerInfo, Recharge)
 from website.paytm_utils import (
@@ -32,13 +33,12 @@ from website.tasks import (
 
 csrf = CSRFProtect(app)
 
-#TODO: add when self-care portal is ready
-# @app.before_first_request
-# def init_session_var():
-#     """Initialize session variable for portal use."""
 
-#     # set user to be logged out
-#     session['user_logged_in'] = False
+@app.before_first_request
+def init_session_var():
+    """Initialize session variable for portal use."""
+    # set user to be logged out
+    session['user_logged_in'] = False
 
 
 # Routes
@@ -509,23 +509,66 @@ def privacy():
 
 
 # Self-care routes
-@app.route('/portal', methods=['GET', 'POST'])
-def portal():
-    """Route for self-care portal."""
-    form = AuthenticationForm()
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Route for self-care login."""
+    form = LoginForm()
 
     if form.validate_on_submit():
-        pass
+        # get customer login credentials
+        customer = CustomerLogin.query.filter_by(
+            customer_no=form.customer_no.data
+        ).first()
+
+        redirect_to = None
+
+        # valid customer and valid password
+        if customer is not None and customer.password_hash is not None:
+            # verify password
+            pwd_verified = pbkdf2_sha256.verify(
+                form.password.data,
+                customer.password_hash
+            )
+
+            # condition based on password sanity
+            if pwd_verified:
+                session['user_logged_in'] = True
+                redirect_to = 'portal'
+            else:
+                flash(
+                    (
+                        'Incorrect password for the given customer number. '
+                        'Please try again.'
+                    ), 'danger'
+                )
+                redirect_to = 'login'
+
+        # non-registered customer
+        elif customer is not None and customer.password_hash is None:
+            redirect_to = 'login'
+            flash(
+                (
+                    'You have not registered for the self-care portal. '
+                    'Please register before proceeding.'
+                ), 'danger'
+            )
+
+        # invalid customer
+        else:
+            redirect_to = 'login'
+            flash('Invalid customer number.', 'danger')
+
+        return redirect(url_for(redirect_to))
 
     return render_template(
-        'portal.html',
+        'login.html',
         form=form
     )
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    """Route for registering self-care."""
+    """Route for self-care registration."""
     form = RegistrationForm()
 
     if form.validate_on_submit():
@@ -539,10 +582,11 @@ def register():
 
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot():
-    """Route for generating new password."""
+    """Route for generating new password for self-care."""
     form = ForgotPasswordForm()
 
     if form.validate_on_submit():
+
         return render_template('enter_otp.html')
 
     return render_template(
@@ -551,33 +595,21 @@ def forgot():
     )
 
 
-#TODO: add when self-care portal is ready
-# @app.route('/portal', methods=['GET', 'POST'])
-# def portal():
-#     """Route for portal."""
+@app.route('/portal', methods=['GET'])
+@app.route('/portal/<action>')
+def portal(action=None):
+    """Route for self-care portal."""
+    # user not logged in
+    if not session['user_logged_in']:
+        return redirect(url_for('login'))
 
-#     # preliminary check whether user is already logged in
-#     if not session['user_logged_in']:
-#         form = AuthenticationForm()
-
-#         if form.validate_on_submit():
-#             username = request.form['username']
-#             password = request.form['password']
-
-#             authenticate_user = AuthenticateUser(app)
-#             authenticate_user.request(username, password)
-
-#             # if login is successful
-#             if authenticate_user.response():
-#                 session['user_logged_in'] = True
-#                 return render_template('portal.html', logged_in=True)
-
-#             # if login fails, display message
-#             else:
-#                 flash('Could not log in due to invalid credentials', 'danger')
-#                 return redirect(url_for('portal'))
-
-#         return render_template('portal.html', logged_in=False, form=form)
-
-#     elif session['user_logged_in']:
-#         return render_template('portal.html', logged_in=True)
+    # user logged in
+    elif session['user_logged_in']:
+        if action == 'recharge':
+            pass
+        elif action == 'docket':
+            pass
+        elif action == 'plan_change':
+            pass
+        else:
+            return render_template('portal.html')

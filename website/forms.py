@@ -87,7 +87,7 @@ class GetCustomerNumberForm(FlaskForm):
     submit = SubmitField('Get')
 
 
-class AuthenticationForm(FlaskForm):
+class LoginForm(FlaskForm):
     """Class for authentication form."""
     customer_no = StringField('Customer Number', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])

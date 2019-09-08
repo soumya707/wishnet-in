@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% from "_macros.html" import render_field, render_submit %}
 
-{% block title %}Forgot Password{% endblock %}
+{% block title %}Self-care login{% endblock %}
 
 {% block content %}
 
@@ -14,14 +14,15 @@
   <div class="row border-top">
 
     <div class="col-sm-4 bg-light-grey p-3">
-      <img class="sidebar-img p-1" src="{{ url_for('static', filename='img/etc/forgot_password.svg') }}">
+      <img class="sidebar-img p-1"
+           src="{{ url_for('static', filename='img/etc/login.svg') }}">
       <h5 class="text-justify">
         Be independent, do it yourself</br>For any queries, please contact us at <strong><a href="tel:18004194244" class="text-red">1800-419-4244</a></strong>
       </h5>
     </div> <!-- col -->
 
     <div class="col-sm-4 p-3">
-      <h3 class="py-2 text-red">Forgot password?</h3>
+      <h3 class="py-2 text-red">Log In</h3>
 
       <div class="content-section">
 
@@ -29,32 +30,32 @@
           {{ form.hidden_tag() }}
           <fieldset class="form-group">
 
-            <!-- CUSTOMER NUMBER -->
+            <!-- USERNAME -->
             <div class="form-row">
               {{ render_field(form.customer_no) }}
             </div>
 
-          </fieldset> <!-- fieldset -->
+            <!-- PASSWORD -->
+            <div class="form-row">
+              {{ render_field(form.password) }}
+            </div>
 
-          <!-- SUBMIT -->
-          {{ render_submit(form.submit) }}
+        </fieldset> <!-- fieldset -->
 
-        </form>
+        <!-- SUBMIT -->
+        {{ render_submit(form.submit) }}
+
+      </form>
       </div> <!-- content-section -->
-
-      <div class="p-2">
-        The OTP will be sent to your registered mobile number.
-      </div> <!-- info -->
-
     </div> <!-- col -->
 
     <div class="col-sm-4 bg-light-grey pt-4">
 
       <!-- LIST GROUP -->
       <div class="list-group">
-        <a class="list-group-item list-group-item-action outline" href="{{ url_for('get_cust_no') }}">Know your Customer Number</a>
-        <a class="list-group-item list-group-item-action outline" href="{{ url_for('login') }}">Self-care Login</a>
-        <a class="list-group-item list-group-item-action outline" href="{{ url_for('register') }}">Self-care Registration</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('get_cust_no') }}">Know your Customer Number</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('register') }}">Self-care Registration</a>
+        <a class="list-group-item list-group-item-action" href="#">Forgot Password?</a>
       </div> <!-- list-group -->
 
       <!-- DESCRIPTION -->

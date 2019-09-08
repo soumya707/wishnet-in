@@ -1,14 +1,11 @@
 {% extends "layout.html" %}
 {% from "_macros.html" import render_field, render_submit %}
 
-{% block title %}Self-care Portal{% endblock %}
+{% block title %}Self-care login{% endblock %}
 
 {% block content %}
 
 <div class="container p-3">
-
-  <!-- checks whether already logged in or not -->
-  {% if not logged_in %}
 
   <h2 class="pb-3">Self-Care
     <div class="heading-underline"></div>
@@ -25,53 +22,23 @@
     </div> <!-- col -->
 
     <div class="col-sm-4 p-3">
-      <h3 class="py-2 text-red">Log In</h3>
+      <h3 class="py-2 text-red">Portal</h3>
 
-      <div class="content-section">
-
-        <form method="POST">
-          {{ form.hidden_tag() }}
-          <fieldset class="form-group">
-
-            <!-- CUSTOMER NUMBER -->
-            <div class="form-row">
-              {{ render_field(form.customer_no) }}
-            </div>
-
-            <!-- PASSWORD -->
-            <div class="form-row">
-              {{ render_field(form.password) }}
-            </div>
-
-        </fieldset> <!-- fieldset -->
-
-        <!-- SUBMIT -->
-        {{ render_submit(form.submit) }}
-
-      </form>
-      </div> <!-- content-section -->
     </div> <!-- col -->
 
     <div class="col-sm-4 bg-light-grey pt-4">
 
       <!-- LIST GROUP -->
       <div class="list-group">
-        <a class="list-group-item list-group-item-action outline" href="{{ url_for('get_cust_no') }}">Know your Customer Number</a>
-        <a class="list-group-item list-group-item-action outline" href="{{ url_for('register') }}">Self-care Registration</a>
-        <a class="list-group-item list-group-item-action outline" href="{{ url_for('forgot') }}">Forgot Password?</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('get_cust_no') }}">Recharge</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('register') }}">Docket</a>
+        <a class="list-group-item list-group-item-action" href="#">Plan Change</a>
       </div> <!-- list-group -->
-
-      <!-- DESCRIPTION -->
-      <h5 class="description text-red text-center p-3">Only our existing broadband customers can avail self-care facility</h5>
 
     </div> <!-- col -->
 
   </div> <!-- row -->
 
-    {% else %}
-    <div>Logged in</div>
-
-    {% endif %}
 </div> <!-- container -->
 
 {% endblock %}
