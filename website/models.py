@@ -268,13 +268,3 @@ class CustomerLogin(db.Model):
 
     def __str__(self):
         return self.customer_no
-
-
-# Register new user
-# class RegisterNewUser(db.Model):
-#     """Class definition for registering new user."""
-
-#     __bind_key__ = 'users'
-
-#     id = db.Column(db.Integer, primary_key=True)
-#     customer_no = db.Column(db.String(100), nullable=True)
