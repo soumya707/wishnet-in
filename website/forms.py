@@ -9,7 +9,7 @@ from flask_wtf import FlaskForm
 from wtforms import (
     PasswordField, SelectField, StringField, SubmitField, TextAreaField)
 from wtforms.validators import (
-    DataRequired, Email, IPAddress, Length, Optional, Regexp)
+    Email, EqualTo, InputRequired, IPAddress, Length, Optional, Regexp)
 
 
 def get_sorted_location(filepath):
@@ -23,7 +23,7 @@ class RechargeForm(FlaskForm):
     """Class for recharge form."""
     user_id = StringField(
         'User ID',
-        validators=[DataRequired()],
+        validators=[InputRequired()],
         render_kw={'placeholder': 'Customer Number'})
     submit = SubmitField('Insta-Recharge')
 
@@ -34,33 +34,33 @@ class NewConnectionForm(FlaskForm):
     phone_no_msg = 'Invalid mobile no.'
     email_msg = 'Invalid e-mail address'
 
-    first_name = StringField('First Name', validators=[DataRequired()])
+    first_name = StringField('First Name', validators=[InputRequired()])
     middle_name = StringField('Middle Name')
-    last_name = StringField('Last Name', validators=[DataRequired()])
-    address = StringField('Address', validators=[DataRequired()])
+    last_name = StringField('Last Name', validators=[InputRequired()])
+    address = StringField('Address', validators=[InputRequired()])
     location = SelectField(
         'Location',
         choices=get_sorted_location('website/location_for_new_connection.csv'),
-        validators=[DataRequired()]
+        validators=[InputRequired()]
     )
     postal_code = StringField(
         'Pin code',
         validators=[
-            DataRequired(),
+            InputRequired(),
             Regexp(r'^[7]+\d{1,6}$', message=pin_code_msg)
         ]
     )
     phone_no = StringField(
         'Mobile no.',
         validators=[
-            DataRequired(),
+            InputRequired(),
             Regexp(r'^\d{1,10}$', message=phone_no_msg)
         ]
     )
     email_address = StringField(
         'E-mail',
         validators=[
-            DataRequired(),
+            InputRequired(),
             Email(message=email_msg)
         ]
     )
@@ -89,18 +89,28 @@ class GetCustomerNumberForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     """Class for authentication form."""
-    customer_no = StringField('Customer Number', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    customer_no = StringField('Customer Number', validators=[InputRequired()])
+    password = PasswordField('Password', validators=[InputRequired()])
     submit = SubmitField('Sign in')
 
 
 class RegistrationForm(FlaskForm):
     """Class for registration form."""
-    customer_no = StringField('Customer Number', validators=[DataRequired()])
+    customer_no = StringField('Customer Number', validators=[InputRequired()])
     submit = SubmitField('Get OTP')
 
 
 class ForgotPasswordForm(FlaskForm):
     """Class for forgot password form."""
-    customer_no = StringField('Customer Number', validators=[DataRequired()])
+    customer_no = StringField('Customer Number', validators=[InputRequired()])
     submit = SubmitField('Get OTP')
+
+
+class SetPasswordForm(FlaskForm):
+    """Class for setting new password form."""
+    password = PasswordField('New Password', validators=[
+        InputRequired(),
+        EqualTo('confirm', message='Passwords must match')
+    ])
+    confirm = PasswordField('Repeat Password')
+    submit = SubmitField('Set New Password')
