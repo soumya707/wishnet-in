@@ -3,6 +3,10 @@
 """Define helper functions for the application."""
 
 import csv
+from datetime import datetime
+from pathlib import Path
+
+from passlib.totp import generate_secret
 
 
 class AvailablePlans():
@@ -18,3 +22,35 @@ class AvailablePlans():
             # skip header
             next(plan_reader)
             return {row[2]: (row[0], row[3]) for row in plan_reader}
+
+
+def generate_otp_secret(filepath):
+    """Generates OTP secret key and stores it in filepath."""
+    path = Path(filepath)
+    # if file exists
+    if path.is_file():
+        file_exist = True
+    else:
+        file_exist = False
+
+    with open(filepath, 'a') as csvfile:
+        col_names = ['date', 'key']
+        writer = csv.DictWriter(csvfile, fieldnames=col_names)
+
+        if not file_exist:
+            writer.writeheader()
+
+        writer.writerow({
+            'date': datetime.now().strftime("%Y-%m-%d"),
+            'key': generate_secret()
+        })
+
+
+def retrieve_otp_secret(filepath):
+    """Retrieves OTP secret key from filepath."""
+    with open(filepath, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        rows = [row for row in reader]
+        return {
+            str(rows[-1].get('date')): str(rows[-1].get('key'))
+        }

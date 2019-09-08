@@ -14,6 +14,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy_caching import CachingQuery
 from flask_caching import Cache
 from flask_security import Security, SQLAlchemyUserDatastore
+from passlib.totp import TOTP
+
+from website.utils import AvailablePlans, retrieve_otp_secret
 
 
 # initiate Flask application
@@ -41,14 +44,19 @@ admin = Admin(
     template_mode='bootstrap3',
 )
 
-# setup Flask-MIgrate
+# setup Flask-Migrate
 migrate = Migrate(app, db)
+
+# Setup Passlib TOTP
+TotpFactory = TOTP.using(
+    period=270,
+    secrets=retrieve_otp_secret('website/otp_secrets.csv')
+)
 
 # setup Flask-Session
 Session(app)
 
-# import here to avoid cyclic import
-from website.utils import AvailablePlans
+# get available plans
 plans = AvailablePlans('website/plans_with_tariff.csv')
 
 from website import views
@@ -58,9 +66,6 @@ from website.models import (
 from website.security.models import Role, User
 from website.security.models import (
     CustomFileView, EditorModelView, SuperuserModelView)
-
-
-
 
 
 # Setup Flask-Security
