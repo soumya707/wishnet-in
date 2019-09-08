@@ -3,9 +3,9 @@
 """Views for the website."""
 
 
-from datetime import datetime
 import random
 import string
+from datetime import datetime
 
 from flask import (
     current_app, flash, redirect, render_template, request, session, url_for)
@@ -19,14 +19,15 @@ from website.forms import (
     NewConnectionForm, RechargeForm, RegistrationForm)
 from website.models import (
     FAQ, BestPlans, CarouselImages, CustomerInfo, Downloads, JobVacancy,
-    RegionalOffices, Services, Ventures)
+    RechargeEntry, RegionalOffices, Services, Ventures)
 from website.mqs_api import (
     AuthenticateUser, ContractsByKey, GetCustomerInfo, Recharge)
 from website.paytm_utils import (
     initiate_transaction, verify_final_status, verify_transaction)
 from website.razorpay_utils import make_order, verify_signature
 from website.tasks import (
-    add_new_connection_data_to_db, send_async_new_connection_mail)
+    add_new_connection_data_to_db, add_recharge_data_to_db,
+    send_async_new_connection_mail)
 
 
 csrf = CSRFProtect(app)
@@ -179,26 +180,20 @@ def payment(ref_no):
                 amount=request.form['amount']
             )
 
-            return render_template(
-                'paytm_pay.html',
-                paytm_form=form_data,
-            )
-
         elif request.form['gateway'] == 'razorpay':
             # Get Razorpay form data
-            razorpay_order, form_data = make_order(
+            form_data = make_order(
                 order_id=ref_no,
                 cust_info=session['cust_data'],
                 amount=request.form['amount']
             )
 
-            return render_template(
-                'razorpay_pay.html',
-                razorpay_form=form_data,
-            )
+        return render_template(
+            '{}_pay.html'.format(request.form['gateway']),
+            form=form_data,
+        )
 
     elif request.method == 'GET':
-
         return render_template(
             'payment.html',
             cust_data=session.get('cust_data'),
@@ -212,79 +207,193 @@ def verify_response(gateway):
     """Route for verifying response for payment."""
     if request.method == 'POST':
         # check payment gateway
+        # Paytm
         if gateway == 'paytm':
+            # store response data
+            recharge_data = {
+                'wishnet_order_id': session['order_id'],
+                'payment_gateway': 'Paytm',
+                'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
+            }
+
             # initial checksum verification
             verified = verify_transaction(request.form)
 
+            # check verification success
             if verified:
+                recharge_data.update(txn_order_id=request.form['TXNID'])
                 # final status verification
-                final_status_code, final_status_msg = \
-                    verify_final_status(session['order_id'])
+                final_status_code = verify_final_status(session['order_id'])
 
                 ## FIXME: payment status failure even if successful
                 # check if transaction successful
-                if final_status_code in ('1', '400', '402'):
+                if final_status_code == '01':
+                    recharge_data.update(
+                        txn_datetime=str(request.form['TXNDATE']),
+                        txn_status='SUCCESS'
+                    )
                     #TODO: add sms for successful transaction
                     txn_sms_msg = (
-                        'Thank You! Your transaction of Rs. {} is successful.'
+                        'Thank You! Your transaction of Rs.{} is successful.'
                         '\nTeam Wishnet'
-                    ).format(request.form.get('TXNAMOUNT'))
+                    ).format(session['amount'])
 
                     # TopUp in MQS
+                    # customer_data = session.get('cust_data')
+
                     # top_up = Recharge(app)
-                    # top_up.request(session['cust_data']['cust_no'])
+                    # top_up.request(customer_data.get('cust_no'))
                     # top_up.response()
 
-                    # FIXME: verify proper error code
-                    # success in MQS
-                    if top_up.txn_msg == 'Success':
-                        status = 'successful'
-                        flash('Recharge successful.', 'success')
-                        #TODO: add sms for successful recharge
-                    # failure in mQS
-                    else:
-                        status = 'unsuccessful'
-                        flash('Recharge unsuccessful.', 'danger')
-                        #TODO: add sms for unsuccessful recharge
+                    # recharge_data['topup_ref_id'] = top_up.ref_no
+                    # recharge_data['topup_datetime'] = datetime.now().strftime(
+                    #     "%Y-%m-%d %H:%M:%S.f"
+                    # )
+                    # # FIXME: verify proper error code
+                    # # success in MQS
+                    # if top_up.error_no == '0':
+                    #     recharge_data['topup_status'] = 'SUCCESS'
+                    #     status = 'successful'
+                    #     flash('Recharge successful.', 'success')
+                    #     #TODO: add sms for successful recharge
+                    #     recharge_msg = ''
+                    # # pending in MQS
+                    # elif top_up.error_no in ('80342', '80337', '80262'):
+                    #     recharge_data['topup_status'] = 'PENDING'
+                    #     status = 'unsuccessful'
+                    #     flash('Recharge pending.', 'danger')
+                    #     #TODO: add sms for pending recharge
+                    #     recharge_msg = (
+                    #         'Payment received but recharge is pending.'
+                    #         'We will revert within 24 hours.'
+                    #         '\nTeam Wishnet'
+                    #     )
+                    # # failure in MQS
+                    # else:
+                    #     recharge_data['topup_status'] = 'FAILED'
+                    #     status = 'unsuccessful'
+                    #     flash('Recharge unsuccessful.', 'danger')
+                    #     #TODO: add sms for unsuccessful recharge
+                    #     recharge_msg = (
+                    #         'Payment received but recharge failed.'
+                    #         'We will revert within 24 hours.'
+                    #         '\nTeam Wishnet'
+                    #     )
+                # Transaction Status failure
                 else:
+                    recharge_data.update(
+                        txn_datetime='',
+                        txn_status='FAILURE',
+                        topup_ref_id='',
+                        topup_datetime='',
+                        topup_status='',
+                    )
                     #TODO: add sms for unsuccessful transaction
                     txn_sms_msg = (
                         'Payment declined! Please consult your '
                         'payment gateway for details.'
+                        '\nTeam Wishnet'
                     )
                     status = 'unsuccessful'
                     flash(
                         'Payment incomplete! Please check with {}.'.\
                         format(gateway.capitalize()), 'danger'
                     )
-            else:
+            # checksumhash verification failure
+            # data tampered during transaction
+            elif not verified:
+                recharge_data.update(
+                    txn_status='CHECKSUM VERIFICATION FAILURE',
+                    topup_ref_id='',
+                    topup_datetime='',
+                    topup_status='',
+                )
                 status = 'unsuccessful'
                 flash('Payment failed! Please try again.', 'danger')
 
+        # Razorpay
         elif gateway == 'razorpay':
+            # store response data
+            recharge_data = {
+                'wishnet_order_id': session['order_id'],
+                'payment_gateway': 'Razorpay',
+                'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
+            }
+
             verified = verify_signature(request.form)
+            # signature verification success
             if verified:
+                recharge_data.update(
+                    txn_order_id=request.form['razorpay_order_id'],
+                    txn_status='SUCCESS',
+                )
+                #TODO: add sms for successful transaction
+                txn_sms_msg = (
+                    'Thank You! Your transaction of Rs.{} is successful.'
+                    '\nTeam Wishnet'
+                ).format(session['amount'])
+
                 # TopUp in MQS
+                # customer_data = session.get('cust_data')
+
                 # top_up = Recharge(app)
-                # top_up.request()
+                # top_up.request(customer_data.get('cust_no'))
                 # top_up.response()
-                # check if recharge done in MQS
-                if top_up.txn_msg == 'Success':
-                    status = 'successful'
-                    flash('Recharge successful.', 'success')
-                    #TODO: add sms for successful recharge
-                else:
-                    status = 'unsuccessful'
-                    flash('Recharge unsuccessful.', 'danger')
-                    #TODO: add sms for unsuccessful recharge
+
+                # recharge_data['topup_ref_id'] = top_up.ref_no
+                # recharge_data['topup_datetime'] = datetime.now().strftime(
+                #     "%Y-%m-%d %H:%M:%S.f"
+                # )
+                # # FIXME: verify proper error code
+                # # success in MQS
+                # if top_up.error_no == '0':
+                #     recharge_data['topup_status'] = 'SUCCESS'
+                #     status = 'successful'
+                #     flash('Recharge successful.', 'success')
+                #     #TODO: add sms for successful recharge
+                #     recharge_msg = ''
+                # # pending in MQS
+                # elif top_up.error_no in ('80342', '80337', '80262'):
+                #     recharge_data['topup_status'] = 'PENDING'
+                #     status = 'unsuccessful'
+                #     flash('Recharge pending.', 'danger')
+                #     #TODO: add sms for pending recharge
+                #     recharge_msg = (
+                #         'Payment received but recharge is pending.'
+                #         'We will revert within 24 hours.'
+                #         '\nTeam Wishnet'
+                #     )
+                # # failure in MQS
+                # else:
+                #     recharge_data['topup_status'] = 'FAILED'
+                #     status = 'unsuccessful'
+                #     flash('Recharge unsuccessful.', 'danger')
+                #     #TODO: add sms for unsuccessful recharge
+                #     recharge_msg = (
+                #         'Payment received but recharge failed.'
+                #         'We will revert within 24 hours.'
+                #         '\nTeam Wishnet'
+                #     )
+
+            # signature verification failure
             else:
+                recharge_data.update(
+                    txn_order_id='',
+                    txn_status='SIGNATURE VERIFICATION FAILURE',
+                    topup_ref_id='',
+                    topup_datetime='',
+                    topup_status='',
+                )
                 status = 'unsuccessful'
                 flash('Recharge failed! Please try again.', 'danger')
+
+        # add recharge data to db async
+        add_recharge_data_to_db.delay(recharge_data)
 
         return redirect(
             url_for(
                 'receipt',
-                ref_no=session.get('order_id'),
+                ref_no=session['order_id'],
                 status=status
             )
         )
@@ -294,15 +403,15 @@ def verify_response(gateway):
 def receipt(ref_no, status):
     """Route to transaction receipt."""
     # remove data from session storage
-    session.pop('active_plans', None)
-    session.pop('order_id', None)
+    # session.pop('active_plans', None)
+    # session.pop('order_id', None)
 
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     return render_template(
         'receipt.html',
-        cust_data=session.get('cust_data'),
-        amount=session.get('amount'),
+        cust_data=session['cust_data'],
+        amount=session['amount'],
         date_and_time=current_time,
         txn_status=status,
         txn_no=ref_no,
