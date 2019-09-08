@@ -257,17 +257,17 @@ class CustomerInfo(db.Model):
 
 
 # Get self-login details
-# class GetCustomerAuth(db.Model):
-#     """Class definition for getting customer login authentication."""
+class CustomerLogin(db.Model):
+    """Class definition for getting customer login authentication."""
 
-#     __bind_key__ = 'users'
+    __bind_key__ = 'users'
 
-#     id = db.Column(db.Integer, primary_key=True)
-#     customer_no = db.Column(db.String(100), nullable=False)
-#     password = db.Column(db.String(50), nullable=True)
+    id = db.Column(db.Integer, primary_key=True)
+    customer_no = db.Column(db.String(100), nullable=False)
+    password_hash = db.Column(db.String(100), nullable=True)
 
-#     def __str__(self):
-#         return self.customer_no
+    def __str__(self):
+        return self.customer_no
 
 
 # Register new user
