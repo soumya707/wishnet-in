@@ -106,6 +106,12 @@ class ForgotPasswordForm(FlaskForm):
     submit = SubmitField('Get OTP')
 
 
+class OTPVerificationForm(FlaskForm):
+    """Class for verifying OTP form."""
+    otp = StringField('Enter OTP', validators=[InputRequired()])
+    submit = SubmitField('Verify')
+
+
 class SetPasswordForm(FlaskForm):
     """Class for setting new password form."""
     password = PasswordField('New Password', validators=[
