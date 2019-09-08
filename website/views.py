@@ -11,16 +11,17 @@ from flask import (
     current_app, flash, redirect, render_template, request, session, url_for)
 from flask_sqlalchemy_caching import FromCache
 from flask_wtf.csrf import CSRFProtect
+from passlib.exc import MalformedTokenError, TokenError
 from passlib.hash import pbkdf2_sha256
 from sqlalchemy import or_
 
-from website import app, cache, plans
+from website import TotpFactory, app, cache, plans
 from website.forms import (
     ForgotPasswordForm, GetCustomerNumberForm, LoginForm, NewConnectionForm,
-    RechargeForm, RegistrationForm)
+    OTPVerificationForm, RechargeForm, RegistrationForm, SetPasswordForm)
 from website.models import (
-    FAQ, BestPlans, CarouselImages, CustomerInfo, Downloads, JobVacancy,
-    RechargeEntry, RegionalOffices, Services, Ventures, CustomerLogin)
+    FAQ, BestPlans, CarouselImages, CustomerInfo, CustomerLogin, Downloads,
+    JobVacancy, RechargeEntry, RegionalOffices, Services, Ventures)
 from website.mqs_api import (
     AuthenticateUser, ContractsByKey, GetCustomerInfo, Recharge)
 from website.paytm_utils import (
@@ -509,6 +510,7 @@ def privacy():
 
 
 # Self-care routes
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Route for self-care login."""
@@ -526,26 +528,25 @@ def login():
         if customer is not None and customer.password_hash is not None:
             # verify password
             pwd_verified = pbkdf2_sha256.verify(
-                form.password.data,
+                str(form.password.data),
                 customer.password_hash
             )
-
             # condition based on password sanity
             if pwd_verified:
                 session['user_logged_in'] = True
                 redirect_to = 'portal'
             else:
+                redirect_to = 'login'
                 flash(
                     (
                         'Incorrect password for the given customer number. '
                         'Please try again.'
                     ), 'danger'
                 )
-                redirect_to = 'login'
 
         # non-registered customer
         elif customer is not None and customer.password_hash is None:
-            redirect_to = 'login'
+            redirect_to = 'register'
             flash(
                 (
                     'You have not registered for the self-care portal. '
@@ -572,7 +573,40 @@ def register():
     form = RegistrationForm()
 
     if form.validate_on_submit():
-        pass
+        # get customer info
+        customer = CustomerLogin.query.filter_by(
+            customer_no=form.customer_no.data
+        ).first()
+
+        redirect_to = None
+
+        # valid customer and valid password
+        if customer is not None and customer.password_hash is not None:
+            redirect_to = 'login'
+            flash('You are already registered. Try logging in.', 'info')
+
+        # non-registered customer
+        elif customer is not None and customer.password_hash is None:
+            # TODO: add sms api for sending otp
+            # generate OTP
+            totp = TotpFactory.new()
+            session['otp_data'] = totp.to_dict()
+
+            session['customer_no'] = form.customer_no.data
+            redirect_to = 'verify_otp'
+            flash(
+                'OTP:{} has been sent to your registered mobile number.'.format(
+                    totp.generate().token
+                ),
+                'success'
+            )
+
+        # invalid customer
+        else:
+            redirect_to = 'register'
+            flash('Invalid customer number.', 'danger')
+
+        return redirect(url_for(redirect_to))
 
     return render_template(
         'register.html',
@@ -586,11 +620,117 @@ def forgot():
     form = ForgotPasswordForm()
 
     if form.validate_on_submit():
+        # get customer login credentials
+        customer = CustomerLogin.query.filter_by(
+            customer_no=form.customer_no.data
+        ).first()
 
-        return render_template('enter_otp.html')
+        redirect_to = None
+
+        # valid customer and valid password
+        if customer is not None and customer.password_hash is not None:
+            # TODO: add sms api for sending otp
+            # generate OTP
+            totp = TotpFactory.new()
+            session['otp_data'] = totp.to_dict()
+
+            session['customer_no'] = form.customer_no.data
+            redirect_to = 'verify_otp'
+            flash(
+                'OTP:{} has been sent to your registered mobile number.'.format(
+                    totp.generate().token
+                ),
+                'success'
+            )
+
+        # non-registered customer
+        elif customer is not None and customer.password_hash is None:
+            redirect_to = 'register'
+            flash(
+                (
+                    'You have not registered for the self-care portal. '
+                    'Please register before proceeding.'
+                ), 'danger'
+            )
+
+        # invalid customer
+        else:
+            redirect_to = 'forgot'
+            flash('Invalid customer number.', 'danger')
+
+        return redirect(url_for(redirect_to))
 
     return render_template(
         'forgot_password.html',
+        form=form
+    )
+
+
+@app.route('/verify_otp', methods=['GET', 'POST'])
+def verify_otp():
+    """Route for verifying OTP."""
+    form = OTPVerificationForm()
+
+    if form.validate_on_submit():
+        otp = form.otp.data
+
+        redirect_to = None
+
+        # Verify OTP
+        totp = TotpFactory.from_dict(session['otp_data'])
+
+        try:
+            totp.verify(str(otp), totp)
+        except (MalformedTokenError, TokenError) as _:
+            otp_verified = False
+        else:
+            otp_verified = True
+
+        # destroy OTP data
+        session.pop('otp_data', None)
+
+        if otp_verified:
+            redirect_to = 'set_password'
+        elif not otp_verified:
+            session.pop('customer_no', None)
+            redirect_to = 'login'
+            flash('OTP verification failed. Please try again.', 'danger')
+
+        return redirect(url_for(redirect_to))
+
+    return render_template(
+        'verify_otp.html',
+        form=form
+    )
+
+
+@app.route('/set_password', methods=['GET', 'POST'])
+def set_password():
+    """Route for setting new password for self-care."""
+    form = SetPasswordForm()
+
+    if form.validate_on_submit():
+        customer = CustomerLogin.query.filter_by(
+            customer_no=session['customer_no']
+        ).first()
+
+        # generate hashed password and store
+        hashed_pwd = pbkdf2_sha256.hash(str(form.password.data))
+        customer.password_hash = hashed_pwd
+
+        # make synchronous call to save password
+        db = current_app.extensions['sqlalchemy'].db
+        db.session.add(customer)
+        db.session.commit()
+
+        # remove customer number from session storage
+        session.pop('customer_no', None)
+
+        flash('Password saved successfully!', 'success')
+        return redirect(url_for('login'))
+
+    return render_template(
+        'set_password.html',
         form=form
     )
 
