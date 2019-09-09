@@ -239,12 +239,13 @@ def verify_response(gateway):
                 # check if transaction successful
                 if final_status_code == '01':
                     recharge_data.update(
+                        txn_amount=request.form['TXNAMOUNT'],
                         txn_datetime=str(request.form['TXNDATE']),
                         txn_status='SUCCESS'
                     )
 
                     # TopUp in MQS
-                    customer_data = session.get['cust_data']
+                    customer_data = session['cust_data']
 
                     top_up = Recharge(app)
                     top_up.request(
@@ -281,7 +282,7 @@ def verify_response(gateway):
                 # Transaction Status failure
                 else:
                     recharge_data.update(
-                        txn_datetime='',
+                        txn_amount='',
                         txn_status='FAILURE',
                         topup_ref_id='',
                         topup_datetime='',
@@ -296,6 +297,8 @@ def verify_response(gateway):
             # data tampered during transaction
             elif not verified:
                 recharge_data.update(
+                    txn_order_id='',
+                    txn_amount='',
                     txn_status='CHECKSUM VERIFICATION FAILURE',
                     topup_ref_id='',
                     topup_datetime='',
@@ -318,60 +321,52 @@ def verify_response(gateway):
             if verified:
                 recharge_data.update(
                     txn_order_id=request.form['razorpay_order_id'],
+                    txn_amount=session['amount'],
                     txn_status='SUCCESS',
                 )
-                #TODO: add sms for successful transaction
-                txn_sms_msg = (
-                    'Thank You! Your transaction of Rs.{} is successful.'
-                    '\nTeam Wishnet'
-                ).format(session['amount'])
 
                 # TopUp in MQS
-                # customer_data = session.get('cust_data')
+                customer_data = session['cust_data']
 
-                # top_up = Recharge(app)
-                # top_up.request(customer_data.get('cust_no'))
-                # top_up.response()
+                top_up = Recharge(app)
+                top_up.request(
+                    customer_data['cust_no'],
+                    session['plan_code']
+                )
+                top_up.response()
 
-                # recharge_data['topup_ref_id'] = top_up.ref_no
-                # recharge_data['topup_datetime'] = datetime.now().strftime(
-                #     "%Y-%m-%d %H:%M:%S.f"
-                # )
-                # # FIXME: verify proper error code
-                # # success in MQS
-                # if top_up.error_no == '0':
-                #     recharge_data['topup_status'] = 'SUCCESS'
-                #     status = 'successful'
-                #     flash('Recharge successful.', 'success')
-                #     #TODO: add sms for successful recharge
-                #     recharge_msg = ''
-                # # pending in MQS
-                # elif top_up.error_no in ('80342', '80337', '80262'):
-                #     recharge_data['topup_status'] = 'PENDING'
-                #     status = 'unsuccessful'
-                #     flash('Recharge pending.', 'danger')
-                #     #TODO: add sms for pending recharge
-                #     recharge_msg = (
-                #         'Payment received but recharge is pending.'
-                #         'We will revert within 24 hours.'
-                #         '\nTeam Wishnet'
-                #     )
-                # # failure in MQS
-                # else:
-                #     recharge_data['topup_status'] = 'FAILED'
-                #     status = 'unsuccessful'
-                #     flash('Recharge unsuccessful.', 'danger')
-                #     #TODO: add sms for unsuccessful recharge
-                #     recharge_msg = (
-                #         'Payment received but recharge failed.'
-                #         'We will revert within 24 hours.'
-                #         '\nTeam Wishnet'
-                #     )
+                recharge_data['topup_ref_id'] = top_up.ref_no
+                recharge_data['topup_datetime'] = datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S.%f"
+                )
+
+                # success in MQS
+                if top_up.error_no == '0':
+                    recharge_data['topup_status'] = 'SUCCESS'
+                    status = 'successful'
+                    flash(
+                        (
+                            'Payment received and recharge successful. '
+                            'Kindly await for plan activation.'
+                        ), 'success'
+                    )
+                # failure in MQS
+                else:
+                    recharge_data['topup_status'] = 'FAILURE'
+                    status = 'unsuccessful'
+                    flash(
+                        (
+                            'Payment received but recharge failed.'
+                            'We will revert within 24 hours.'
+                        ), 'danger'
+                    )
 
             # signature verification failure
+            # data tampered during transaction
             else:
                 recharge_data.update(
                     txn_order_id='',
+                    txn_amount='',
                     txn_status='SIGNATURE VERIFICATION FAILURE',
                     topup_ref_id='',
                     topup_datetime='',
@@ -395,10 +390,6 @@ def verify_response(gateway):
 @app.route('/receipt/<ref_no>/<status>')
 def receipt(ref_no, status):
     """Route to transaction receipt."""
-    # remove data from session storage
-    # session.pop('active_plans', None)
-    # session.pop('order_id', None)
-
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     return render_template(
@@ -467,7 +458,6 @@ def new_conn():
 def contact():
     """Route for contact."""
     regional_offices = RegionalOffices.query.options(FromCache(cache)).all()
-
     return render_template('contact.html', regional_offices=regional_offices)
 
 
@@ -476,7 +466,6 @@ def support():
     """Route for support."""
     faq = FAQ.query.options(FromCache(cache)).all()
     categories = {item.category for item in faq}
-
     return render_template('support.html', categories=categories, items=faq)
 
 

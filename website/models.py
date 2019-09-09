@@ -230,11 +230,15 @@ class RechargeEntry(db.Model):
     wishnet_payment_order_id = db.Column(db.String(20), nullable=False)
     payment_gateway = db.Column(db.String(10), nullable=False)
     payment_gateway_order_id = db.Column(db.String(100), nullable=False)
+    payment_amount = db.Column(db.String(10), nullable=False)
     payment_datetime = db.Column(db.String(50), nullable=False)
     payment_status = db.Column(db.String(200), nullable=False)
     mq_topup_reference_id = db.Column(db.String(20), nullable=False)
     mq_topup_datetime = db.Column(db.String(50), nullable=False)
     mq_topup_status = db.Column(db.String(10), nullable=False)
+    refund_amount = db.Column(db.String(10), nullable=True)
+    refund_datetime = db.Column(db.String(50), nullable=True)
+    refund_status = db.Column(db.String(10), nullable=True)
 
     def __str__(self):
         return self.wishnet_payment_order_id
