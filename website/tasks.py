@@ -77,6 +77,7 @@ def send_async_new_connection_mail(recipient_mail, query_no):
 def add_recharge_data_to_db(data):
     """Asynchronously add recharge data to database."""
     recharge = RechargeEntry(
+        customer_no=data['customer_no'],
         wishnet_payment_order_id=data['wishnet_order_id'],
         payment_gateway=data['payment_gateway'],
         payment_gateway_order_id=data['txn_order_id'],

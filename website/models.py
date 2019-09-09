@@ -227,6 +227,7 @@ class RechargeEntry(db.Model):
     __bind_key__ = 'recharge'
 
     id = db.Column(db.Integer, primary_key=True)
+    customer_no = db.Column(db.String(100), nullable=False)
     wishnet_payment_order_id = db.Column(db.String(20), nullable=False)
     payment_gateway = db.Column(db.String(10), nullable=False)
     payment_gateway_order_id = db.Column(db.String(100), nullable=False)

@@ -217,11 +217,14 @@ def payment(ref_no):
 def verify_response(gateway):
     """Route for verifying response for payment."""
     if request.method == 'POST':
+        # retrieve customer data
+        cust_data = session['cust_data']
         # check payment gateway
         # Paytm
         if gateway == 'paytm':
             # store response data
             recharge_data = {
+                'customer_no': cust_data['cust_no'],
                 'wishnet_order_id': session['order_id'],
                 'payment_gateway': 'Paytm',
                 'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
@@ -311,6 +314,7 @@ def verify_response(gateway):
         elif gateway == 'razorpay':
             # store response data
             recharge_data = {
+                'customer_no': cust_data['cust_no'],
                 'wishnet_order_id': session['order_id'],
                 'payment_gateway': 'Razorpay',
                 'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
