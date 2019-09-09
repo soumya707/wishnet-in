@@ -14,25 +14,59 @@
   <div class="row border-top">
 
     <div class="col-sm-4 bg-light-grey p-3">
+      <img class="sidebar-img p-1"
+           src="{{ url_for('static', filename='img/etc/portal.svg') }}">
 
       <!-- OPTIONS -->
       <div class="list-group">
-        <a class="list-group-item list-group-item-action" href="{{ url_for('get_cust_no') }}">Recharge</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('portal') }}">Self-Care Info</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('get_cust_no') }}">Add Plan / Recharge</a>
         <a class="list-group-item list-group-item-action" href="{{ url_for('register') }}">Docket</a>
-        <a class="list-group-item list-group-item-action" href="#">Plan Change</a>
+        <a class="list-group-item list-group-item-action" href="#">Usage Details</a>
+        <a class="list-group-item list-group-item-action" href="#">Online Transaction History</a>
+        <a class="list-group-item list-group-item-action" href="#">Update Profile</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('logout') }}">Sign Out</a>
       </div> <!-- list-group -->
 
     </div> <!-- col -->
 
-    <div class="col-sm-4 p-3">
-      <h3 class="py-2 text-red">Portal</h3>
+    <div class="col-sm-8 p-3">
+      <h3 class="py-2 text-red">Customer Info</h3>
 
-    </div> <!-- col -->
-
-    <div class="col-sm-4 bg-light-grey pt-4">
-
-      <!-- CUSTOMER INFO -->
-
+      <table class="table table-borderless">
+        <tbody>
+          <!-- CUSTOMER NUMBER -->
+          <tr>
+            <th scope="row">Customer Number</th>
+            <td>: {{ cust_data.cust_no }}</td>
+          </tr>
+          <!-- CUSTOMER NAME -->
+          <tr>
+            <th scope="row">Customer Name</th>
+            <td>: {{ cust_data.name }}</td>
+          </tr>
+          <!-- CUSTOMER ADDRESS -->
+          <tr>
+            <th scope="row">Address</th>
+            <td>: {{ cust_data.address }}</td>
+          </tr>
+          <!-- CUSTOMER CONTACT NUMBER -->
+          <tr>
+            <th scope="row">Mobile number</th>
+            <td>: {{ cust_data.contact_no }}</td>
+          </tr>
+          <!-- CUSTOMER EMAIL ADDRESS -->
+          <tr>
+            <th scope="row">E-mail Address</th>
+            <td>: {{ cust_data.email }}</td>
+          </tr>
+          <!-- CUSTOMER PARTNER -->
+          <tr>
+            <th scope="row">LCO</th>
+            <td>: {{ cust_data.partner }}</td>
+          </tr>
+        </tbody>
+      </table>
 
     </div> <!-- col -->
 

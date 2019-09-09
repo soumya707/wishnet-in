@@ -535,6 +535,8 @@ def login():
             if pwd_verified:
                 session['user_logged_in'] = True
                 redirect_to = 'portal'
+                # store customer number in session
+                session['customer_no'] = customer.customer_no
             else:
                 redirect_to = 'login'
                 flash(
@@ -561,10 +563,30 @@ def login():
 
         return redirect(url_for(redirect_to))
 
-    return render_template(
-        'login.html',
-        form=form
-    )
+    # user logged in
+    if session['user_logged_in']:
+        return redirect(url_for('logout'))
+    # user not logged in
+    else:
+        return render_template(
+            'login.html',
+            form=form
+        )
+
+
+@app.route('/logout')
+def logout():
+    """Route for self-care logout."""
+    # user logged in already
+    if session['user_logged_in']:
+        flash('You have been successfully logged out.', 'success')
+        # revoke session entry
+        session['user_logged_in'] = False
+    # user not logged in (invalid access to route)
+    elif not session['user_logged_in']:
+        flash('You are not logged in yet.', 'danger')
+
+    return redirect(url_for('login'))
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -741,6 +763,7 @@ def portal(action=None):
     """Route for self-care portal."""
     # user not logged in
     if not session['user_logged_in']:
+        flash('You have not logged in yet.', 'danger')
         return redirect(url_for('login'))
 
     # user logged in
@@ -752,4 +775,29 @@ def portal(action=None):
         elif action == 'plan_change':
             pass
         else:
-            return render_template('portal.html')
+            # Get customer info
+            user_info = GetCustomerInfo(app)
+            user_info.request(session['customer_no'])
+            user_info.response()
+
+            # store customer data in session
+            session['cust_data'] = user_info.to_dict()
+
+            return render_template(
+                'portal.html',
+                cust_data=user_info.to_dict(),
+            )
+
+
+# Portal actions
+
+@app.route('/portal/recharge')
+def portal_recharge():
+    """Route for self-care portal recharge."""
+    pass
+
+
+@app.route('/portal/docket')
+def portal_docket():
+    """Route for self-care portal docket."""
+    pass
