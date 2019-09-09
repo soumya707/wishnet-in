@@ -21,6 +21,7 @@ class AvailablePlans():
             plan_reader = csv.reader(csvfile)
             # skip header
             next(plan_reader)
+            # {plan_code: (plan_name, price)}
             return {row[2]: (row[0], row[3]) for row in plan_reader}
 
 

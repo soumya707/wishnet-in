@@ -57,12 +57,15 @@ def index():
         user_contracts.request(user)
         user_contracts.response()
 
-        # user exists
+        # user has active plans
         if user_contracts.valid_user:
             # Get active plans for the user
+            # {plan_name: (price, validity, plan_code)}
             active_plans = {
-                plans.all_plans[plan][0]: (plans.all_plans[plan][1], validity)
-                for (plan, validity) in user_contracts.active_plans
+                plans.all_plans[plan][0]: (
+                    plans.all_plans[plan][1], validity, plan
+                )
+                for plan, validity in user_contracts.active_plans
                 if plan in plans.all_plans
             }
 
@@ -81,9 +84,14 @@ def index():
                     ref_no=user_contracts.ref_no,
                 )
             )
-        # user does not exist
+        # user does not have active plans
         elif not user_contracts.valid_user:
-            flash('Invalid customer number! Please try again.', 'danger')
+            flash(
+                (
+                    'There is an issue with insta-recharge for your '
+                    'account. Please use self-care or call us.'
+                ), 'danger'
+            )
             return redirect(
                 url_for('index')
             )
@@ -131,9 +139,9 @@ def get_cust_no():
             #TODO: add SMS API
             flash(
                 (
-                    'Customer Number has been sent to your Registered Mobile '
+                    'Customer Number: {} has been sent to your Registered Mobile '
                     'Number.'
-                )
+                ).format(customer.customer_no)
                 , 'success'
             )
         # mobile number not available
@@ -171,6 +179,8 @@ def payment(ref_no):
     if request.method == 'POST':
         # store amount in session
         session['amount'] = request.form['amount']
+        # store selected plan code in session
+        session['plan_code'] = request.form['plan_code']
 
         # Check payment gateway
         if request.form['gateway'] == 'paytm':
@@ -226,60 +236,48 @@ def verify_response(gateway):
                 # final status verification
                 final_status_code = verify_final_status(session['order_id'])
 
-                ## FIXME: payment status failure even if successful
                 # check if transaction successful
                 if final_status_code == '01':
                     recharge_data.update(
                         txn_datetime=str(request.form['TXNDATE']),
                         txn_status='SUCCESS'
                     )
-                    #TODO: add sms for successful transaction
-                    txn_sms_msg = (
-                        'Thank You! Your transaction of Rs.{} is successful.'
-                        '\nTeam Wishnet'
-                    ).format(session['amount'])
 
                     # TopUp in MQS
-                    # customer_data = session.get('cust_data')
+                    customer_data = session.get['cust_data']
 
-                    # top_up = Recharge(app)
-                    # top_up.request(customer_data.get('cust_no'))
-                    # top_up.response()
+                    top_up = Recharge(app)
+                    top_up.request(
+                        customer_data['cust_no'],
+                        session['plan_code']
+                    )
+                    top_up.response()
 
-                    # recharge_data['topup_ref_id'] = top_up.ref_no
-                    # recharge_data['topup_datetime'] = datetime.now().strftime(
-                    #     "%Y-%m-%d %H:%M:%S.f"
-                    # )
-                    # # FIXME: verify proper error code
-                    # # success in MQS
-                    # if top_up.error_no == '0':
-                    #     recharge_data['topup_status'] = 'SUCCESS'
-                    #     status = 'successful'
-                    #     flash('Recharge successful.', 'success')
-                    #     #TODO: add sms for successful recharge
-                    #     recharge_msg = ''
-                    # # pending in MQS
-                    # elif top_up.error_no in ('80342', '80337', '80262'):
-                    #     recharge_data['topup_status'] = 'PENDING'
-                    #     status = 'unsuccessful'
-                    #     flash('Recharge pending.', 'danger')
-                    #     #TODO: add sms for pending recharge
-                    #     recharge_msg = (
-                    #         'Payment received but recharge is pending.'
-                    #         'We will revert within 24 hours.'
-                    #         '\nTeam Wishnet'
-                    #     )
-                    # # failure in MQS
-                    # else:
-                    #     recharge_data['topup_status'] = 'FAILED'
-                    #     status = 'unsuccessful'
-                    #     flash('Recharge unsuccessful.', 'danger')
-                    #     #TODO: add sms for unsuccessful recharge
-                    #     recharge_msg = (
-                    #         'Payment received but recharge failed.'
-                    #         'We will revert within 24 hours.'
-                    #         '\nTeam Wishnet'
-                    #     )
+                    recharge_data['topup_ref_id'] = top_up.ref_no
+                    recharge_data['topup_datetime'] = datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S.%f"
+                    )
+
+                    # success in MQS
+                    if top_up.error_no == '0':
+                        recharge_data['topup_status'] = 'SUCCESS'
+                        status = 'successful'
+                        flash(
+                            (
+                                'Payment received and recharge successful. '
+                                'Kindly await for plan activation.'
+                            ), 'success'
+                        )
+                    # failure in MQS
+                    else:
+                        recharge_data['topup_status'] = 'FAILURE'
+                        status = 'unsuccessful'
+                        flash(
+                            (
+                                'Payment received but recharge failed.'
+                                'We will revert within 24 hours.'
+                            ), 'danger'
+                        )
                 # Transaction Status failure
                 else:
                     recharge_data.update(
@@ -288,12 +286,6 @@ def verify_response(gateway):
                         topup_ref_id='',
                         topup_datetime='',
                         topup_status='',
-                    )
-                    #TODO: add sms for unsuccessful transaction
-                    txn_sms_msg = (
-                        'Payment declined! Please consult your '
-                        'payment gateway for details.'
-                        '\nTeam Wishnet'
                     )
                     status = 'unsuccessful'
                     flash(
@@ -565,7 +557,7 @@ def login():
 
     # user logged in
     if session['user_logged_in']:
-        return redirect(url_for('logout'))
+        return redirect(url_for('portal'))
     # user not logged in
     else:
         return render_template(

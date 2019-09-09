@@ -50,15 +50,19 @@
               <!-- Transaction amount -->
               <input type="hidden" name="amount" value="" id="total-price-input">
 
+              <!-- Selected plan code -->
+              <input type="hidden" name="plan_code" value="" id="selected-plan-code">
+
               <!-- Active Plans -->
                 <div class="form-group">
                   <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    {% for name, (price, validity) in active_plans.items() %}
-                      <label class="btn payment-plans shadow {% if loop.first %}active{% endif %} m-1 rounded">
-                        <input type="radio"
-                               name="plan" value="{{ price }}" id="{{ name }}"
-                               autocomplete="off" onchange="fillForm(this);"
-                               {% if loop.first %}checked{% endif %} />
+                    {% for name, (price, validity, code) in active_plans.items() %}
+                    <label class="btn payment-plans shadow {% if loop.first %}active{% endif %} m-1 rounded">
+                      <!-- plan details dump -->
+                      <input type="radio"
+                             name="plan" value="{{ price ~ '-' ~ code }}" id="{{ name }}"
+                             autocomplete="off" onchange="fillForm(this);"
+                             {% if loop.first %}checked{% endif %} />
 
                                <div class="plan-choice">
                                  <i class="far fa-check-circle fa-2x" style="color: green;"></i>
@@ -66,7 +70,7 @@
                                {{ name }}</br>
                                Valid Till: {{ validity }}</br>
                                &#8377 {{ price }}
-                      </label>
+                    </label>
                     {% endfor %}
                   </div>
                 </div> <!-- form-group -->
@@ -124,10 +128,14 @@
       $(elem).siblings("div").show();
       // change selected plan
       $("#chosen-plan-span").text($(elem).attr("id"));
-      // add GST
-      var totalPrice = (parseFloat($(elem).val()) * 1.18).toFixed(2).toString();
+      // add GST and add plan code
+      var arr = $(elem).val().split("-");
+      var price = arr[0];
+      var code = arr[1];
+      var totalPrice = (parseFloat(price) * 1.18).toFixed(2).toString();
       $("#total-price-span").text(totalPrice);
       $("#total-price-input").val(totalPrice);
+      $("#selected-plan-code").val(code);
   }
 
 </script>
