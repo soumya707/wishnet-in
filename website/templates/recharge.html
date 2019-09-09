@@ -1,3 +1,43 @@
 {% extends "layout.html" %}
+{% from "_macros.html" import render_field, render_submit %}
 
-{% block title %}Recharge{% endblock %}
+{% block title %}Self-care login{% endblock %}
+
+{% block content %}
+
+<div class="container p-3">
+
+  <h2 class="pb-3">Self-Care
+    <div class="heading-underline"></div>
+  </h2>
+
+  <div class="row border-top">
+
+    <div class="col-sm-4 bg-light-grey p-3">
+      <img class="sidebar-img p-1"
+           src="{{ url_for('static', filename='img/etc/portal.svg') }}">
+
+      <!-- OPTIONS -->
+      <div class="list-group">
+        <a class="list-group-item list-group-item-action" href="{{ url_for('portal') }}">Self-Care Info</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('recharge') }}">Add Plan / Recharge</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('docket') }}">Docket</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('usage') }}">Usage Details</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('transaction_history') }}">Online Transaction History</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('change_password') }}">Update Profile</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('logout') }}">Sign Out</a>
+      </div> <!-- list-group -->
+
+    </div> <!-- col -->
+
+    <div class="col-sm-8 p-3">
+      <!-- CUSTOMER INFO -->
+      <h3 class="py-2 text-red">Add Plan / Recharge</h3>
+
+    </div> <!-- col -->
+
+  </div> <!-- row -->
+
+</div> <!-- container -->
+
+{% endblock %}

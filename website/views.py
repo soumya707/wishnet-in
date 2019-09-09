@@ -750,8 +750,7 @@ def set_password():
 
 
 @app.route('/portal', methods=['GET'])
-@app.route('/portal/<action>')
-def portal(action=None):
+def portal():
     """Route for self-care portal."""
     # user not logged in
     if not session['user_logged_in']:
@@ -760,36 +759,105 @@ def portal(action=None):
 
     # user logged in
     elif session['user_logged_in']:
-        if action == 'recharge':
-            pass
-        elif action == 'docket':
-            pass
-        elif action == 'plan_change':
-            pass
-        else:
-            # Get customer info
-            user_info = GetCustomerInfo(app)
-            user_info.request(session['customer_no'])
-            user_info.response()
+        # Get customer info
+        user_info = GetCustomerInfo(app)
+        user_info.request(session['customer_no'])
+        user_info.response()
 
-            # store customer data in session
-            session['cust_data'] = user_info.to_dict()
+        # Get active plans
+        user_contracts = ContractsByKey(app)
+        user_contracts.request(session['customer_no'])
+        user_contracts.response()
 
-            return render_template(
-                'portal.html',
-                cust_data=user_info.to_dict(),
-            )
+        # user has active plans
+        if user_contracts.valid_user:
+            active_plans = {
+                plans.all_plans[plan][0]: validity
+                for (plan, validity) in
+                user_contracts.active_plans_with_validity if plan in
+                plans.all_plans
+            }
+        # user does not have active plans
+        elif not user_contracts.valid_user:
+            active_plans = None
+
+        # store customer data in session
+        session['cust_data'] = user_info.to_dict()
+
+        return render_template(
+            'portal.html',
+            cust_data=user_info.to_dict(),
+            active_plans=active_plans,
+        )
 
 
 # Portal actions
 
 @app.route('/portal/recharge')
-def portal_recharge():
+def recharge():
     """Route for self-care portal recharge."""
-    pass
+    # user not logged in
+    if not session['user_logged_in']:
+        flash('You have not logged in yet.', 'danger')
+        return redirect(url_for('login'))
+    # user logged in
+    elif session['user_logged_in']:
+        return render_template(
+            'recharge.html'
+        )
 
 
 @app.route('/portal/docket')
-def portal_docket():
+def docket():
     """Route for self-care portal docket."""
-    pass
+    # user not logged in
+    if not session['user_logged_in']:
+        flash('You have not logged in yet.', 'danger')
+        return redirect(url_for('login'))
+    # user logged in
+    elif session['user_logged_in']:
+        return render_template(
+            'docket.html'
+        )
+
+
+@app.route('/portal/usage')
+def usage():
+    """Route for self-care portal usage."""
+    # user not logged in
+    if not session['user_logged_in']:
+        flash('You have not logged in yet.', 'danger')
+        return redirect(url_for('login'))
+    # user logged in
+    elif session['user_logged_in']:
+        return render_template(
+            'usage.html'
+        )
+
+
+@app.route('/portal/transaction_history')
+def transaction_history():
+    """Route for self-care transaction history."""
+    # user not logged in
+    if not session['user_logged_in']:
+        flash('You have not logged in yet.', 'danger')
+        return redirect(url_for('login'))
+    # user logged in
+    elif session['user_logged_in']:
+        return render_template(
+            'transaction_history.html'
+        )
+
+
+@app.route('/portal/change_password')
+def change_password():
+    """Route for self-care portal password change."""
+    # user not logged in
+    if not session['user_logged_in']:
+        flash('You have not logged in yet.', 'danger')
+        return redirect(url_for('login'))
+    # user logged in
+    elif session['user_logged_in']:
+        return render_template(
+            'change_password.html'
+        )
