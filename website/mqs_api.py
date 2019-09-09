@@ -69,7 +69,7 @@ class Recharge(MQSAPI):
         self.txn_msg = None
         self.error_no = None
 
-    def request(self, cust_id):
+    def request(self, cust_id, plan):
         """Send request for TopUp."""
 
         topup_info_xml = '''
@@ -179,7 +179,9 @@ class ContractsByKey(MQSAPI):
         self.response_msg = None
         self.txn_no = None
         self.txn_msg = None
+        self.error_no = None
         self.valid_user = None
+        self.active_plans_with_validity = None
         self.active_plans = None
 
     def request(self, cust_id):
@@ -207,19 +209,31 @@ class ContractsByKey(MQSAPI):
 
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
+            self.error_no = res_tree.findtext('.//ERRORNO')
 
             # check if user is valid or not
-            if self.txn_msg == 'Success':
+            if self.error_no == '0':
                 self.valid_user = True
                 plans = [plan.text for plan in res_tree.iterfind('.//PlanCode')]
+                start_dates = [
+                    plan.text for plan in res_tree.iterfind('.//StartDate')
+                ]
                 end_dates = [
                     plan.text for plan in res_tree.iterfind('.//EndDate')
                 ]
+                fmt_fixed_start_dates = self._fix_date_fmt(start_dates)
                 fmt_fixed_end_dates = self._fix_date_fmt(end_dates)
+                validity = [
+                    ' - '.join(date) for date in
+                    zip(fmt_fixed_start_dates, fmt_fixed_end_dates)
+                ]
+                self.active_plans_with_validity = [
+                    entry for entry in zip(plans, validity)
+                ]
                 self.active_plans = [
                     entry for entry in zip(plans, fmt_fixed_end_dates)
                 ]
-            elif self.txn_msg == 'Failed':
+            else:
                 self.valid_user = False
 
     def _fix_date_fmt(self, dates):
