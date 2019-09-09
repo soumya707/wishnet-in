@@ -152,6 +152,26 @@ This will create all the necessary tables.
 
 Before you do anything else, it is necessary to generate a `admin` superuser so that you can create and update contents of the website. To generate the same head over to the webserver in the browser and append `/admin` to the end of the URL. This will open the admin portal and is customizable via the configurations.
 
+#### Default admin credentials
+
+By default, the application has the following admin credentials you can use to log in the admin portal:
+
+1. Superuser:
+
+``` text
+Username: websiteadmin@wnpl.co.in
+Password: w3bs1te@dm1n
+```
+
+2. Editor:
+
+``` text
+Username: websiteeditor@wnpl.co.in
+Password: w3bs1teed1t0r
+```
+
+These credentials won't work if you are setting up the database from scratch.
+
 ### Setting up the system for deployment
 
 To successfully run the application, make sure to install, configure and daemonize the following:
