@@ -3,6 +3,8 @@
 """Define helper functions for the application."""
 
 import csv
+import random
+import string
 from datetime import datetime
 from pathlib import Path
 
@@ -23,6 +25,11 @@ class AvailablePlans():
             next(plan_reader)
             # {plan_code: (plan_name, price)}
             return {row[2]: (row[0], row[3]) for row in plan_reader}
+
+
+def order_no_gen():
+    """Generate random order numbers."""
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=16))
 
 
 def generate_otp_secret(filepath):

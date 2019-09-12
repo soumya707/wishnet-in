@@ -32,7 +32,7 @@ app.config.from_pyfile('config.py')
 db = SQLAlchemy(app, query_class=CachingQuery)
 
 # setup Flask-Caching
-cache = Cache(app)
+CACHE = Cache(app)
 
 # setup Flask-Admin
 admin = Admin(
@@ -48,7 +48,7 @@ admin = Admin(
 migrate = Migrate(app, db)
 
 # Setup Passlib TOTP
-TotpFactory = TOTP.using(
+TOTPFACTORY = TOTP.using(
     period=270,
     secrets=retrieve_otp_secret('website/otp_secrets.csv')
 )
@@ -57,7 +57,7 @@ TotpFactory = TOTP.using(
 Session(app)
 
 # get available plans
-plans = AvailablePlans('website/plans_with_tariff.csv')
+PLANS = AvailablePlans('website/plans_with_tariff.csv')
 
 from website import views
 from website.models import (
@@ -69,8 +69,8 @@ from website.security.models import (
 
 
 # Setup Flask-Security
-user_datastore = SQLAlchemyUserDatastore(db, User, Role)
-security = Security(app, user_datastore)
+USER_DATASTORE = SQLAlchemyUserDatastore(db, User, Role)
+SECURITY = Security(app, USER_DATASTORE)
 
 
 path = op.join(op.dirname(__file__), 'static')
@@ -96,7 +96,7 @@ admin.add_view(EditorModelView(JobVacancy, db.session, category='Info'))
 
 # define a context processor for merging flask-admin's template context into the
 # flask-security views.
-@security.context_processor
+@SECURITY.context_processor
 def security_context_processor():
     """Use Flask-Admin's template."""
     return dict(

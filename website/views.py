@@ -15,24 +15,26 @@ from passlib.exc import MalformedTokenError, TokenError
 from passlib.hash import pbkdf2_sha256
 from sqlalchemy import or_
 
-from website import TotpFactory, app, cache, plans
+from website import PLANS, TOTPFACTORY, app, CACHE
 from website.forms import (
     ForgotPasswordForm, GetCustomerNumberForm, LoginForm, NewConnectionForm,
-    OTPVerificationForm, RechargeForm, RegistrationForm, SetPasswordForm)
+    OTPVerificationForm, RechargeForm, RegistrationForm, SetPasswordForm,
+    UpdateProfileForm)
 from website.models import (
     FAQ, BestPlans, CarouselImages, CustomerInfo, CustomerLogin, Downloads,
     JobVacancy, RechargeEntry, RegionalOffices, Services, Ventures)
 from website.mqs_api import (
-    AuthenticateUser, ContractsByKey, GetCustomerInfo, Recharge)
+    CloseTicket, ContractsByKey, GetCustomerInfo, Recharge, RegisterTicket)
 from website.paytm_utils import (
     initiate_transaction, verify_final_status, verify_transaction)
 from website.razorpay_utils import make_order, verify_signature
 from website.tasks import (
     add_new_connection_data_to_db, add_recharge_data_to_db,
     send_async_new_connection_mail)
+from website.utils import order_no_gen
 
 
-csrf = CSRFProtect(app)
+CSRF = CSRFProtect(app)
 
 
 @app.before_first_request
@@ -62,26 +64,26 @@ def index():
             # Get active plans for the user
             # {plan_name: (price, validity, plan_code)}
             active_plans = {
-                plans.all_plans[plan][0]: (
-                    plans.all_plans[plan][1], validity, plan
+                PLANS.all_plans[plan_code][0]: (
+                    PLANS.all_plans[plan_code][1], validity, plan_code
                 )
-                for plan, validity in user_contracts.active_plans
-                if plan in plans.all_plans
+                for (plan_code, validity) in user_contracts.active_plans
+                if plan_code in PLANS.all_plans
             }
 
             # Get customer info
-            user_info = GetCustomerInfo(app)
-            user_info.request(user)
-            user_info.response()
+            customer = CustomerInfo.query.filter_by(customer_no=user).first()
 
             session['active_plans'] = active_plans
-            session['cust_data'] = user_info.to_dict()
+            session['customer_no'] = customer.customer_no
+            session['customer_name'] = customer.customer_name
+            session['customer_mobile_no'] = customer.mobile_no
             session['order_id'] = user_contracts.ref_no
 
             return redirect(
                 url_for(
                     'payment',
-                    ref_no=user_contracts.ref_no,
+                    order_id=session['order_id'],
                 )
             )
         # user does not have active plans
@@ -97,10 +99,10 @@ def index():
             )
 
     # GET request
-    carousel_images = CarouselImages.query.options(FromCache(cache)).all()
-    services = Services.query.options(FromCache(cache)).all()
-    best_plans = BestPlans.query.options(FromCache(cache)).all()
-    downloads = Downloads.query.options(FromCache(cache)).all()
+    carousel_images = CarouselImages.query.options(FromCache(CACHE)).all()
+    services = Services.query.options(FromCache(CACHE)).all()
+    best_plans = BestPlans.query.options(FromCache(CACHE)).all()
+    downloads = Downloads.query.options(FromCache(CACHE)).all()
 
     return render_template(
         'index.html',
@@ -173,8 +175,8 @@ def get_cust_no():
     )
 
 
-@app.route('/payment/<ref_no>', methods=['GET', 'POST'])
-def payment(ref_no):
+@app.route('/payment/<order_id>', methods=['GET', 'POST'])
+def payment(order_id):
     """Route for payment."""
     if request.method == 'POST':
         # store amount in session
@@ -186,16 +188,18 @@ def payment(ref_no):
         if request.form['gateway'] == 'paytm':
             # Get Paytm form data
             form_data = initiate_transaction(
-                order_id=ref_no,
-                cust_info=session['cust_data'],
+                order_id=order_id,
+                customer_no=session['customer_no'],
+                customer_mobile_no=session['customer_mobile_no'],
                 amount=request.form['amount']
             )
 
         elif request.form['gateway'] == 'razorpay':
             # Get Razorpay form data
             form_data = make_order(
-                order_id=ref_no,
-                cust_info=session['cust_data'],
+                order_id=order_id,
+                customer_no=session['customer_no'],
+                customer_mobile_no=session['customer_mobile_no'],
                 amount=request.form['amount']
             )
 
@@ -207,24 +211,23 @@ def payment(ref_no):
     elif request.method == 'GET':
         return render_template(
             'payment.html',
-            cust_data=session.get('cust_data'),
-            active_plans=session.get('active_plans'),
+            customer_no=session['customer_no'],
+            customer_name=session['customer_name'],
+            active_plans=session['active_plans'],
         )
 
 
 @app.route('/verify/<gateway>', methods=['POST'])
-@csrf.exempt
+@CSRF.exempt
 def verify_response(gateway):
     """Route for verifying response for payment."""
     if request.method == 'POST':
-        # retrieve customer data
-        cust_data = session['cust_data']
         # check payment gateway
         # Paytm
         if gateway == 'paytm':
             # store response data
             recharge_data = {
-                'customer_no': cust_data['cust_no'],
+                'customer_no': session['customer_no'],
                 'wishnet_order_id': session['order_id'],
                 'payment_gateway': 'Paytm',
                 'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
@@ -248,11 +251,9 @@ def verify_response(gateway):
                     )
 
                     # TopUp in MQS
-                    customer_data = session['cust_data']
-
                     top_up = Recharge(app)
                     top_up.request(
-                        customer_data['cust_no'],
+                        session['customer_no'],
                         session['plan_code']
                     )
                     top_up.response()
@@ -314,7 +315,7 @@ def verify_response(gateway):
         elif gateway == 'razorpay':
             # store response data
             recharge_data = {
-                'customer_no': cust_data['cust_no'],
+                'customer_no': session['customer_no'],
                 'wishnet_order_id': session['order_id'],
                 'payment_gateway': 'Razorpay',
                 'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
@@ -330,11 +331,9 @@ def verify_response(gateway):
                 )
 
                 # TopUp in MQS
-                customer_data = session['cust_data']
-
                 top_up = Recharge(app)
                 top_up.request(
-                    customer_data['cust_no'],
+                    session['customer_no'],
                     session['plan_code']
                 )
                 top_up.response()
@@ -385,24 +384,25 @@ def verify_response(gateway):
         return redirect(
             url_for(
                 'receipt',
-                ref_no=session['order_id'],
+                order_id=session['order_id'],
                 status=status
             )
         )
 
 
-@app.route('/receipt/<ref_no>/<status>')
-def receipt(ref_no, status):
+@app.route('/receipt/<order_id>/<status>')
+def receipt(order_id, status):
     """Route to transaction receipt."""
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     return render_template(
         'receipt.html',
-        cust_data=session['cust_data'],
+        customer_no=session['customer_no'],
+        customer_name=session['customer_name'],
         amount=session['amount'],
         date_and_time=current_time,
         txn_status=status,
-        txn_no=ref_no,
+        txn_no=order_id,
     )
 
 
@@ -461,14 +461,14 @@ def new_conn():
 @app.route('/contact')
 def contact():
     """Route for contact."""
-    regional_offices = RegionalOffices.query.options(FromCache(cache)).all()
+    regional_offices = RegionalOffices.query.options(FromCache(CACHE)).all()
     return render_template('contact.html', regional_offices=regional_offices)
 
 
 @app.route('/support')
 def support():
     """Route for support."""
-    faq = FAQ.query.options(FromCache(cache)).all()
+    faq = FAQ.query.options(FromCache(CACHE)).all()
     categories = {item.category for item in faq}
     return render_template('support.html', categories=categories, items=faq)
 
@@ -477,14 +477,14 @@ def support():
 def career():
     """Route for career."""
     items = JobVacancy.query.filter_by(status='Active')\
-                            .options(FromCache(cache)).all()
+                            .options(FromCache(CACHE)).all()
     return render_template('careers.html', items=items)
 
 
 @app.route('/about')
 def about():
     """Route for about us."""
-    ventures = Ventures.query.options(FromCache(cache)).all()
+    ventures = Ventures.query.options(FromCache(CACHE)).all()
     return render_template('about.html', ventures=ventures)
 
 
@@ -521,7 +521,7 @@ def login():
                 session['user_logged_in'] = True
                 redirect_to = 'portal'
                 # store customer number in session
-                session['customer_no'] = customer.customer_no
+                session['portal_customer_no'] = customer.customer_no
             else:
                 redirect_to = 'login'
                 flash(
@@ -567,6 +567,13 @@ def logout():
         flash('You have been successfully logged out.', 'success')
         # revoke session entry
         session['user_logged_in'] = False
+        # remove portal customer data storage
+        session.pop('portal_customer_no', None)
+        session.pop('portal_customer_data', None)
+        session.pop('portal_active_plans', None)
+        session.pop('portal_inactive_plans', None)
+        session.pop('portal_available_plans', None)
+        session.pop('portal_order_no', None)
     # user not logged in (invalid access to route)
     elif not session['user_logged_in']:
         flash('You are not logged in yet.', 'danger')
@@ -596,7 +603,7 @@ def register():
         elif customer is not None and customer.password_hash is None:
             # TODO: add sms api for sending otp
             # generate OTP
-            totp = TotpFactory.new()
+            totp = TOTPFACTORY.new()
             session['otp_data'] = totp.to_dict()
 
             session['customer_no'] = form.customer_no.data
@@ -684,7 +691,7 @@ def verify_otp():
         redirect_to = None
 
         # Verify OTP
-        totp = TotpFactory.from_dict(session['otp_data'])
+        totp = TOTPFACTORY.from_dict(session['otp_data'])
 
         try:
             totp.verify(str(otp), totp)
@@ -752,41 +759,40 @@ def portal():
 
     # user logged in
     elif session['user_logged_in']:
-        # Get customer info
-        user_info = GetCustomerInfo(app)
-        user_info.request(session['customer_no'])
-        user_info.response()
+        # check if session variable exists for customer data
+        if not session.get('portal_customer_data'):
+            # Get customer info
+            user_info = GetCustomerInfo(app)
+            user_info.request(session['portal_customer_no'])
+            user_info.response()
+            # add customer data to session for quick access
+            session['portal_customer_data'] = user_info.to_dict()
 
-        # Get active plans
-        user_contracts = ContractsByKey(app)
-        user_contracts.request(session['customer_no'])
-        user_contracts.response()
-
-        # user has active plans
-        if user_contracts.valid_user:
+        # check if session variable exists for active plans
+        if not session.get('portal_active_plans'):
+            user_data = session['portal_customer_data']
+            # get active plans
+            # {plan_name: (price, validity, plan_code) }
             active_plans = {
-                plans.all_plans[plan][0]: validity
-                for (plan, validity) in
-                user_contracts.active_plans_with_validity if plan in
-                plans.all_plans
+                PLANS.all_plans[plan_code][0]: (
+                    PLANS.all_plans[plan_code][1], validity, plan_code
+                )
+                for (_, plan_code, validity) in user_data['active_plans']
+                if plan_code in PLANS.all_plans
             }
-        # user does not have active plans
-        elif not user_contracts.valid_user:
-            active_plans = None
-
-        # store customer data in session
-        session['cust_data'] = user_info.to_dict()
+            # store in session variable
+            session['portal_active_plans'] = active_plans
 
         return render_template(
             'portal.html',
-            cust_data=user_info.to_dict(),
-            active_plans=active_plans,
+            cust_data=session['portal_customer_data'],
+            active_plans=session['portal_active_plans'],
         )
 
 
 # Portal actions
 
-@app.route('/portal/recharge')
+@app.route('/portal/recharge', methods=['GET', 'POST'])
 def recharge():
     """Route for self-care portal recharge."""
     # user not logged in
@@ -795,8 +801,90 @@ def recharge():
         return redirect(url_for('login'))
     # user logged in
     elif session['user_logged_in']:
+        if request.method == 'POST':
+            # store amount in session
+            session['portal_amount'] = request.form['amount']
+            # store selected plan code in session
+            session['portal_plan_code'] = request.form['plan_code']
+            # generate and store a transaction id
+            session['portal_order_no'] = order_no_gen()
+
+            # retrieve customer data
+            customer_data = session['portal_customer_data']
+
+            # Check payment gateway
+            if request.form['gateway'] == 'paytm':
+                # Get Paytm form data
+                form_data = initiate_transaction(
+                    order_id=session['portal_order_no'],
+                    customer_no=session['portal_customer_no'],
+                    customer_mobile_no=customer_data['contact_no'],
+                    amount=session['portal_amount']
+                )
+
+            elif request.form['gateway'] == 'razorpay':
+                # Get Razorpay form data
+                form_data = make_order(
+                    order_id=session['portal_order_no'],
+                    customer_no=session['portal_customer_no'],
+                    customer_mobile_no=customer_data['contact_no'],
+                    amount=session['portal_amount']
+                )
+
+            return render_template(
+                '{}_pay.html'.format(request.form['gateway']),
+                form=form_data,
+            )
+
+        elif request.method == 'GET':
+            # check if session variable exists for inactive plans
+            if not session.get('portal_inactive_plans'):
+                user_data = session['portal_customer_data']
+                # get inactive plans
+                # {plan_name: (price, validity, plan_code) }
+                inactive_plans = {
+                    PLANS.all_plans[plan_code][0]: (
+                        PLANS.all_plans[plan_code][1], validity, plan_code
+                    )
+                    for (_, plan_code, validity) in user_data['inactive_plans']
+                    if plan_code in PLANS.all_plans
+                }
+                # store in session variable
+                session['portal_inactive_plans'] = inactive_plans
+
+            return render_template(
+                'recharge.html',
+                active_plans=session['portal_active_plans'],
+                inactive_plans=session['portal_inactive_plans'],
+            )
+
+
+@app.route('/portal/add_plan')
+def add_plan():
+    """Route for self-care portal add plan."""
+    # user not logged in
+    if not session['user_logged_in']:
+        flash('You have not logged in yet.', 'danger')
+        return redirect(url_for('login'))
+    # user logged in
+    elif session['user_logged_in']:
+        # check if session variable exists for available plans
+        if not session.get('portal_available_plans'):
+            user_data = session['portal_customer_data']
+            # get available plans
+            # {plan_name: (price, plan_code) }
+            available_plan_codes = set(PLANS.all_plans.keys()).\
+                difference(user_data['all_plans'])
+            available_plans = {
+                PLANS.all_plans[plan_code][0]: (
+                    PLANS.all_plans[plan_code][1], plan_code
+                )
+                for plan_code in available_plan_codes
+            }
+
         return render_template(
-            'recharge.html'
+            'add_plan.html',
+            available_plans=available_plans,
         )
 
 
@@ -837,12 +925,17 @@ def transaction_history():
         return redirect(url_for('login'))
     # user logged in
     elif session['user_logged_in']:
+        # retrieve data from db
+        transactions = RechargeEntry.query.filter_by(
+            customer_no=session['portal_customer_no']
+        ).all()
         return render_template(
-            'transaction_history.html'
+            'transaction_history.html',
+            transactions=transactions,
         )
 
 
-@app.route('/portal/change_password')
+@app.route('/portal/change_password', methods=['GET', 'POST'])
 def change_password():
     """Route for self-care portal password change."""
     # user not logged in
@@ -851,6 +944,49 @@ def change_password():
         return redirect(url_for('login'))
     # user logged in
     elif session['user_logged_in']:
+        form = UpdateProfileForm()
+
+        if form.validate_on_submit():
+            customer = CustomerLogin.query.filter_by(
+                customer_no=session['portal_customer_no']
+            ).first()
+
+            # verify old password
+            pwd_verified = pbkdf2_sha256.verify(
+                str(form.old_password.data),
+                customer.password_hash
+            )
+
+            # if old password is verified
+            if pwd_verified:
+                # check if the old and new passwords are same
+                if form.old_password.data == form.new_password.data:
+                    flash(
+                        'You can\'t use your old password as the new one.'
+                        , 'danger'
+                    )
+                else:
+                    # generate new hashed password and store
+                    hashed_pwd = pbkdf2_sha256.hash(str(form.new_password.data))
+                    customer.password_hash = hashed_pwd
+
+                    # make synchronous call to save password
+                    db = current_app.extensions['sqlalchemy'].db
+                    db.session.add(customer)
+                    db.session.commit()
+
+                    flash('Password saved successfully!', 'success')
+            # old password is incorrect
+            else:
+                flash(
+                    'Old password entered is incorrect, please try again.'
+                    , 'danger'
+                )
+
+            return redirect(url_for('change_password'))
+
+        # GET request
         return render_template(
-            'change_password.html'
+            'change_password.html',
+            form=form,
         )
