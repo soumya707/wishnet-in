@@ -8,7 +8,7 @@ import requests
 from website import app
 
 
-def make_order(order_id, cust_info, amount):
+def make_order(order_id, customer_no, customer_mobile_no, amount):
     """Generate an order from Razorpay."""
 
     post_data = {
@@ -16,7 +16,7 @@ def make_order(order_id, cust_info, amount):
         'currency': 'INR',
         'receipt': order_id,
         'payment_capture': '1',
-        'notes': {'cust_no': str(cust_info['cust_no'])}
+        'notes': {'customer_no': customer_no},
     }
 
     order_resp = requests.post(
@@ -32,8 +32,7 @@ def make_order(order_id, cust_info, amount):
         'key_id': app.config['RAZORPAY_KEY'],
         'name': 'Wish Net Pvt. Ltd.',
         'order_id': razorpay_order_id,
-        'prefill[email]': cust_info.get('email'),
-        'prefill[contact]': cust_info.get('contact_no'),
+        'prefill[contact]': customer_mobile_no,
         'callback_url': app.config['RAZORPAY_CALLBACKURL'],
     }
 
