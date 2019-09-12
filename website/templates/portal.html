@@ -1,91 +1,62 @@
-{% extends "layout.html" %}
-{% from "_macros.html" import render_field, render_submit %}
+{% extends "self_care_layout.html" %}
 
-{% block title %}Self-care login{% endblock %}
+{% block title %}Self-care portal{% endblock %}
 
-{% block content %}
+{% block portal_content %}
 
-<div class="container p-3">
+<div class="col-sm-8 p-3">
 
-  <h2 class="pb-3">Self-Care
-    <div class="heading-underline"></div>
-  </h2>
+  <h3 class="py-2 text-red">Customer Info</h3>
 
-  <div class="row border-top">
+  <!-- CUSTOMER INFO -->
+  <table class="table table-striped table-bordered">
+    <tbody>
+      <!-- CUSTOMER NAME -->
+      <tr>
+        <th scope="row">Customer Name</th>
+        <td>{{ cust_data.name }}</td>
+      </tr>
+      <!-- CUSTOMER ADDRESS -->
+      <tr>
+        <th scope="row">Address</th>
+        <td>{{ cust_data.address }}</td>
+      </tr>
+      <!-- CUSTOMER CONTACT NUMBER -->
+      <tr>
+        <th scope="row">Mobile number</th>
+        <td>{{ cust_data.contact_no }}</td>
+      </tr>
+      <!-- CUSTOMER EMAIL ADDRESS -->
+      <tr>
+        <th scope="row">E-mail Address</th>
+        <td>{{ cust_data.email }}</td>
+      </tr>
+      <!-- CUSTOMER PARTNER -->
+      <tr>
+        <th scope="row">LCO</th>
+        <td>{{ cust_data.partner }}</td>
+      </tr>
+    </tbody>
+  </table>
 
-    <div class="col-sm-4 bg-light-grey p-3">
-      <img class="sidebar-img p-1"
-           src="{{ url_for('static', filename='img/etc/portal.svg') }}">
+  <!-- ACTIVE PLANS -->
+  <h3 class="py-2 text-red">Active Plans</h3>
 
-      <!-- OPTIONS -->
-      <div class="list-group">
-        <a class="list-group-item list-group-item-action" href="{{ url_for('portal') }}">Self-Care Info</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('recharge') }}">Add Plan / Recharge</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('docket') }}">Docket</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('usage') }}">Usage Details</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('transaction_history') }}">Online Transaction History</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('change_password') }}">Update Profile</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('logout') }}">Sign Out</a>
-      </div> <!-- list-group -->
+  {% if not active_plans %}
+  <h5 class="py-4 text-red">You don't have any active plans.</h5>
+  {% elif active_plans %}
+  <table class="table table-striped table-bordered">
+    <tbody>
+      {% for name, (_, validity, _) in active_plans.items() %}
+      <tr scope="row">
+        <th>{{ name }}</th>
+        <td>Validity: {{ validity }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
 
-    </div> <!-- col -->
-
-    <div class="col-sm-8 p-3">
-      <!-- CUSTOMER INFO -->
-      <h3 class="py-2 text-red">Customer Info</h3>
-
-      <table class="table table-striped table-bordered">
-          </tr>
-          <!-- CUSTOMER NAME -->
-          <tr>
-            <th scope="row">Customer Name</th>
-            <td>{{ cust_data.name }}</td>
-          </tr>
-          <!-- CUSTOMER ADDRESS -->
-          <tr>
-            <th scope="row">Address</th>
-            <td>{{ cust_data.address }}</td>
-          </tr>
-          <!-- CUSTOMER CONTACT NUMBER -->
-          <tr>
-            <th scope="row">Mobile number</th>
-            <td>{{ cust_data.contact_no }}</td>
-          </tr>
-          <!-- CUSTOMER EMAIL ADDRESS -->
-          <tr>
-            <th scope="row">E-mail Address</th>
-            <td>{{ cust_data.email }}</td>
-          </tr>
-          <!-- CUSTOMER PARTNER -->
-          <tr>
-            <th scope="row">LCO</th>
-            <td>{{ cust_data.partner }}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- ACTIVE PLANS -->
-      <h3 class="py-2 text-red">Active Plans</h3>
-
-      {% if not active_plans %}
-      <h5 class="py-4 text-red">You don't have any active plans.</h5>
-      {% elif active_plans %}
-      <table class="table table-striped table-bordered">
-        <tbody>
-          {% for name, validity in active_plans.items() %}
-          <tr scope="row">
-            <th>{{ name }}</th>
-            <td>Validity: {{ validity }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% endif %}
-
-    </div> <!-- col -->
-
-  </div> <!-- row -->
-
-</div> <!-- container -->
+</div> <!-- col -->
 
 {% endblock %}

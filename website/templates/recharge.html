@@ -1,43 +1,142 @@
-{% extends "layout.html" %}
-{% from "_macros.html" import render_field, render_submit %}
+{% extends "self_care_layout.html" %}
 
-{% block title %}Self-care login{% endblock %}
+{% block title %}Self-care recharge{% endblock %}
 
-{% block content %}
+{% block portal_content %}
 
-<div class="container p-3">
+<div class="col-sm-8 p-3">
 
-  <h2 class="pb-3">Self-Care
-    <div class="heading-underline"></div>
-  </h2>
+  <h3 class="py-2 text-red">Recharge</h3>
 
-  <div class="row border-top">
+  <form method="POST" id="payment-form">
+    <!-- CSRF token -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <!-- Selected plan code -->
+    <input type="hidden" name="amount" value="" id="selected-plan-code">
+    <!-- Transaction amount -->
+    <input type="hidden" name="plan_code" value="" id="total-price-input">
 
-    <div class="col-sm-4 bg-light-grey p-3">
-      <img class="sidebar-img p-1"
-           src="{{ url_for('static', filename='img/etc/portal.svg') }}">
+    <h4 class="py-2">Active Plans</h4>
+    <!-- ACTIVE PLAN TABLE -->
+    <!-- conditional viewing of content here -->
+    {% if not active_plans %}
+    <h5 class="py-4 text-red">You don't have any active plans.</h5>
+    {% elif active_plans %}
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          <th scope="col">Plan Name</th>
+          <th scope="col">Validity</th>
+          <th scope="col">Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for name, (price, validity, code) in active_plans.items() %}
+        <tr scope="row">
+          <td>
+            <input type="radio"
+                   name="plan" value="{{ price ~ '-' ~ code }}" id="{{ name }}"
+                   autocomplete="off" onchange="fillForm(this);"
+                   {% if loop.first %}checked{% endif %}>
+          </td>
+          <td>{{ name }}</td>
+          <td>{{ validity }}</td>
+          <td>&#8377 {{ price }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
 
-      <!-- OPTIONS -->
-      <div class="list-group">
-        <a class="list-group-item list-group-item-action" href="{{ url_for('portal') }}">Self-Care Info</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('recharge') }}">Add Plan / Recharge</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('docket') }}">Docket</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('usage') }}">Usage Details</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('transaction_history') }}">Online Transaction History</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('change_password') }}">Update Profile</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('logout') }}">Sign Out</a>
-      </div> <!-- list-group -->
+    <h4 class="py-2">Inactive Plans</h4>
+    <!-- INACTIVE PLAN TABLE -->
+    {% if not inactive_plans %}
+    <h5 class="py-4 text-red">You don't have any inactive plans.</h5>
+    {% elif inactive_plans %}
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          <th scope="col">Plan Name</th>
+          <th scope="col">Validity</th>
+          <th scope="col">Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for name, (price, validity, code) in inactive_plans.items() %}
+        <tr scope="row">
+          <td>
+            <input type="radio"
+                   name="plan" value="{{ price ~ '-' ~ code }}" id="{{ name }}"
+                   autocomplete="off" onchange="fillForm(this);">
+          </td>
+          <td>{{ name }}</td>
+          <td>{{ validity }}</td>
+          <td>&#8377 {{ price }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
 
-    </div> <!-- col -->
+    <!-- PAYMENT -->
+    <h3 class="py-2 text-red">Payment</h3>
 
-    <div class="col-sm-8 p-3">
-      <!-- CUSTOMER INFO -->
-      <h3 class="py-2 text-red">Add Plan / Recharge</h3>
+    <p>Selected Plan: <span class="text-red" id="chosen-plan-span"><span></p>
+    <p>Total Price (18% GST): <span class="text-red">&#8377 <span id="total-price-span"></span></span></p>
 
-    </div> <!-- col -->
+    <!-- PAYMENT GATEWAY -->
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="gateway" id="paytm-gateway"
+             value="paytm" form="payment-form" checked>
+      <label class="form-check-label pt-1" for="paytm-gateway">
+        Paytm
+      </label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="gateway" id="razorpay-gateway"
+             value="razorpay" form="payment-form">
+      <label class="form-check-label pt-1" for="razorpay-gateway">
+        Razorpay
+      </label>
+    </div>
+    <!-- PAY -->
+    <div class="pt-3">
+      <input type="submit" class="btn btn-red" name="pay" value="Pay"
+             form="payment-form">
+    </div>
 
-  </div> <!-- row -->
+  </form>
 
-</div> <!-- container -->
+</div> <!-- col -->
+
+{% endblock %}
+
+{% block scripts %}
+
+{{ super() }}
+
+<script>
+
+  $(document).ready(function() {
+      fillForm('input[name=plan]:checked');
+  });
+
+  function fillForm(elem) {
+      // change selected plan
+      $("#chosen-plan-span").text($(elem).attr("id"));
+      // add GST to selected plan and set total price
+      var arr = $(elem).val().split("-");
+      var price = arr[0];
+      var code = arr[1];
+      var totalPrice = (parseFloat(price) * 1.18).toFixed(2).toString();
+      // fill hidden fields for selected plan code and price
+      $("#selected-plan-code").val(code);
+      $("#total-price-input").val(totalPrice);
+      $("#total-price-span").text(totalPrice);
+  }
+
+</script>
 
 {% endblock %}

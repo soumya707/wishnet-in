@@ -1,43 +1,43 @@
-{% extends "layout.html" %}
-{% from "_macros.html" import render_field, render_submit %}
+{% extends "self_care_layout.html" %}
 
-{% block title %}Self-care login{% endblock %}
+{% block title %}Self-care transaction history{% endblock %}
 
-{% block content %}
+{% block portal_content %}
 
-<div class="container p-3">
+<div class="col-sm-8 p-3">
 
-  <h2 class="pb-3">Self-Care
-    <div class="heading-underline"></div>
-  </h2>
+  <h3 class="py-2 text-red">Online Transaction History</h3>
 
-  <div class="row border-top">
+  <!-- ONLINE TRANSACTION HISTORY -->
+  {% if not transactions %}
+  <h5 class="py-4 text-red">You don't have any online transactions.</h5>
+  {% elif transactions %}
+  <table class="table table-striped table-bordered table-responsive">
+    <thead>
+      <tr>
+        <th scope="col">Transaction no.</th>
+        <th scope="col">Date</th>
+        <th scope="col">Gateway</th>
+        <th scope="col">Gateway transaction no.</th>
+        <th scope="col">Amount</th>
+        <th scope="col">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for transaction in transactions %}
+      <tr scope="row">
+        <td>{{ transaction.wishnet_payment_order_id }}</td>
+        <td>{{ transaction.payment_datetime }}</td>
+        <td>{{ transaction.payment_gateway }}</td>
+        <td>{{ transaction.payment_gateway_order_id }}</td>
+        <td>{{ transaction.payment_amount }}</td>
+        <td>{{ transaction.payment_status }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
 
-    <div class="col-sm-4 bg-light-grey p-3">
-      <img class="sidebar-img p-1"
-           src="{{ url_for('static', filename='img/etc/portal.svg') }}">
-
-      <!-- OPTIONS -->
-      <div class="list-group">
-        <a class="list-group-item list-group-item-action" href="{{ url_for('portal') }}">Self-Care Info</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('recharge') }}">Add Plan / Recharge</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('docket') }}">Docket</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('usage') }}">Usage Details</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('transaction_history') }}">Online Transaction History</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('change_password') }}">Update Profile</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('logout') }}">Sign Out</a>
-      </div> <!-- list-group -->
-
-    </div> <!-- col -->
-
-    <div class="col-sm-8 p-3">
-      <!-- CUSTOMER INFO -->
-      <h3 class="py-2 text-red">Online Transaction History</h3>
-
-    </div> <!-- col -->
-
-  </div> <!-- row -->
-
-</div> <!-- container -->
+</div> <!-- col -->
 
 {% endblock %}

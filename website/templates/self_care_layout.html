@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="container p-3">
+
+  <h2 class="pb-3">Self-Care
+    <div class="heading-underline"></div>
+  </h2>
+
+  <div class="row border-top">
+
+    <div class="col-sm-4 bg-light-grey p-3">
+      <img class="sidebar-img p-1"
+           src="{{ url_for('static', filename='img/etc/portal.svg') }}">
+
+      <!-- OPTIONS -->
+      <div class="list-group">
+        <a class="list-group-item list-group-item-action outline"
+           href="{{ url_for('portal') }}">
+          <i class="fas fa-info-circle pl-1"></i>
+          <span class="pl-1">Self-Care Info</span>
+        </a>
+        <a class="list-group-item list-group-item-action outline"
+           href="{{ url_for('recharge') }}">
+          <i class="fas fa-wallet pl-1"></i>
+          <span class="pl-1">Recharge</span>
+        </a>
+        <a class="list-group-item list-group-item-action outline"
+           href="{{ url_for('add_plan') }}">
+          <i class="fas fa-plus-square pl-1"></i>
+          <span class="pl-1">Add Plan</span>
+        </a>
+        <a class="list-group-item list-group-item-action outline"
+           href="{{ url_for('docket') }}">
+          <i class="fas fa-ticket-alt pl-1"></i>
+          <span class="pl-1">Docket</span>
+        </a>
+        <a class="list-group-item list-group-item-action outline"
+           href="{{ url_for('usage') }}">
+          <i class="fas fa-chart-pie pl-1"></i>
+          <span class="pl-1">Usage Details</span>
+        </a>
+        <a class="list-group-item list-group-item-action outline"
+           href="{{ url_for('transaction_history') }}">
+          <i class="fas fa-file-invoice-dollar pl-1"></i>
+          <span class="pl-1">Online Transaction History</span>
+        </a>
+        <a class="list-group-item list-group-item-action outline"
+           href="{{ url_for('change_password') }}">
+          <i class="fas fa-user-edit pl-1"></i>
+          <span class="pl-1">Update Profile</span>
+        </a>
+        <a class="list-group-item list-group-item-action outline"
+           href="{{ url_for('logout') }}">
+          <i class="fas fa-sign-out-alt pl-1"></i>
+            <span class="pl-1">Sign Out</span>
+        </a>
+      </div> <!-- list-group -->
+
+    </div> <!-- col -->
+
+    {% block portal_content %}{% endblock %}
+
+  </div> <!-- row -->
+
+</div> <!-- container -->
+
+{% endblock %}
