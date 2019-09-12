@@ -120,3 +120,18 @@ class SetPasswordForm(FlaskForm):
     ])
     confirm = PasswordField('Repeat Password')
     submit = SubmitField('Set New Password')
+
+
+class UpdateProfileForm(FlaskForm):
+    """Class for updating profile form."""
+    old_password = PasswordField('Old Password', validators=[
+        InputRequired(),
+    ])
+    new_password = PasswordField('New Password', validators=[
+        InputRequired(),
+        EqualTo('confirm', message='New passwords must match')
+    ])
+    confirm = PasswordField('Repeat new password', validators=[
+        InputRequired(),
+    ])
+    submit = SubmitField('Set New Password')
