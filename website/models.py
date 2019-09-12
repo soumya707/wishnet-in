@@ -253,6 +253,7 @@ class CustomerInfo(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     customer_no = db.Column(db.String(100), nullable=False)
+    customer_name = db.Column(db.String(400), nullable=False)
     user_name = db.Column(db.String(20), nullable=False)
     mobile_no = db.Column(db.String(15), nullable=True)
     ip_addr = db.Column(db.String(20), nullable=True)
