@@ -647,7 +647,7 @@ def forgot():
         if customer is not None and customer.password_hash is not None:
             # TODO: add sms api for sending otp
             # generate OTP
-            totp = TotpFactory.new()
+            totp = TOTPFACTORY.new()
             session['otp_data'] = totp.to_dict()
 
             session['customer_no'] = form.customer_no.data
