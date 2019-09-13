@@ -74,16 +74,16 @@ def index():
             # Get customer info
             customer = CustomerInfo.query.filter_by(customer_no=user).first()
 
-            session['active_plans'] = active_plans
-            session['customer_no'] = customer.customer_no
-            session['customer_name'] = customer.customer_name
-            session['customer_mobile_no'] = customer.mobile_no
-            session['order_id'] = user_contracts.ref_no
+            session['insta_active_plans'] = active_plans
+            session['insta_customer_no'] = customer.customer_no
+            session['insta_customer_name'] = customer.customer_name
+            session['insta_customer_mobile_no'] = customer.mobile_no
+            session['insta_order_id'] = user_contracts.ref_no
 
             return redirect(
                 url_for(
-                    'payment',
-                    order_id=session['order_id'],
+                    'insta_recharge',
+                    order_id=session['insta_order_id'],
                 )
             )
         # user does not have active plans
@@ -141,8 +141,8 @@ def get_cust_no():
             #TODO: add SMS API
             flash(
                 (
-                    'Customer Number: {} has been sent to your Registered Mobile '
-                    'Number.'
+                    'Customer number: {} has been sent to your registered '
+                    'mobile number.'
                 ).format(customer.customer_no)
                 , 'success'
             )
@@ -175,22 +175,22 @@ def get_cust_no():
     )
 
 
-@app.route('/payment/<order_id>', methods=['GET', 'POST'])
-def payment(order_id):
-    """Route for payment."""
+@app.route('/insta_recharge/<order_id>', methods=['GET', 'POST'])
+def insta_recharge(order_id):
+    """Route for insta-recharge."""
     if request.method == 'POST':
         # store amount in session
-        session['amount'] = request.form['amount']
+        session['insta_amount'] = request.form['amount']
         # store selected plan code in session
-        session['plan_code'] = request.form['plan_code']
+        session['insta_plan_code'] = request.form['plan_code']
 
         # Check payment gateway
         if request.form['gateway'] == 'paytm':
             # Get Paytm form data
             form_data = initiate_transaction(
                 order_id=order_id,
-                customer_no=session['customer_no'],
-                customer_mobile_no=session['customer_mobile_no'],
+                customer_no=session['insta_customer_no'],
+                customer_mobile_no=session['insta_customer_mobile_no'],
                 amount=request.form['amount']
             )
 
@@ -198,8 +198,8 @@ def payment(order_id):
             # Get Razorpay form data
             form_data = make_order(
                 order_id=order_id,
-                customer_no=session['customer_no'],
-                customer_mobile_no=session['customer_mobile_no'],
+                customer_no=session['insta_customer_no'],
+                customer_mobile_no=session['insta_customer_mobile_no'],
                 amount=request.form['amount']
             )
 
@@ -210,10 +210,10 @@ def payment(order_id):
 
     elif request.method == 'GET':
         return render_template(
-            'payment.html',
-            customer_no=session['customer_no'],
-            customer_name=session['customer_name'],
-            active_plans=session['active_plans'],
+            'insta_recharge.html',
+            customer_no=session['insta_customer_no'],
+            customer_name=session['insta_customer_name'],
+            active_plans=session['insta_active_plans'],
         )
 
 
@@ -227,8 +227,8 @@ def verify_response(gateway):
         if gateway == 'paytm':
             # store response data
             recharge_data = {
-                'customer_no': session['customer_no'],
-                'wishnet_order_id': session['order_id'],
+                'customer_no': session['insta_customer_no'],
+                'wishnet_order_id': session['insta_order_id'],
                 'payment_gateway': 'Paytm',
                 'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
             }
@@ -240,7 +240,9 @@ def verify_response(gateway):
             if verified:
                 recharge_data.update(txn_order_id=request.form['TXNID'])
                 # final status verification
-                final_status_code = verify_final_status(session['order_id'])
+                final_status_code = verify_final_status(
+                    session['insta_order_id']
+                )
 
                 # check if transaction successful
                 if final_status_code == '01':
@@ -253,8 +255,8 @@ def verify_response(gateway):
                     # TopUp in MQS
                     top_up = Recharge(app)
                     top_up.request(
-                        session['customer_no'],
-                        session['plan_code']
+                        session['insta_customer_no'],
+                        session['insta_plan_code']
                     )
                     top_up.response()
 
@@ -315,8 +317,8 @@ def verify_response(gateway):
         elif gateway == 'razorpay':
             # store response data
             recharge_data = {
-                'customer_no': session['customer_no'],
-                'wishnet_order_id': session['order_id'],
+                'customer_no': session['insta_customer_no'],
+                'wishnet_order_id': session['insta_order_id'],
                 'payment_gateway': 'Razorpay',
                 'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
             }
@@ -326,15 +328,15 @@ def verify_response(gateway):
             if verified:
                 recharge_data.update(
                     txn_order_id=request.form['razorpay_order_id'],
-                    txn_amount=session['amount'],
+                    txn_amount=session['insta_amount'],
                     txn_status='SUCCESS',
                 )
 
                 # TopUp in MQS
                 top_up = Recharge(app)
                 top_up.request(
-                    session['customer_no'],
-                    session['plan_code']
+                    session['insta_customer_no'],
+                    session['insta_plan_code']
                 )
                 top_up.response()
 
@@ -384,7 +386,7 @@ def verify_response(gateway):
         return redirect(
             url_for(
                 'receipt',
-                order_id=session['order_id'],
+                order_id=session['insta_order_id'],
                 status=status
             )
         )
@@ -397,9 +399,9 @@ def receipt(order_id, status):
 
     return render_template(
         'receipt.html',
-        customer_no=session['customer_no'],
-        customer_name=session['customer_name'],
-        amount=session['amount'],
+        customer_no=session['insta_customer_no'],
+        customer_name=session['insta_customer_name'],
+        amount=session['insta_amount'],
         date_and_time=current_time,
         txn_status=status,
         txn_no=order_id,
