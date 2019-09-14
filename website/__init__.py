@@ -62,7 +62,8 @@ PLANS = AvailablePlans('website/plans_with_tariff.csv')
 from website import views
 from website.models import (
     BestPlans, CarouselImages, Downloads, JobVacancy, FAQ, RegionalOffices,
-    Services, Ventures, BizPlan, FUPPlan, FTTHPlan, UnlimitedPlan)
+    Services, Ventures, BizPlan, FUPPlan, FTTHPlan, UnlimitedPlan,
+    NewConnectionAvailableLocations)
 from website.security.models import Role, User
 from website.security.models import (
     CustomFileView, EditorModelView, SuperuserModelView)
@@ -92,6 +93,9 @@ admin.add_view(EditorModelView(FUPPlan, db.session, category='Plans'))
 admin.add_view(EditorModelView(RegionalOffices, db.session, category='Info'))
 admin.add_view(EditorModelView(FAQ, db.session, category='Info'))
 admin.add_view(EditorModelView(JobVacancy, db.session, category='Info'))
+admin.add_view(EditorModelView(
+    NewConnectionAvailableLocations, db.session, category='New Connection')
+)
 
 
 # define a context processor for merging flask-admin's template context into the

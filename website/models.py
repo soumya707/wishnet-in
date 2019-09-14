@@ -158,7 +158,19 @@ class Ventures(db.Model):
     pic = db.Column(db.String(20), nullable=False)
 
 
-# New Connection form model
+
+# New Connection available locations
+class NewConnectionAvailableLocations(db.Model):
+    """Class for representing the locations available for new connection."""
+
+    __bind_key__ = 'connection'
+
+    id = db.Column(db.Integer, primary_key=True)
+    location = db.Column(db.String(20), unique=True, nullable=False)
+
+    def __str__(self):
+        return self.location
+
 class NewConnection(db.Model):
     """Class for representing the already existing new connection info."""
 

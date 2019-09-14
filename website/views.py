@@ -22,7 +22,8 @@ from website.forms import (
     UpdateProfileForm)
 from website.models import (
     FAQ, BestPlans, CarouselImages, CustomerInfo, CustomerLogin, Downloads,
-    JobVacancy, RechargeEntry, RegionalOffices, Services, Ventures)
+    JobVacancy, RechargeEntry, RegionalOffices, Services, Ventures,
+    NewConnectionAvailableLocations)
 from website.mqs_api import (
     CloseTicket, ContractsByKey, GetCustomerInfo, Recharge, RegisterTicket)
 from website.paytm_utils import (
@@ -406,6 +407,13 @@ def tariff():
 def new_conn():
     """Route for new connection."""
     form = NewConnectionForm()
+    form.location.choices = [
+        (row.location, row.location) for row in
+        NewConnectionAvailableLocations.query.options(FromCache(CACHE)).\
+        order_by(
+            NewConnectionAvailableLocations.location
+        ).all()
+    ]
 
     if form.validate_on_submit():
         query_no = ''.join(

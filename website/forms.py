@@ -2,21 +2,12 @@
 
 """Define the forms to be used."""
 
-import csv
-import re
 
 from flask_wtf import FlaskForm
 from wtforms import (
     PasswordField, SelectField, StringField, SubmitField, TextAreaField)
 from wtforms.validators import (
     Email, EqualTo, InputRequired, IPAddress, Length, Optional, Regexp)
-
-
-def get_sorted_location(filepath):
-    """Returns tuple of city names for use in form."""
-    with open(filepath, 'r') as csvfile:
-        location_reader = csv.reader(csvfile)
-        return sorted([(row[0], row[0]) for row in location_reader])
 
 
 class RechargeForm(FlaskForm):
@@ -38,11 +29,7 @@ class NewConnectionForm(FlaskForm):
     middle_name = StringField('Middle Name')
     last_name = StringField('Last Name', validators=[InputRequired()])
     address = StringField('Address', validators=[InputRequired()])
-    location = SelectField(
-        'Location',
-        choices=get_sorted_location('website/location_for_new_connection.csv'),
-        validators=[InputRequired()]
-    )
+    location = SelectField('Location', validators=[InputRequired()])
     postal_code = StringField(
         'Pin code',
         validators=[
