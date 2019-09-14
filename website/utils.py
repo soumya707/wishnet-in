@@ -11,22 +11,6 @@ from pathlib import Path
 from passlib.totp import generate_secret
 
 
-class AvailablePlans():
-    """Define all the available plans."""
-
-    def __init__(self, filepath, **kwds):
-        super(AvailablePlans, self).__init__(**kwds)
-        self.all_plans = self._get_all_plans_data(filepath)
-
-    def _get_all_plans_data(self, filepath):
-        with open(filepath, 'r') as csvfile:
-            plan_reader = csv.reader(csvfile)
-            # skip header
-            next(plan_reader)
-            # {plan_code: (plan_name, price)}
-            return {row[2]: (row[0], row[3]) for row in plan_reader}
-
-
 def order_no_gen():
     """Generate random order numbers."""
     return ''.join(random.choices(string.ascii_letters + string.digits, k=16))

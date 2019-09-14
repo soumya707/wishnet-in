@@ -16,7 +16,7 @@ from flask_caching import Cache
 from flask_security import Security, SQLAlchemyUserDatastore
 from passlib.totp import TOTP
 
-from website.utils import AvailablePlans, retrieve_otp_secret
+from website.utils import retrieve_otp_secret
 
 
 # initiate Flask application
@@ -56,9 +56,6 @@ TOTPFACTORY = TOTP.using(
 # setup Flask-Session
 Session(app)
 
-# get available plans
-PLANS = AvailablePlans('website/plans_with_tariff.csv')
-
 from website import views
 from website.models import *
 from website.security.models import Role, User
@@ -71,11 +68,11 @@ USER_DATASTORE = SQLAlchemyUserDatastore(db, User, Role)
 SECURITY = Security(app, USER_DATASTORE)
 
 
-path = op.join(op.dirname(__file__), 'static')
+PATH = op.join(op.dirname(__file__), 'static')
 
 
 # add defined models as views to admin portal
-admin.add_view(CustomFileView(path, '/static/', name='Static Files'))
+admin.add_view(CustomFileView(PATH, '/static/', name='Static Files'))
 admin.add_view(SuperuserModelView(User, db.session, category='Access'))
 admin.add_view(SuperuserModelView(Role, db.session, category='Access'))
 admin.add_view(EditorModelView(CarouselImages, db.session, category='Index'))
@@ -94,6 +91,8 @@ admin.add_view(EditorModelView(
     NewConnection, db.session, category='New Connection'))
 admin.add_view(EditorModelView(
     AvailableLocations, db.session, category='New Connection'))
+admin.add_view(EditorModelView(TariffInfo, db.session, category='Recharge'))
+admin.add_view(EditorModelView(RechargeEntry, db.session, category='Recharge'))
 
 
 # define a context processor for merging flask-admin's template context into the

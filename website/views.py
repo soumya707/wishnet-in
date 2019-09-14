@@ -15,7 +15,7 @@ from passlib.exc import MalformedTokenError, TokenError
 from passlib.hash import pbkdf2_sha256
 from sqlalchemy import or_
 
-from website import PLANS, TOTPFACTORY, app, CACHE
+from website import TOTPFACTORY, app, CACHE
 from website.forms import *
 from website.models import *
 from website.mqs_api import *
@@ -55,14 +55,18 @@ def index():
 
         # user has active plans
         if user_contracts.valid_user:
+            plans = {
+                row.plan_code: row
+                for row in TariffInfo.query.options(FromCache(CACHE)).all()
+            }
             # Get active plans for the user
             # {plan_name: (price, validity, plan_code)}
             active_plans = {
-                PLANS.all_plans[plan_code][0]: (
-                    PLANS.all_plans[plan_code][1], validity, plan_code
+                plans[plan_code].plan_name: (
+                    plans[plan_code].price, validity_period, plan_code
                 )
-                for (plan_code, validity) in user_contracts.active_plans
-                if plan_code in PLANS.all_plans
+                for (plan_code, validity_period) in user_contracts.active_plans
+                if plan_code in plans
             }
 
             # Get customer info
@@ -753,14 +757,18 @@ def portal():
         # check if session variable exists for active plans
         if not session.get('portal_active_plans'):
             user_data = session['portal_customer_data']
-            # get active plans
-            # {plan_name: (price, validity, plan_code) }
+            plans = {
+                row.plan_code: row
+                for row in TariffInfo.query.options(FromCache(CACHE)).all()
+            }
+            # Get active plans for the user
+            # {plan_name: (price, validity, plan_code)}
             active_plans = {
-                PLANS.all_plans[plan_code][0]: (
-                    PLANS.all_plans[plan_code][1], validity, plan_code
+                plans[plan_code].plan_name: (
+                    plans[plan_code].price, validity_period, plan_code
                 )
-                for (_, plan_code, validity) in user_data['active_plans']
-                if plan_code in PLANS.all_plans
+                for (_, plan_code, validity_period) in user_data['active_plans']
+                if plan_code in plans
             }
             # store in session variable
             session['portal_active_plans'] = active_plans
@@ -824,14 +832,18 @@ def recharge():
             # check if session variable exists for inactive plans
             if not session.get('portal_inactive_plans'):
                 user_data = session['portal_customer_data']
+                plans = {
+                    row.plan_code: row
+                    for row in TariffInfo.query.options(FromCache(CACHE)).all()
+                }
                 # get inactive plans
                 # {plan_name: (price, validity, plan_code) }
                 inactive_plans = {
-                    PLANS.all_plans[plan_code][0]: (
-                        PLANS.all_plans[plan_code][1], validity, plan_code
+                    plans[plan_code].plan_name: (
+                        plans[plan_code].price, validity_period, plan_code
                     )
-                    for (_, plan_code, validity) in user_data['inactive_plans']
-                    if plan_code in PLANS.all_plans
+                    for (_, plan_code, validity_period) in
+                    user_data['inactive_plans'] if plan_code in plans
                 }
                 # store in session variable
                 session['portal_inactive_plans'] = inactive_plans
@@ -855,13 +867,21 @@ def add_plan():
         # check if session variable exists for available plans
         if not session.get('portal_available_plans'):
             user_data = session['portal_customer_data']
+            plans = {
+                row.plan_code: row
+                for row in TariffInfo.query.options(FromCache(CACHE)).all()
+            }
             # get available plans
             # {plan_name: (price, plan_code) }
-            available_plan_codes = set(PLANS.all_plans.keys()).\
+            available_plan_codes = set(plans.keys()).\
                 difference(user_data['all_plans'])
             available_plans = {
-                PLANS.all_plans[plan_code][0]: (
-                    PLANS.all_plans[plan_code][1], plan_code
+                plans[plan_code].plan_name: (
+                    plans[plan_code].price,
+                    plan_code,
+                    plans[plan_code].speed,
+                    plans[plan_code].validity,
+                    plans[plan_code].plan_type,
                 )
                 for plan_code in available_plan_codes
             }

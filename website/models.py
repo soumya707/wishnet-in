@@ -245,7 +245,26 @@ class CarouselImages(db.Model):
         return self.image_name
 
 
-# Recharge
+# Recharge / Add Plan tariff and meta details
+class TariffInfo(db.Model):
+    """Class for representing plans and meta data."""
+
+    __bind_key__ = 'recharge'
+
+    id = db.Column(db.Integer, primary_key=True)
+    plan_name = db.Column(db.String(50), unique=True, nullable=False)
+    mqs_name = db.Column(db.String(50), unique=True, nullable=False)
+    plan_code = db.Column(db.String(50), unique=True, nullable=False)
+    price = db.Column(db.Integer, nullable=False)
+    speed = db.Column(db.Integer, nullable=False)
+    validity = db.Column(db.Integer, nullable=False)
+    plan_type = db.Column(db.String(50), nullable=False)
+
+    def __str__(self):
+        return self.plan_name
+
+
+# Recharge entry
 class RechargeEntry(db.Model):
     """Class for representing recharge data."""
 
