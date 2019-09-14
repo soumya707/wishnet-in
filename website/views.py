@@ -31,7 +31,7 @@ from website.razorpay_utils import make_order, verify_signature
 from website.tasks import (
     add_new_connection_data_to_db, add_recharge_data_to_db,
     send_async_new_connection_mail)
-from website.utils import order_no_gen
+from website.utils import order_no_gen, verify_mqs_topup
 
 
 CSRF = CSRFProtect(app)
@@ -191,7 +191,8 @@ def insta_recharge(order_id):
                 order_id=order_id,
                 customer_no=session['insta_customer_no'],
                 customer_mobile_no=session['insta_customer_mobile_no'],
-                amount=request.form['amount']
+                amount=request.form['amount'],
+                pay_source='insta',
             )
 
         elif request.form['gateway'] == 'razorpay':
@@ -200,7 +201,8 @@ def insta_recharge(order_id):
                 order_id=order_id,
                 customer_no=session['insta_customer_no'],
                 customer_mobile_no=session['insta_customer_mobile_no'],
-                amount=request.form['amount']
+                amount=request.form['amount'],
+                pay_source='insta',
             )
 
         return render_template(
@@ -223,12 +225,14 @@ def verify_response(gateway):
     """Route for verifying response for payment."""
     if request.method == 'POST':
         # check payment gateway
-        # Paytm
+        # PAYTM
         if gateway == 'paytm':
+            session_var_prefix = request.form['MERC_UNQ_REF']
+
             # store response data
             recharge_data = {
-                'customer_no': session['insta_customer_no'],
-                'wishnet_order_id': session['insta_order_id'],
+                'customer_no': session[f'{session_var_prefix}_customer_no'],
+                'wishnet_order_id': session[f'{session_var_prefix}_order_id'],
                 'payment_gateway': 'Paytm',
                 'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
             }
@@ -241,7 +245,7 @@ def verify_response(gateway):
                 recharge_data.update(txn_order_id=request.form['TXNID'])
                 # final status verification
                 final_status_code = verify_final_status(
-                    session['insta_order_id']
+                    session[f'{session_var_prefix}_order_id']
                 )
 
                 # check if transaction successful
@@ -255,8 +259,8 @@ def verify_response(gateway):
                     # TopUp in MQS
                     top_up = Recharge(app)
                     top_up.request(
-                        session['insta_customer_no'],
-                        session['insta_plan_code']
+                        session[f'{session_var_prefix}_customer_no'],
+                        session[f'{session_var_prefix}_plan_code']
                     )
                     top_up.response()
 
@@ -265,26 +269,14 @@ def verify_response(gateway):
                         "%Y-%m-%d %H:%M:%S.%f"
                     )
 
-                    # success in MQS
-                    if top_up.error_no == '0':
-                        recharge_data['topup_status'] = 'SUCCESS'
-                        status = 'successful'
-                        flash(
-                            (
-                                'Payment received and recharge successful. '
-                                'Kindly await for plan activation.'
-                            ), 'success'
-                        )
-                    # failure in MQS
-                    else:
-                        recharge_data['topup_status'] = 'FAILURE'
-                        status = 'unsuccessful'
-                        flash(
-                            (
-                                'Payment received but recharge failed.'
-                                'We will revert within 24 hours.'
-                            ), 'danger'
-                        )
+                    # verify MQS TopUp status
+                    db_entry_status, status, msg, msg_stat = \
+                        verify_mqs_topup(top_up)
+
+                    recharge_data['topup_status'] = db_entry_status
+                    status = status
+                    flash(msg, msg_stat)
+
                 # Transaction Status failure
                 else:
                     recharge_data.update(
@@ -313,12 +305,14 @@ def verify_response(gateway):
                 status = 'unsuccessful'
                 flash('Payment failed! Please try again.', 'danger')
 
-        # Razorpay
+        # RAZORPAY
         elif gateway == 'razorpay':
+            notes = session['notes']
+            session_var_prefix = notes['pay_source']
             # store response data
             recharge_data = {
-                'customer_no': session['insta_customer_no'],
-                'wishnet_order_id': session['insta_order_id'],
+                'customer_no': session[f'{session_var_prefix}_customer_no'],
+                'wishnet_order_id': session[f'{session_var_prefix}_order_id'],
                 'payment_gateway': 'Razorpay',
                 'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
             }
@@ -328,15 +322,15 @@ def verify_response(gateway):
             if verified:
                 recharge_data.update(
                     txn_order_id=request.form['razorpay_order_id'],
-                    txn_amount=session['insta_amount'],
+                    txn_amount=session[f'{session_var_prefix}_amount'],
                     txn_status='SUCCESS',
                 )
 
                 # TopUp in MQS
                 top_up = Recharge(app)
                 top_up.request(
-                    session['insta_customer_no'],
-                    session['insta_plan_code']
+                    session[f'{session_var_prefix}_customer_no'],
+                    session[f'{session_var_prefix}_plan_code']
                 )
                 top_up.response()
 
@@ -345,26 +339,13 @@ def verify_response(gateway):
                     "%Y-%m-%d %H:%M:%S.%f"
                 )
 
-                # success in MQS
-                if top_up.error_no == '0':
-                    recharge_data['topup_status'] = 'SUCCESS'
-                    status = 'successful'
-                    flash(
-                        (
-                            'Payment received and recharge successful. '
-                            'Kindly await for plan activation.'
-                        ), 'success'
-                    )
-                # failure in MQS
-                else:
-                    recharge_data['topup_status'] = 'FAILURE'
-                    status = 'unsuccessful'
-                    flash(
-                        (
-                            'Payment received but recharge failed.'
-                            'We will revert within 24 hours.'
-                        ), 'danger'
-                    )
+                # verify MQS TopUp status
+                db_entry_status, status, msg, msg_stat = \
+                    verify_mqs_topup(top_up)
+
+                recharge_data['topup_status'] = db_entry_status
+                status = status
+                flash(msg, msg_stat)
 
             # signature verification failure
             # data tampered during transaction
@@ -385,15 +366,15 @@ def verify_response(gateway):
 
         return redirect(
             url_for(
-                'receipt',
-                order_id=session['insta_order_id'],
+                f'{session_var_prefix}_receipt',
+                order_id=session[f'{session_var_prefix}_order_id'],
                 status=status
             )
         )
 
 
 @app.route('/receipt/<order_id>/<status>')
-def receipt(order_id, status):
+def insta_receipt(order_id, status):
     """Route to transaction receipt."""
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -809,7 +790,7 @@ def recharge():
             # store selected plan code in session
             session['portal_plan_code'] = request.form['plan_code']
             # generate and store a transaction id
-            session['portal_order_no'] = order_no_gen()
+            session['portal_order_id'] = order_no_gen()
 
             # retrieve customer data
             customer_data = session['portal_customer_data']
@@ -818,19 +799,21 @@ def recharge():
             if request.form['gateway'] == 'paytm':
                 # Get Paytm form data
                 form_data = initiate_transaction(
-                    order_id=session['portal_order_no'],
+                    order_id=session['portal_order_id'],
                     customer_no=session['portal_customer_no'],
                     customer_mobile_no=customer_data['contact_no'],
-                    amount=session['portal_amount']
+                    amount=request.form['amount'],
+                    pay_source='portal',
                 )
 
             elif request.form['gateway'] == 'razorpay':
                 # Get Razorpay form data
                 form_data = make_order(
-                    order_id=session['portal_order_no'],
+                    order_id=session['portal_order_id'],
                     customer_no=session['portal_customer_no'],
                     customer_mobile_no=customer_data['contact_no'],
-                    amount=session['portal_amount']
+                    amount=session['portal_amount'],
+                    pay_source='portal',
                 )
 
             return render_template(
@@ -888,6 +871,23 @@ def add_plan():
             'add_plan.html',
             available_plans=available_plans,
         )
+
+
+@app.route('/portal/receipt/<order_id>/<status>')
+def portal_receipt(order_id, status):
+    """Route to transaction receipt."""
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cust_data = session['portal_customer_data']
+
+    return render_template(
+        'portal_receipt.html',
+        customer_no=session['portal_customer_no'],
+        customer_name=cust_data['name'],
+        amount=session['portal_amount'],
+        date_and_time=current_time,
+        txn_status=status,
+        txn_no=order_id,
+    )
 
 
 @app.route('/portal/docket')

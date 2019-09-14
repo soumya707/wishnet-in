@@ -8,7 +8,7 @@ import requests
 from website import app
 
 
-def make_order(order_id, customer_no, customer_mobile_no, amount):
+def make_order(order_id, customer_no, customer_mobile_no, amount, pay_source):
     """Generate an order from Razorpay."""
 
     post_data = {
@@ -16,7 +16,10 @@ def make_order(order_id, customer_no, customer_mobile_no, amount):
         'currency': 'INR',
         'receipt': order_id,
         'payment_capture': '1',
-        'notes': {'customer_no': customer_no},
+        'notes': {
+            'customer_no': customer_no,
+            'pay_source': pay_source,
+        },
     }
 
     order_resp = requests.post(

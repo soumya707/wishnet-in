@@ -82,9 +82,9 @@
     <!-- CSRF token -->
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <!-- Selected plan code -->
-    <input type="hidden" name="amount" value="" id="selected-plan-code">
+    <input type="hidden" name="amount" value="" id="total-price-input">
     <!-- Transaction amount -->
-    <input type="hidden" name="plan_code" value="" id="total-price-input">
+    <input type="hidden" name="plan_code" value="" id="selected-plan-code">
     <!-- PAYMENT GATEWAY -->
     <div class="form-check form-check-inline">
       <input class="form-check-input" type="radio" name="gateway" id="paytm-gateway"

@@ -1,0 +1,54 @@
+{% extends "self_care_layout.html" %}
+
+{% block title %}Self-care receipt{% endblock %}
+
+{% block portal_content %}
+
+<div class="col-sm-8 p-3">
+
+  <h3 class="py-2 text-red">Transaction Details</h3>
+
+  <!-- TRANSACTION DETAILS -->
+  <table class="table table-borderless">
+    <tbody>
+      <!-- Customer no. -->
+      <tr>
+        <th scope="row">Customer No.</th>
+        <td>: {{ customer_no }}</td>
+      </tr>
+      <!-- Customer name -->
+      <tr>
+        <th scope="row">Customer Name</th>
+        <td>: {{ customer_name }}</td>
+      </tr>
+      <!-- Amount -->
+      <tr>
+        <th scope="row">Amount</th>
+        <td>: &#8377 {{ amount }}</td>
+      </tr>
+      <!-- Date and Time -->
+      <tr>
+        <th scope="row">Date & Time</th>
+        <td>: {{ date_and_time }}</td>
+      </tr>
+      <!-- Transaction status -->
+      <tr>
+        <th scope="row">Transaction</th>
+        <td>: {{ txn_status.capitalize() }}</td>
+      </tr>
+      <!-- Transaction no. -->
+      <tr>
+        <th scope="row">Transaction No.</th>
+        <td>: {{ txn_no }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- PRINT -->
+  <div class="text-center">
+    <i class="fas fa-print fa-lg"></i>
+  </div>
+
+</div> <!-- col -->
+
+{% endblock %}

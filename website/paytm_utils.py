@@ -8,7 +8,12 @@ from website import app
 from website.Checksum import generate_checksum, verify_checksum
 
 
-def initiate_transaction(order_id, customer_no, customer_mobile_no, amount):
+def initiate_transaction(
+        order_id,
+        customer_no,
+        customer_mobile_no,
+        amount,
+        pay_source):
     """Generate checksum and form data for making transactions via Paytm."""
 
     paytm_params = {
@@ -21,6 +26,7 @@ def initiate_transaction(order_id, customer_no, customer_mobile_no, amount):
         'INDUSTRY_TYPE_ID' : app.config['PAYTM_INDUSTRYTYPE'],
         'TXN_AMOUNT' : amount,
         'CALLBACK_URL' : app.config['PAYTM_CALLBACKURL'],
+        'MERC_UNQ_REF': pay_source,
     }
 
     # Generate checksum for parameters we have
