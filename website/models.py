@@ -103,6 +103,9 @@ class FAQ(db.Model):
     answer = db.Column(db.Text, nullable=False)
     category = db.Column(db.String(20), nullable=False)
 
+    def __str__(self):
+        return self.question
+
 
 # Best plans
 class BestPlans(db.Model):
@@ -117,6 +120,9 @@ class BestPlans(db.Model):
     validity = db.Column(db.Integer, nullable=False)
     logo_id = db.Column(db.String(20), nullable=False)
 
+    def __str__(self):
+        return self.name
+
 
 # Services
 class Services(db.Model):
@@ -128,6 +134,9 @@ class Services(db.Model):
     name = db.Column(db.String(100), nullable=False)
     features = db.Column(db.Text, nullable=False)
     logo_id = db.Column(db.String(20), nullable=False)
+
+    def __str__(self):
+        return self.name
 
 
 # Downloads
@@ -157,10 +166,12 @@ class Ventures(db.Model):
     description = db.Column(db.Text, nullable=False)
     pic = db.Column(db.String(20), nullable=False)
 
+    def __str__(self):
+        return self.name
 
 
 # New Connection available locations
-class NewConnectionAvailableLocations(db.Model):
+class AvailableLocations(db.Model):
     """Class for representing the locations available for new connection."""
 
     __bind_key__ = 'connection'
@@ -171,8 +182,10 @@ class NewConnectionAvailableLocations(db.Model):
     def __str__(self):
         return self.location
 
+
+# New Connection
 class NewConnection(db.Model):
-    """Class for representing the already existing new connection info."""
+    """Class for representing the new connection info."""
 
     __bind_key__ = 'connection'
 
@@ -276,7 +289,7 @@ class CustomerInfo(db.Model):
 
 # Get self-login details
 class CustomerLogin(db.Model):
-    """Class definition for getting customer login authentication."""
+    """Class for representing customer login authentication."""
 
     __bind_key__ = 'users'
 

@@ -16,16 +16,9 @@ from passlib.hash import pbkdf2_sha256
 from sqlalchemy import or_
 
 from website import PLANS, TOTPFACTORY, app, CACHE
-from website.forms import (
-    ForgotPasswordForm, GetCustomerNumberForm, LoginForm, NewConnectionForm,
-    OTPVerificationForm, RechargeForm, RegistrationForm, SetPasswordForm,
-    UpdateProfileForm)
-from website.models import (
-    FAQ, BestPlans, CarouselImages, CustomerInfo, CustomerLogin, Downloads,
-    JobVacancy, RechargeEntry, RegionalOffices, Services, Ventures,
-    NewConnectionAvailableLocations)
-from website.mqs_api import (
-    CloseTicket, ContractsByKey, GetCustomerInfo, Recharge, RegisterTicket)
+from website.forms import *
+from website.models import *
+from website.mqs_api import *
 from website.paytm_utils import (
     initiate_transaction, verify_final_status, verify_transaction)
 from website.razorpay_utils import make_order, verify_signature
@@ -409,10 +402,8 @@ def new_conn():
     form = NewConnectionForm()
     form.location.choices = [
         (row.location, row.location) for row in
-        NewConnectionAvailableLocations.query.options(FromCache(CACHE)).\
-        order_by(
-            NewConnectionAvailableLocations.location
-        ).all()
+        AvailableLocations.query.options(FromCache(CACHE)).\
+        order_by(AvailableLocations.location).all()
     ]
 
     if form.validate_on_submit():
