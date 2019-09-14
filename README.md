@@ -10,6 +10,7 @@ This repository contains the code and resources for the website.
 +-- config.py
 +-- README.md
 +-- tox.ini
++-- celeryconfig.py (contains configurations for Celery)
 +-- instance/
 |   +-- config.py (contains instance specific config)
 +-- migrations/ (contains files for database migrations)
@@ -104,11 +105,11 @@ MAIL_PASSWORD = '...'
 MAIL_DEFAULT_SENDER = '...'
 
 # Flask-Session
-SESSION_TYPE = 'filesystem'
+SESSION_TYPE = '...'
 SESSION_FILE_DIR = '...'
 
 # Flask-Caching
-CACHE_TYPE = 'filesystem'
+CACHE_TYPE = '...'
 CACHE_DIR = '...'
 
 # reCAPTCHA support
@@ -134,6 +135,21 @@ PAYTM_TXNURL = '...'
 # Razorpay credentials
 RAZORPAY_KEY = "..."
 RAZORPAY_SECRET = "..."
+
+```
+
+Now, create a `celeryconfig.py` module which would hold the configurations for Celery. An example configuration can be like so:
+
+``` python
+
+# Broker URL
+broker_url = '...'
+
+# Modules to import when Celery worker starts
+imports = ('website.tasks', )
+
+# Result backend
+result_backend = '...'
 
 ```
 

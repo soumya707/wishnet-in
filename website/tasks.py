@@ -14,12 +14,7 @@ mail = Mail(app)
 
 
 def make_celery(flask_app):
-    celery = Celery(
-        flask_app.import_name,
-        backend=flask_app.config['CELERY_RESULT_BACKEND'],
-        broker=flask_app.config['CELERY_BROKER_URL']
-    )
-    celery.conf.update(flask_app.config)
+    celery = Celery(__name__)
 
     class ContextTask(celery.Task):
         def __call__(self, *args, **kwargs):
@@ -31,6 +26,7 @@ def make_celery(flask_app):
 
 
 celery = make_celery(app)
+celery.config_from_object('celeryconfig')
 
 
 @celery.task
