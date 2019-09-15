@@ -6,7 +6,7 @@ from celery import Celery
 from flask_mail import Mail, Message
 
 from website import app, db
-from website.models import NewConnection, RechargeEntry
+from website.models import NewConnection, RechargeEntry, Ticket
 
 
 # setup Flask-Mail
@@ -85,4 +85,18 @@ def add_recharge_data_to_db(data):
         mq_topup_status=data['topup_status'],
     )
     db.session.add(recharge)
+    db.session.commit()
+
+
+@celery.task
+def add_new_ticket_to_db(data):
+    """Asynchronously add new connection data to database."""
+    ticket = Ticket(
+        customer_no=data['customer_no'],
+        ticket_no=data['ticket_no'],
+        category_desc=data['category_desc'],
+        nature_desc=data['nature_desc'],
+        remarks=data['remarks'],
+    )
+    db.session.add(ticket)
     db.session.commit()

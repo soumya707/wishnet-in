@@ -287,20 +287,20 @@ class RegisterTicket(MQSAPI):
         self.error_no = None
         self.ticket_no = None
 
-    def request(self, cust_id, ticket_category, ticket_desc, ticket_nature):
+    def request(self, cust_id, category, description, nature):
         """Send request for RegisterTicket."""
 
         register_ticket_xml = '''
         <REQUESTINFO>
             <KEY_NAMEVALUE>
                 <KEY_NAME>CUSTOMERNO</KEY_NAME>
-                <KEY_VALUE>{customer_no}</KEY_VALUE>
+                <KEY_VALUE>{0}</KEY_VALUE>
             </KEY_NAMEVALUE>
             <REGISTERTICKET>
                 <TICKETNO></TICKETNO>
-                <TICKETCATEGORY>{ticket_category}</TICKETCATEGORY>
-                <TICKETDESCRIPTION>{ticket_desc}</TICKETDESCRIPTION>
-                <TICKETNATURE>{ticket_nature}</TICKETNATURE>
+                <TICKETCATEGORY>{3}</TICKETCATEGORY>
+                <TICKETDESCRIPTION>{1}</TICKETDESCRIPTION>
+                <TICKETNATURE>{2}</TICKETNATURE>
                 <TICKETSTATUS>ACTIVE</TICKETSTATUS>
                 <TICKETPRIORITY>HIGH</TICKETPRIORITY>
                 <SERVICETEAM>CUSTOMERDESK</SERVICETEAM>
@@ -311,12 +311,7 @@ class RegisterTicket(MQSAPI):
                     <PROBLEMCODE></PROBLEMCODE>
                 </PROBLEM>
             </PROBLEM-INFO>
-        </REQUESTINFO>'''.format(
-            customer_no=cust_id,
-            ticket_category=ticket_category,
-            ticket_desc=ticket_desc,
-            ticket_nature=ticket_nature,
-        )
+        </REQUESTINFO>'''.format(cust_id, description, nature, category.strip())
 
         res = self.client.service.RegisterTicket(
             register_ticket_xml, self.ref_no
@@ -332,7 +327,7 @@ class RegisterTicket(MQSAPI):
 
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
-            self.error_no = res_tree.findtext('.//ERROR_NO')
+            self.error_no = res_tree.findtext('.//ERRORNO')
             self.ticket_no = res_tree.findtext('.//SERVICEREQUESTNO')
 
 
@@ -373,4 +368,4 @@ class CloseTicket(MQSAPI):
 
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
-            self.error_no = res_tree.findtext('.//ERROR_NO')
+            self.error_no = res_tree.findtext('.//ERRORNO')

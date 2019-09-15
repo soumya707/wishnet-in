@@ -93,6 +93,8 @@ admin.add_view(EditorModelView(
     AvailableLocations, db.session, category='New Connection'))
 admin.add_view(EditorModelView(TariffInfo, db.session, category='Recharge'))
 admin.add_view(EditorModelView(RechargeEntry, db.session, category='Recharge'))
+admin.add_view(EditorModelView(TicketInfo, db.session, category='Ticket'))
+admin.add_view(EditorModelView(Ticket, db.session, category='Ticket'))
 
 
 # define a context processor for merging flask-admin's template context into the

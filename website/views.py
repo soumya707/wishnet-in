@@ -24,7 +24,7 @@ from website.paytm_utils import (
 from website.razorpay_utils import make_order, verify_signature
 from website.tasks import (
     add_new_connection_data_to_db, add_recharge_data_to_db,
-    send_async_new_connection_mail)
+    send_async_new_connection_mail, add_new_ticket_to_db)
 from website.utils import order_no_gen, verify_mqs_topup
 
 
@@ -560,6 +560,7 @@ def logout():
         session.pop('portal_inactive_plans', None)
         session.pop('portal_available_plans', None)
         session.pop('portal_order_no', None)
+        session.pop('portal_open_ticket_no', None)
     # user not logged in (invalid access to route)
     elif not session['user_logged_in']:
         flash('You are not logged in yet.', 'danger')
@@ -918,9 +919,156 @@ def docket():
         return redirect(url_for('login'))
     # user logged in
     elif session['user_logged_in']:
+        tickets = Ticket.query.filter_by(
+            customer_no=session['portal_customer_no']
+        ).all()
+
+        open_tickets = [ticket for ticket in tickets if ticket.status == 'Open']
+        closed_tickets = [
+            ticket for ticket in tickets if ticket.status == 'Closed'
+        ]
+
+        # save open ticket no in session
+        if open_tickets:
+            session['portal_open_ticket_no'] = open_tickets[0].ticket_no
+
+        # set if open dockets exist
         return render_template(
-            'docket.html'
+            'docket.html',
+            tickets=tickets,
+            open_tickets=open_tickets,
+            closed_tickets=closed_tickets,
         )
+
+
+@app.route('/portal/new_docket', methods=['GET', 'POST'])
+def new_docket():
+    """Route for self-care new docket."""
+    # user not logged in
+    if not session['user_logged_in']:
+        flash('You have not logged in yet.', 'danger')
+        return redirect(url_for('login'))
+    # user logged in
+    elif session['user_logged_in']:
+        # open ticket exists
+        if not session.get('portal_open_ticket_no'):
+            form = NewTicketForm()
+            form.nature.choices = [
+                (row.ticket_nature_code, row.ticket_nature_desc)
+                for row in TicketInfo.query.options(FromCache(CACHE)).all()
+            ]
+
+            if form.validate_on_submit():
+                nature_code = form.nature.data
+                # query category from db
+                entry = TicketInfo.query.options(FromCache(CACHE)).filter_by(
+                    ticket_nature_code=nature_code
+                ).first()
+                category_code = entry.ticket_category_code
+                category_desc = entry.ticket_category_desc
+                nature_desc = entry.ticket_nature_desc
+
+                remarks = form.remarks.data
+
+                # Generate ticket in MQS
+                register_ticket = RegisterTicket(app)
+                register_ticket.request(
+                    cust_id=session['portal_customer_no'],
+                    category=category_code,
+                    description=remarks,
+                    nature=nature_code,
+                )
+                register_ticket.response()
+
+                # check if success
+                if register_ticket.error_no == '0':
+                    ticket_no = register_ticket.ticket_no
+
+                    # send data to db
+                    ticket_data = {
+                        'customer_no': session['portal_customer_no'],
+                        'ticket_no': ticket_no,
+                        'category_desc': category_desc,
+                        'nature_desc': nature_desc,
+                        'remarks': remarks,
+                    }
+                    add_new_ticket_to_db(ticket_data)
+
+                    msg = 'Docket generated successfully.'
+                    status = 'success'
+                else:
+                    msg = 'Docket could not be generated. Please try again.'
+                    status = 'danger'
+
+                flash(msg, status)
+                return redirect(url_for('docket'))
+
+            # GET request
+            return render_template(
+                'new_docket.html',
+                form=form,
+                allowed=True,
+            )
+
+        # has open ticket
+        elif session.get('portal_open_ticket_no'):
+            return render_template(
+                'new_docket.html',
+                # form=form,
+                allowed=False,
+            )
+
+
+@app.route('/portal/close_docket')
+def close_docket():
+    """Route for self-care close docket."""
+    # user not logged in
+    if not session['user_logged_in']:
+        flash('You have not logged in yet.', 'danger')
+        return redirect(url_for('login'))
+    # user logged in
+    elif session['user_logged_in']:
+        # open ticket exists
+        if session.get('portal_open_ticket_no'):
+            ticket_no = session.get('portal_open_ticket_no')
+
+            # Close ticket in MQS
+            close_ticket = CloseTicket(app)
+            close_ticket.request(ticket_no)
+            close_ticket.response()
+
+            # check if success
+            if close_ticket.error_no == '0':
+                ticket = Ticket.query.filter_by(
+                    ticket_no=session['portal_open_ticket_no']
+                ).first()
+                ticket.status = 'Closed'
+                ticket.closing_date = datetime.now().astimezone()
+                # close ticket in db
+                db = current_app.extensions['sqlalchemy'].db
+                db.session.add(ticket)
+                db.session.commit()
+
+                msg = 'Docket: {} closed successfully.'.format(ticket_no)
+                status = 'success'
+
+                # remove data from session variable
+                session.pop('portal_open_ticket_no', None)
+
+            else:
+                msg = (
+                    'Docket: {} couldn\'t be closed successfully, please try '
+                    'again.'
+                ).format(ticket_no)
+                status = 'danger'
+
+        # no open ticket exists
+        elif not session.get('portal_open_ticket_no'):
+            msg = 'No open ticket exists.'
+            status = 'danger'
+
+        flash(msg, status)
+        return redirect(url_for('docket'))
 
 
 @app.route('/portal/usage')
