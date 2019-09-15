@@ -25,6 +25,8 @@ flask-caching = "*"
 flask-sqlalchemy-caching = "*"
 celery = "*"
 razorpay = "*"
+cryptography = "*"
+gunicorn = {extras = ["gevent"],version = "*"}
 
 [requires]
 python_version = "3.6"
