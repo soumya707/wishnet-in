@@ -9,6 +9,84 @@
 
   <h3 class="py-2 text-red">Docket</h3>
 
+  <!-- CREATE DOCKET BUTTON -->
+  <a class="btn btn-red"
+     href="{% if not open_tickets %}{{ url_for('new_docket') }}{% endif %}">
+    Create Docket
+  </a>
+  <!-- CLOSE DOCKET BUTTON -->
+  <a class="btn btn-red"
+     href="{% if open_tickets %}{{ url_for('close_docket') }}{% endif %}">Close Docket</a>
+
+  {% if not tickets %}
+  <h5 class="py-4 text-red">You don't have any docket history.</h5>
+  {% elif tickets %}
+  <!-- OPEN DOCKETS -->
+  <h4 class="py-2 pt-4">Open Docket</h4>
+
+  {% if not open_tickets %}
+  <h5 class="py-4 text-red">You don't have any open docket.</h5>
+  {% elif open_tickets %}
+  <table class="table table-striped table-bordered table-responsive">
+    <thead>
+      <tr>
+        <th scope="col">Ticket No.</th>
+        <th scope="col">Ticket Category</th>
+        <th scope="col">Ticket Nature</th>
+        <th scope="col">Remarks</th>
+        <th scope="col">Opened On</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ticket in open_tickets %}
+      <tr scope="row">
+        <td>{{ ticket.ticket_no }}</td>
+        <td>{{ ticket.category_desc }}</td>
+        <td>{{ ticket.nature_desc }}</td>
+        <td>{{ ticket.remarks }}</td>
+        <td>{{ ticket.opening_date }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <!-- CLOSED DOCKETS -->
+  <h4 class="py-2">Closed Dockets</h4>
+
+  {% if not closed_tickets %}
+  <h5 class="py-4 text-red">You don't have any closed dockets.</h5>
+  {% elif closed_tickets %}
+  <table class="table table-striped table-bordered table-responsive">
+    <thead>
+      <tr>
+        <th scope="col">Ticket No.</th>
+        <th scope="col">Ticket Category</th>
+        <th scope="col">Ticket Nature</th>
+        <th scope="col">Remarks</th>
+        <th scope="col">Status</th>
+        <th scope="col">Opened On</th>
+        <th scope="col">Closed On</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ticket in closed_tickets %}
+      <tr scope="row">
+        <td>{{ ticket.ticket_no }}</td>
+        <td>{{ ticket.category_desc }}</td>
+        <td>{{ ticket.nature_desc }}</td>
+        <td>{{ ticket.remarks }}</td>
+        <td>{{ ticket.status }}</td>
+        <td>{{ ticket.opening_date }}</td>
+        <td>{{ ticket.closing_date }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  {% endif %}
+
 </div> <!-- col -->
 
 {% endblock %}

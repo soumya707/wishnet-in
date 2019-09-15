@@ -1,0 +1,41 @@
+{% extends "self_care_layout.html" %}
+{% from "_macros.html" import render_field, render_submit %}
+
+{% block title %}Self-care docket{% endblock %}
+
+{% block portal_content %}
+
+<div class="col-sm-8 p-3">
+
+  <h3 class="py-2 text-red">New Docket</h3>
+
+  {% if not allowed %}
+  <h5 class="py-4 text-red">You already have an open docket. Please close that before proceeding.</h5>
+  {% elif allowed %}
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <fieldset class="form-group">
+
+      <div class="form-row">
+        <!-- NATURE -->
+        <div class="col">
+          {{ render_field(form.nature) }}
+        </div> <!-- col -->
+      </div> <!-- form-row -->
+
+      <div class="form-row">
+        <div class="col">
+          {{ render_field(form.remarks) }}
+        </div> <!-- col -->
+      </div> <!-- form-row -->
+    </fieldset> <!-- form-group -->
+
+    <!-- SUBMIT -->
+    {{ render_submit(form.submit) }}
+
+  </form>
+  {% endif %}
+
+</div> <!-- col -->
+
+{% endblock %}

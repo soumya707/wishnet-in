@@ -122,3 +122,10 @@ class UpdateProfileForm(FlaskForm):
         InputRequired(),
     ])
     submit = SubmitField('Set New Password')
+
+
+class NewTicketForm(FlaskForm):
+    """Class for submitting a ticket form."""
+    nature = SelectField('Ticket Nature', validators=[InputRequired()])
+    remarks = TextAreaField('Remarks', validators=[Optional()])
+    submit = SubmitField('Submit')
