@@ -318,3 +318,37 @@ class CustomerLogin(db.Model):
 
     def __str__(self):
         return self.customer_no
+
+
+# Ticket information
+class TicketInfo(db.Model):
+    """Class for representing information regarding tickets."""
+
+    __bind_key__ = 'ticket'
+
+    id = db.Column(db.Integer, primary_key=True)
+    ticket_category_code = db.Column(db.String(20), nullable=False)
+    ticket_category_desc = db.Column(db.String(50), nullable=False)
+    ticket_nature_code = db.Column(db.String(20), unique=True, nullable=False)
+    ticket_nature_desc = db.Column(db.String(50), unique=True, nullable=False)
+
+    def __str__(self):
+        return self.ticket_nature_desc
+
+
+# Save and retrieve tickets
+class Ticket(db.Model):
+    """Class for representing tickets."""
+
+    __bind_key__ = 'ticket'
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_no = db.Column(db.String(100), nullable=False)
+    ticket_no = db.Column(db.String(20), unique=True, nullable=False)
+    category_desc = db.Column(db.String(50), nullable=False)
+    nature_desc = db.Column(db.String(50), nullable=False)
+    remarks = db.Column(db.Text, nullable=True)
+    status = db.Column(db.String(10), nullable=False, default='Open')
+    opening_date = db.Column(db.DateTime(), nullable=False,
+                             default=datetime.now().astimezone())
+    closing_date = db.Column(db.DateTime(), nullable=True)
