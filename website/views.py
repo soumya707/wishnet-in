@@ -535,7 +535,7 @@ def login():
         return redirect(url_for(redirect_to))
 
     # user logged in
-    if session['user_logged_in']:
+    if session.get('user_logged_in'):
         return redirect(url_for('portal'))
     # user not logged in
     else:
@@ -549,7 +549,7 @@ def login():
 def logout():
     """Route for self-care logout."""
     # user logged in already
-    if session['user_logged_in']:
+    if session.get('user_logged_in'):
         flash('You have been successfully logged out.', 'success')
         # revoke session entry
         session['user_logged_in'] = False
@@ -562,7 +562,7 @@ def logout():
         session.pop('portal_order_no', None)
         session.pop('portal_open_ticket_no', None)
     # user not logged in (invalid access to route)
-    elif not session['user_logged_in']:
+    elif not session.get('user_logged_in'):
         flash('You are not logged in yet.', 'danger')
 
     return redirect(url_for('login'))
@@ -740,12 +740,12 @@ def set_password():
 def portal():
     """Route for self-care portal."""
     # user not logged in
-    if not session['user_logged_in']:
+    if not session.get('user_logged_in'):
         flash('You have not logged in yet.', 'danger')
         return redirect(url_for('login'))
 
     # user logged in
-    elif session['user_logged_in']:
+    elif session.get('user_logged_in'):
         # check if session variable exists for customer data
         if not session.get('portal_customer_data'):
             # Get customer info
@@ -787,11 +787,11 @@ def portal():
 def recharge():
     """Route for self-care portal recharge."""
     # user not logged in
-    if not session['user_logged_in']:
+    if not session.get('user_logged_in'):
         flash('You have not logged in yet.', 'danger')
         return redirect(url_for('login'))
     # user logged in
-    elif session['user_logged_in']:
+    elif session.get('user_logged_in'):
         if request.method == 'POST':
             # store amount in session
             session['portal_amount'] = request.form['amount']
@@ -860,11 +860,11 @@ def recharge():
 def add_plan():
     """Route for self-care portal add plan."""
     # user not logged in
-    if not session['user_logged_in']:
+    if not session.get('user_logged_in'):
         flash('You have not logged in yet.', 'danger')
         return redirect(url_for('login'))
     # user logged in
-    elif session['user_logged_in']:
+    elif session.get('user_logged_in'):
         # check if session variable exists for available plans
         if not session.get('portal_available_plans'):
             user_data = session['portal_customer_data']
@@ -914,11 +914,11 @@ def portal_receipt(order_id, status):
 def docket():
     """Route for self-care portal docket."""
     # user not logged in
-    if not session['user_logged_in']:
+    if not session.get('user_logged_in'):
         flash('You have not logged in yet.', 'danger')
         return redirect(url_for('login'))
     # user logged in
-    elif session['user_logged_in']:
+    elif session.get('user_logged_in'):
         tickets = Ticket.query.filter_by(
             customer_no=session['portal_customer_no']
         ).all()
@@ -945,11 +945,11 @@ def docket():
 def new_docket():
     """Route for self-care new docket."""
     # user not logged in
-    if not session['user_logged_in']:
+    if not session.get('user_logged_in'):
         flash('You have not logged in yet.', 'danger')
         return redirect(url_for('login'))
     # user logged in
-    elif session['user_logged_in']:
+    elif session.get('user_logged_in'):
         # open ticket exists
         if not session.get('portal_open_ticket_no'):
             form = NewTicketForm()
@@ -1023,11 +1023,11 @@ def new_docket():
 def close_docket():
     """Route for self-care close docket."""
     # user not logged in
-    if not session['user_logged_in']:
+    if not session.get('user_logged_in'):
         flash('You have not logged in yet.', 'danger')
         return redirect(url_for('login'))
     # user logged in
-    elif session['user_logged_in']:
+    elif session.get('user_logged_in'):
         # open ticket exists
         if session.get('portal_open_ticket_no'):
             ticket_no = session.get('portal_open_ticket_no')
@@ -1075,11 +1075,11 @@ def close_docket():
 def usage():
     """Route for self-care portal usage."""
     # user not logged in
-    if not session['user_logged_in']:
+    if not session.get('user_logged_in'):
         flash('You have not logged in yet.', 'danger')
         return redirect(url_for('login'))
     # user logged in
-    elif session['user_logged_in']:
+    elif session.get('user_logged_in'):
         return render_template(
             'usage.html'
         )
@@ -1089,11 +1089,11 @@ def usage():
 def transaction_history():
     """Route for self-care transaction history."""
     # user not logged in
-    if not session['user_logged_in']:
+    if not session.get('user_logged_in'):
         flash('You have not logged in yet.', 'danger')
         return redirect(url_for('login'))
     # user logged in
-    elif session['user_logged_in']:
+    elif session.get('user_logged_in'):
         # retrieve data from db
         transactions = RechargeEntry.query.filter_by(
             customer_no=session['portal_customer_no']
@@ -1108,11 +1108,11 @@ def transaction_history():
 def change_password():
     """Route for self-care portal password change."""
     # user not logged in
-    if not session['user_logged_in']:
+    if not session.get('user_logged_in'):
         flash('You have not logged in yet.', 'danger')
         return redirect(url_for('login'))
     # user logged in
-    elif session['user_logged_in']:
+    elif session.get('user_logged_in'):
         form = UpdateProfileForm()
 
         if form.validate_on_submit():
