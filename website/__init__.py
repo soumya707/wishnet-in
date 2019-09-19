@@ -87,6 +87,10 @@ admin.add_view(EditorModelView(FUPPlan, db.session, category='Plans'))
 admin.add_view(EditorModelView(RegionalOffices, db.session, category='Info'))
 admin.add_view(EditorModelView(FAQ, db.session, category='Info'))
 admin.add_view(EditorModelView(JobVacancy, db.session, category='Info'))
+admin.add_view(SuperuserModelView(
+    CustomerInfo, db.session, category='Customer Info'))
+admin.add_view(SuperuserModelView(
+    CustomerLogin, db.session, category='Customer Info'))
 admin.add_view(EditorModelView(
     NewConnection, db.session, category='New Connection'))
 admin.add_view(EditorModelView(
