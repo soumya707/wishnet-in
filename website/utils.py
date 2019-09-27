@@ -8,12 +8,23 @@ import string
 from datetime import datetime
 from pathlib import Path
 
+import requests
 from passlib.totp import generate_secret
 
 
 def order_no_gen():
     """Generate random order numbers."""
     return ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+
+
+def send_sms(url, params):
+    """Send SMS to customer."""
+    res = requests.get(url, params)
+
+    if res.status_code == requests.codes.ok:
+        return True
+    else:
+        return False
 
 
 def verify_mqs_topup(topup):

@@ -15,7 +15,7 @@ from passlib.exc import MalformedTokenError, TokenError
 from passlib.hash import pbkdf2_sha256
 from sqlalchemy import or_
 
-from website import TOTPFACTORY, app, CACHE
+from website import CACHE, TOTPFACTORY, app
 from website.forms import *
 from website.models import *
 from website.mqs_api import *
@@ -23,9 +23,9 @@ from website.paytm_utils import (
     initiate_transaction, verify_final_status, verify_transaction)
 from website.razorpay_utils import make_order, verify_signature
 from website.tasks import (
-    add_new_connection_data_to_db, add_recharge_data_to_db,
-    send_async_new_connection_mail, add_new_ticket_to_db)
-from website.utils import order_no_gen, verify_mqs_topup
+    add_new_connection_data_to_db, add_new_ticket_to_db,
+    add_recharge_data_to_db, send_async_new_connection_mail)
+from website.utils import *
 
 
 CSRF = CSRFProtect(app)
@@ -131,19 +131,36 @@ def get_cust_no():
 
         # credentials okay and data available
         if customer is not None and customer.mobile_no is not str():
+            # send SMS
             mobile_no = customer.mobile_no
-            sms_msg = (
-                'Please find your Customer Number: {} as requested by '
-                'you.\nTeam Wishnet'
-            ).format(customer.customer_no)
-            #TODO: add SMS API
-            flash(
-                (
-                    'Customer number: {} has been sent to your registered '
-                    'mobile number.'
-                ).format(customer.customer_no)
-                , 'success'
+            sms_msg = '{} is your customer number. Team Wishnet.'.format(
+                customer.customer_no
             )
+
+            successful = send_sms(
+                app.config['SMS_URL'],
+                {
+                    'username': app.config['SMS_USERNAME'],
+                    'password': app.config['SMS_PASSWORD'],
+                    'from': app.config['SMS_SENDER'],
+                    'to': f'91{mobile_no}',
+                    'text': sms_msg,
+                }
+            )
+
+            if successful:
+                text = (
+                    'Customer number has been sent to your registered '
+                    'mobile number.'
+                )
+                status = 'success'
+
+            else:
+                text = 'There was some problem, please try again.'
+                status = 'danger'
+
+            flash(text, status)
+
         # mobile number not available
         elif customer is not None and customer.mobile_no is str():
             flash(
@@ -588,19 +605,38 @@ def register():
 
         # non-registered customer
         elif customer is not None and customer.password_hash is None:
-            # TODO: add sms api for sending otp
             # generate OTP
             totp = TOTPFACTORY.new()
             session['otp_data'] = totp.to_dict()
-
             session['customer_no'] = form.customer_no.data
             redirect_to = 'verify_otp'
-            flash(
-                'OTP:{} has been sent to your registered mobile number.'.format(
-                    totp.generate().token
-                ),
-                'success'
+
+            # send SMS
+            mobile_no = customer.mobile_no
+            sms_msg = (
+                '{} is your OTP for self-care registration. Team Wishnet.'
+            ).format(totp.generate().token)
+
+            successful = send_sms(
+                app.config['SMS_URL'],
+                {
+                    'username': app.config['SMS_USERNAME'],
+                    'password': app.config['SMS_PASSWORD'],
+                    'from': app.config['SMS_SENDER'],
+                    'to': f'91{mobile_no}',
+                    'text': sms_msg,
+                }
             )
+
+            if successful:
+                text = 'OTP has been sent to your registered mobile number.'
+                status = 'success'
+
+            else:
+                text = 'There was some problem, please try again.'
+                status = 'danger'
+
+            flash(text, status)
 
         # invalid customer
         else:
@@ -630,19 +666,38 @@ def forgot():
 
         # valid customer and valid password
         if customer is not None and customer.password_hash is not None:
-            # TODO: add sms api for sending otp
             # generate OTP
             totp = TOTPFACTORY.new()
             session['otp_data'] = totp.to_dict()
-
             session['customer_no'] = form.customer_no.data
             redirect_to = 'verify_otp'
-            flash(
-                'OTP:{} has been sent to your registered mobile number.'.format(
-                    totp.generate().token
-                ),
-                'success'
+
+            # send SMS
+            mobile_no = customer.mobile_no
+            sms_msg = (
+                '{} is your OTP for resetting password. Team Wishnet.'
+            ).format(totp.generate().token)
+
+            successful = send_sms(
+                app.config['SMS_URL'],
+                {
+                    'username': app.config['SMS_USERNAME'],
+                    'password': app.config['SMS_PASSWORD'],
+                    'from': app.config['SMS_SENDER'],
+                    'to': f'91{mobile_no}',
+                    'text': sms_msg,
+                }
             )
+
+            if successful:
+                text = 'OTP has been sent to your registered mobile number.'
+                status = 'success'
+
+            else:
+                text = 'There was some problem, please try again.'
+                status = 'danger'
+
+            flash(text, status)
 
         # non-registered customer
         elif customer is not None and customer.password_hash is None:
