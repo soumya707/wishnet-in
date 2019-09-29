@@ -2,6 +2,7 @@
 
 """Define helper functions for accessing MQS API."""
 
+from datetime import datetime
 import random
 import string
 
@@ -369,3 +370,82 @@ class CloseTicket(MQSAPI):
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
             self.error_no = res_tree.findtext('.//ERRORNO')
+
+
+class GetUsageDetails():
+    """Class for accessing AAA GetUsageDetails API."""
+
+    def __init__(self, **kwargs):
+        super(GetUsageDetails, self).__init__(**kwargs)
+        self.response_code = None
+        self.response_msg = None
+        self.error_no = None
+        self.usage = None
+
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__ = state
+
+    def request(self, user_name, start_date, end_date):
+        """Prepare and send the request for the service."""
+
+        url = (
+            'http://110.172.52.234:8080/MQNsureWebService/services/RadUser?wsdl'
+        )
+        client = Client(url, faults=False)
+
+        username_token = client.factory.create('ns0:UserInfo')
+        username_token.userName = 'webadmin'
+        username_token.password = 'webadmin'
+
+        get_usage_xml = '''
+        <request name="UserSessionDetails">
+            <UserDetails>
+                <user_name>{0}</user_name>
+                <from_date>{1}</from_date>
+                <to_date>{2}</to_date>
+                <group></group>
+            </UserDetails>
+        </request>'''.format(user_name, start_date, end_date)
+
+        res = client.service.UserSessionDetails(
+            get_usage_xml, username_token
+        )
+
+        self.response_code, self.response_msg = res[0], res[1]
+
+    def response(self):
+        """Prepare and send the request for the service."""
+
+        if self.response_code == 200:
+            res_tree = et.XML(bytes(self.response_msg, encoding='utf8'))
+
+            self.error_no = res_tree.findtext('.//status')
+            plans = [plan.text for plan in res_tree.iterfind('.//group')]
+            # parse into datetime
+            login_time = [
+                datetime.strptime(time.text, '%d%m%Y%H%M%S')
+                for time in res_tree.iterfind('.//login_time')
+            ]
+            # convert into hours
+            usage_time = [
+                round(float(time.text) / 3600, 1)
+                for time in res_tree.iterfind('.//session_free_time')
+            ]
+            # consistent parsing
+            download = [
+                float(download.text)
+                for download in res_tree.iterfind('.//free_download')
+            ]
+            upload = [
+                float(upload.text)
+                for upload in res_tree.iterfind('.//free_upload')
+            ]
+            ip_addr = [ip.text for ip in res_tree.iterfind('.//user_ip')]
+            self.usage = [
+                entry for entry in zip(
+                    plans, login_time, usage_time, download, upload, ip_addr
+                )
+            ]

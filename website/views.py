@@ -5,7 +5,7 @@
 
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import (
     current_app, flash, redirect, render_template, request, session, url_for)
@@ -578,6 +578,7 @@ def logout():
         session.pop('portal_available_plans', None)
         session.pop('portal_order_no', None)
         session.pop('portal_open_ticket_no', None)
+        session.pop('portal_username', None)
     # user not logged in (invalid access to route)
     elif not session.get('user_logged_in'):
         flash('You are not logged in yet.', 'danger')
@@ -1135,8 +1136,29 @@ def usage():
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
+        # check if session variable exists for customer username
+        if not session.get('portal_username'):
+            customer = CustomerInfo.query.filter_by(
+                customer_no=session['portal_customer_no']
+            ).first()
+            session['portal_username'] = customer.user_name
+
+        # get current day and 60 days old date
+        today = datetime.now().astimezone().date()
+        past = today - timedelta(days=60)
+
+        # get usage data using API call
+        usage_details = GetUsageDetails()
+        usage_details.request(
+            user_name=session['portal_username'],
+            start_date=past.strftime("%d%m%Y"),
+            end_date=today.strftime("%d%m%Y")
+        )
+        usage_details.response()
+
         return render_template(
-            'usage.html'
+            'usage.html',
+            usage_details=usage_details.usage
         )
 
 
