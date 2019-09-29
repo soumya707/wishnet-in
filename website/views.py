@@ -912,7 +912,7 @@ def recharge():
             )
 
 
-@app.route('/portal/add_plan')
+@app.route('/portal/add_plan', methods=['GET', 'POST'])
 def add_plan():
     """Route for self-care portal add plan."""
     # user not logged in
@@ -921,32 +921,72 @@ def add_plan():
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
-        # check if session variable exists for available plans
-        if not session.get('portal_available_plans'):
-            user_data = session['portal_customer_data']
-            plans = {
-                row.plan_code: row
-                for row in TariffInfo.query.options(FromCache(CACHE)).all()
-            }
-            # get available plans
-            # {plan_name: (price, plan_code) }
-            available_plan_codes = set(plans.keys()).\
-                difference(user_data['all_plans'])
-            available_plans = {
-                plans[plan_code].plan_name: (
-                    plans[plan_code].price,
-                    plan_code,
-                    plans[plan_code].speed,
-                    plans[plan_code].validity,
-                    plans[plan_code].plan_type,
-                )
-                for plan_code in available_plan_codes
-            }
+        if request.method == 'POST':
+            # store amount in session
+            session['portal_amount'] = request.form['amount']
+            # store selected plan code in session
+            session['portal_plan_code'] = request.form['plan_code']
+            # generate and store a transaction id
+            session['portal_order_id'] = order_no_gen()
 
-        return render_template(
-            'add_plan.html',
-            available_plans=available_plans,
-        )
+            # retrieve customer data
+            customer_data = session['portal_customer_data']
+
+            # Check payment gateway
+            if request.form['gateway'] == 'paytm':
+                # Get Paytm form data
+                form_data = initiate_transaction(
+                    order_id=session['portal_order_id'],
+                    customer_no=session['portal_customer_no'],
+                    customer_mobile_no=customer_data['contact_no'],
+                    amount=request.form['amount'],
+                    pay_source='portal',
+                )
+
+            elif request.form['gateway'] == 'razorpay':
+                # Get Razorpay form data
+                form_data = make_order(
+                    order_id=session['portal_order_id'],
+                    customer_no=session['portal_customer_no'],
+                    customer_mobile_no=customer_data['contact_no'],
+                    amount=session['portal_amount'],
+                    pay_source='portal',
+                )
+
+            return render_template(
+                '{}_pay.html'.format(request.form['gateway']),
+                form=form_data,
+            )
+
+        elif request.method == 'GET':
+            # check if session variable exists for available plans
+            if not session.get('portal_available_plans'):
+                user_data = session['portal_customer_data']
+                plans = {
+                    row.plan_code: row
+                    for row in TariffInfo.query.options(FromCache(CACHE)).all()
+                }
+                # get available plans
+                # {plan_name: (price, plan_code) }
+                available_plan_codes = set(plans.keys()).\
+                    difference(user_data['all_plans'])
+                available_plans = {
+                    plans[plan_code].plan_name: (
+                        plans[plan_code].price,
+                        plan_code,
+                        plans[plan_code].speed,
+                        plans[plan_code].validity,
+                        plans[plan_code].plan_type,
+                    )
+                    for plan_code in available_plan_codes
+                }
+                # store in session variable
+                session['portal_available_plans'] = available_plans
+
+            return render_template(
+                'add_plan.html',
+                available_plans=session['portal_available_plans'],
+            )
 
 
 @app.route('/portal/receipt/<order_id>/<status>')
