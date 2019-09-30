@@ -17,11 +17,11 @@ def order_no_gen():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=16))
 
 
-def send_sms(url, params):
+def send_sms(url, data):
     """Send SMS to customer."""
-    res = requests.get(url, params)
+    res = requests.get(url, params=data)
 
-    if res.status_code == requests.codes.ok:
+    if res.status_code == requests.codes.accepted:
         return True
     else:
         return False
