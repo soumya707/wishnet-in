@@ -6,7 +6,7 @@ from celery import Celery
 from flask_mail import Mail, Message
 
 from website import app, db
-from website.models import NewConnection, RechargeEntry, Ticket
+from website.models import *
 
 
 # setup Flask-Mail
@@ -70,9 +70,9 @@ def send_async_new_connection_mail(recipient_mail, query_no):
 
 
 @celery.task
-def add_recharge_data_to_db(data):
-    """Asynchronously add recharge data to database."""
-    recharge = RechargeEntry(
+def add_txn_data_to_db(data):
+    """Asynchronously add transaction data to database."""
+    txn = RechargeEntry(
         customer_no=data['customer_no'],
         wishnet_payment_order_id=data['wishnet_order_id'],
         payment_gateway=data['payment_gateway'],
@@ -83,8 +83,11 @@ def add_recharge_data_to_db(data):
         mq_topup_reference_id=data['topup_ref_id'],
         mq_topup_datetime=data['topup_datetime'],
         mq_topup_status=data['topup_status'],
+        mq_addplan_reference_id=data['addplan_ref_id'],
+        mq_addplan_datetime=data['addplan_datetime'],
+        mq_addplan_status=data['addplan_status'],
     )
-    db.session.add(recharge)
+    db.session.add(txn)
     db.session.commit()
 
 

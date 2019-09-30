@@ -51,6 +51,30 @@ def verify_mqs_topup(topup):
     return db_entry_status, status, msg, msg_stat
 
 
+def verify_mqs_addplan(add_plan):
+    """Verify the add plan status in MQS."""
+    # success in MQS
+    if add_plan.error_no == '0':
+        db_entry_status = 'SUCCESS'
+        status = 'successful'
+        msg = (
+            'Payment received and plan added. '
+            'Kindly await for plan activation.'
+            )
+        msg_stat = 'success'
+    # failure in MQS
+    else:
+        db_entry_status = 'FAILURE'
+        status = 'unsuccessful'
+        msg = (
+            'Payment received but plan addition failed.'
+            'We will revert within 24 hours.'
+        )
+        msg_stat = 'danger'
+
+    return db_entry_status, status, msg, msg_stat
+
+
 def generate_otp_secret(filepath):
     """Generates OTP secret key and stores it in filepath."""
     path = Path(filepath)

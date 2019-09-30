@@ -2,10 +2,9 @@
 
 """Initiate the application."""
 
-import csv
 import os.path as op
 
-from flask import Flask, url_for, redirect
+from flask import Flask, url_for
 from flask_admin import Admin
 from flask_admin import helpers as admin_helpers
 from flask_migrate import Migrate
@@ -95,8 +94,9 @@ admin.add_view(EditorModelView(
     NewConnection, db.session, category='New Connection'))
 admin.add_view(EditorModelView(
     AvailableLocations, db.session, category='New Connection'))
-admin.add_view(EditorModelView(TariffInfo, db.session, category='Recharge'))
-admin.add_view(EditorModelView(RechargeEntry, db.session, category='Recharge'))
+admin.add_view(EditorModelView(TariffInfo, db.session, category='Transaction'))
+admin.add_view(EditorModelView(RechargeEntry, db.session,
+                               category='Transaction'))
 admin.add_view(EditorModelView(TicketInfo, db.session, category='Ticket'))
 admin.add_view(EditorModelView(Ticket, db.session, category='Ticket'))
 

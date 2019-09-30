@@ -264,9 +264,9 @@ class TariffInfo(db.Model):
         return self.plan_name
 
 
-# Recharge entry
+# Transaction entry
 class RechargeEntry(db.Model):
-    """Class for representing recharge data."""
+    """Class for representing transaction data."""
 
     __bind_key__ = 'recharge'
 
@@ -281,6 +281,9 @@ class RechargeEntry(db.Model):
     mq_topup_reference_id = db.Column(db.String(20), nullable=False)
     mq_topup_datetime = db.Column(db.String(50), nullable=False)
     mq_topup_status = db.Column(db.String(10), nullable=False)
+    mq_addplan_reference_id = db.Column(db.String(20), nullable=False)
+    mq_addplan_datetime = db.Column(db.String(50), nullable=False)
+    mq_addplan_status = db.Column(db.String(10), nullable=False)
     refund_amount = db.Column(db.String(10), nullable=True)
     refund_datetime = db.Column(db.String(50), nullable=True)
     refund_status = db.Column(db.String(10), nullable=True)

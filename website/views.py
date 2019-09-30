@@ -22,9 +22,7 @@ from website.mqs_api import *
 from website.paytm_utils import (
     initiate_transaction, verify_final_status, verify_transaction)
 from website.razorpay_utils import make_order, verify_signature
-from website.tasks import (
-    add_new_connection_data_to_db, add_new_ticket_to_db,
-    add_recharge_data_to_db, send_async_new_connection_mail)
+from website.tasks import *
 from website.utils import *
 
 
@@ -207,7 +205,8 @@ def insta_recharge(order_id):
                 customer_no=session['insta_customer_no'],
                 customer_mobile_no=session['insta_customer_mobile_no'],
                 amount=request.form['amount'],
-                pay_source='insta',
+                # _ is used as the delimiter; check Paytm docs
+                pay_source='insta_recharge',
             )
 
         elif request.form['gateway'] == 'razorpay':
@@ -217,7 +216,8 @@ def insta_recharge(order_id):
                 customer_no=session['insta_customer_no'],
                 customer_mobile_no=session['insta_customer_mobile_no'],
                 amount=request.form['amount'],
-                pay_source='insta',
+                # list is used for passing data; check Razorpay docs
+                pay_source=['insta', 'recharge'],
             )
 
         return render_template(
@@ -242,10 +242,11 @@ def verify_response(gateway):
         # check payment gateway
         # PAYTM
         if gateway == 'paytm':
-            session_var_prefix = request.form['MERC_UNQ_REF']
+            session_var_prefix, txn_type = \
+                request.form['MERC_UNQ_REF'].split('_')
 
             # store response data
-            recharge_data = {
+            data = {
                 'customer_no': session[f'{session_var_prefix}_customer_no'],
                 'wishnet_order_id': session[f'{session_var_prefix}_order_id'],
                 'payment_gateway': 'Paytm',
@@ -257,7 +258,7 @@ def verify_response(gateway):
 
             # check verification success
             if verified:
-                recharge_data.update(txn_order_id=request.form['TXNID'])
+                data.update(txn_order_id=request.form['TXNID'])
                 # final status verification
                 final_status_code = verify_final_status(
                     session[f'{session_var_prefix}_order_id']
@@ -265,41 +266,66 @@ def verify_response(gateway):
 
                 # check if transaction successful
                 if final_status_code == '01':
-                    recharge_data.update(
+                    data.update(
                         txn_amount=request.form['TXNAMOUNT'],
                         txn_datetime=str(request.form['TXNDATE']),
                         txn_status='SUCCESS'
                     )
 
-                    # TopUp in MQS
-                    top_up = Recharge(app)
-                    top_up.request(
-                        session[f'{session_var_prefix}_customer_no'],
-                        session[f'{session_var_prefix}_plan_code']
-                    )
-                    top_up.response()
+                    # check transaction type: recharge or add plan
+                    if txn_type == 'recharge':
+                        # TopUp in MQS
+                        top_up = Recharge(app)
+                        top_up.request(
+                            session[f'{session_var_prefix}_customer_no'],
+                            session[f'{session_var_prefix}_plan_code']
+                        )
+                        top_up.response()
 
-                    recharge_data['topup_ref_id'] = top_up.ref_no
-                    recharge_data['topup_datetime'] = datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S.%f"
-                    )
+                        data['topup_ref_id'] = top_up.ref_no
+                        data['topup_datetime'] = datetime.now().\
+                            strftime("%Y-%m-%d %H:%M:%S.%f")
 
-                    # verify MQS TopUp status
-                    db_entry_status, status, msg, msg_stat = \
-                        verify_mqs_topup(top_up)
+                        # verify MQS TopUp status
+                        db_entry_status, status, msg, msg_stat = \
+                            verify_mqs_topup(top_up)
 
-                    recharge_data['topup_status'] = db_entry_status
-                    status = status
+                        data['topup_status'] = db_entry_status
+                        status = status
+
+                    elif txn_type == 'addplan':
+                        # AddPlan in MQS
+                        add_plan = AddPlan(app)
+                        add_plan.request(
+                            session[f'{session_var_prefix}_customer_no'],
+                            session[f'{session_var_prefix}_plan_code']
+                        )
+                        add_plan.response()
+
+                        data['addplan_ref_id'] = top_up.ref_no
+                        data['addplan_datetime'] = datetime.now().\
+                            strftime("%Y-%m-%d %H:%M:%S.%f")
+
+                        # verify MQS AddPlan status
+                        db_entry_status, status, msg, msg_stat = \
+                            verify_mqs_addplan(add_plan)
+
+                        data['addplan_status'] = db_entry_status
+                        status = status
+
                     flash(msg, msg_stat)
 
                 # Transaction Status failure
                 else:
-                    recharge_data.update(
+                    data.update(
                         txn_amount='',
                         txn_status='FAILURE',
                         topup_ref_id='',
                         topup_datetime='',
                         topup_status='',
+                        addplan_ref_id='',
+                        addplan_datetime='',
+                        addplan_status='',
                     )
                     status = 'unsuccessful'
                     flash(
@@ -309,13 +335,16 @@ def verify_response(gateway):
             # checksumhash verification failure
             # data tampered during transaction
             elif not verified:
-                recharge_data.update(
+                data.update(
                     txn_order_id='',
                     txn_amount='',
                     txn_status='CHECKSUM VERIFICATION FAILURE',
                     topup_ref_id='',
                     topup_datetime='',
                     topup_status='',
+                    addplan_ref_id='',
+                    addplan_datetime='',
+                    addplan_status='',
                 )
                 status = 'unsuccessful'
                 flash('Payment failed! Please try again.', 'danger')
@@ -324,6 +353,7 @@ def verify_response(gateway):
         elif gateway == 'razorpay':
             notes = session['notes']
             session_var_prefix = notes['pay_source']
+            txn_type = notes['txn_type']
             # store response data
             recharge_data = {
                 'customer_no': session[f'{session_var_prefix}_customer_no'],
@@ -335,49 +365,74 @@ def verify_response(gateway):
             verified = verify_signature(request.form)
             # signature verification success
             if verified:
-                recharge_data.update(
+                data.update(
                     txn_order_id=request.form['razorpay_order_id'],
                     txn_amount=session[f'{session_var_prefix}_amount'],
                     txn_status='SUCCESS',
                 )
 
-                # TopUp in MQS
-                top_up = Recharge(app)
-                top_up.request(
-                    session[f'{session_var_prefix}_customer_no'],
-                    session[f'{session_var_prefix}_plan_code']
-                )
-                top_up.response()
+                if txn_type == 'recharge':
+                    # TopUp in MQS
+                    top_up = Recharge(app)
+                    top_up.request(
+                        session[f'{session_var_prefix}_customer_no'],
+                        session[f'{session_var_prefix}_plan_code']
+                    )
+                    top_up.response()
 
-                recharge_data['topup_ref_id'] = top_up.ref_no
-                recharge_data['topup_datetime'] = datetime.now().strftime(
-                    "%Y-%m-%d %H:%M:%S.%f"
-                )
+                    data['topup_ref_id'] = top_up.ref_no
+                    data['topup_datetime'] = datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S.%f"
+                    )
 
-                # verify MQS TopUp status
-                db_entry_status, status, msg, msg_stat = \
-                    verify_mqs_topup(top_up)
+                    # verify MQS TopUp status
+                    db_entry_status, status, msg, msg_stat = \
+                        verify_mqs_topup(top_up)
 
-                recharge_data['topup_status'] = db_entry_status
-                status = status
+                    recharge_data['topup_status'] = db_entry_status
+                    status = status
+
+                elif txn_type == 'addplan':
+                    # AddPlan in MQS
+                    add_plan = AddPlan(app)
+                    add_plan.request(
+                        session[f'{session_var_prefix}_customer_no'],
+                        session[f'{session_var_prefix}_plan_code']
+                    )
+                    add_plan.response()
+
+                    data['addplan_ref_id'] = top_up.ref_no
+                    data['addplan_datetime'] = datetime.now().\
+                        strftime("%Y-%m-%d %H:%M:%S.%f")
+
+                    # verify MQS AddPlan status
+                    db_entry_status, status, msg, msg_stat = \
+                        verify_mqs_addplan(add_plan)
+
+                    data['addplan_status'] = db_entry_status
+                    status = status
+
                 flash(msg, msg_stat)
 
             # signature verification failure
             # data tampered during transaction
             else:
-                recharge_data.update(
+                data.update(
                     txn_order_id='',
                     txn_amount='',
                     txn_status='SIGNATURE VERIFICATION FAILURE',
                     topup_ref_id='',
                     topup_datetime='',
                     topup_status='',
+                    addplan_ref_id='',
+                    addplan_datetime='',
+                    addplan_status='',
                 )
                 status = 'unsuccessful'
-                flash('Recharge failed! Please try again.', 'danger')
+                flash('Transaction failed! Please try again.', 'danger')
 
-        # add recharge data to db async
-        add_recharge_data_to_db.delay(recharge_data)
+        # add transaction data to db async
+        add_txn_data_to_db.delay(data)
 
         return redirect(
             url_for(
@@ -867,7 +922,8 @@ def recharge():
                     customer_no=session['portal_customer_no'],
                     customer_mobile_no=customer_data['contact_no'],
                     amount=request.form['amount'],
-                    pay_source='portal',
+                    # _ is used as the delimiter; check Paytm docs
+                    pay_source='portal_recharge',
                 )
 
             elif request.form['gateway'] == 'razorpay':
@@ -877,7 +933,8 @@ def recharge():
                     customer_no=session['portal_customer_no'],
                     customer_mobile_no=customer_data['contact_no'],
                     amount=session['portal_amount'],
-                    pay_source='portal',
+                    # list is used for passing data; check Razorpay docs
+                    pay_source=['portal', 'recharge'],
                 )
 
             return render_template(
@@ -940,7 +997,8 @@ def add_plan():
                     customer_no=session['portal_customer_no'],
                     customer_mobile_no=customer_data['contact_no'],
                     amount=request.form['amount'],
-                    pay_source='portal',
+                    # _ is used as the delimiter; check Paytm docs
+                    pay_source='portal_addplan',
                 )
 
             elif request.form['gateway'] == 'razorpay':
@@ -950,7 +1008,8 @@ def add_plan():
                     customer_no=session['portal_customer_no'],
                     customer_mobile_no=customer_data['contact_no'],
                     amount=session['portal_amount'],
-                    pay_source='portal',
+                    # list is used for passing data; check Razorpay docs
+                    pay_source=['portal', 'addplan'],
                 )
 
             return render_template(

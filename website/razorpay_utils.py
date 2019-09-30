@@ -18,7 +18,8 @@ def make_order(order_id, customer_no, customer_mobile_no, amount, pay_source):
         'payment_capture': '1',
         'notes': {
             'customer_no': customer_no,
-            'pay_source': pay_source,
+            'pay_source': pay_source[0],
+            'txn_type': pay_source[1],
         },
     }
 

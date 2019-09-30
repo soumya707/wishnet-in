@@ -99,6 +99,48 @@ class Recharge(MQSAPI):
             self.error_no = res_tree.findtext('.//ERRORNO')
 
 
+class AddPlan(MQSAPI):
+    """Define AddContract API."""
+
+    def __init__(self, app, **kwargs):
+        super(AddPlan, self).__init__(app, **kwargs)
+        self.response_code = None
+        self.response_msg = None
+        self.txn_no = None
+        self.txn_msg = None
+        self.error_no = None
+
+    def request(self, cust_id, plan_code):
+        """Send request for AddContract."""
+
+        addplan_info_xml = '''
+        <REQUESTINFO>
+            <KEY_NAMEVALUE>
+                <KEY_NAME>CUSTOMERNO</KEY_NAME>
+                <KEY_VALUE>{}</KEY_VALUE>
+            </KEY_NAMEVALUE>
+            <CONTRACTINFO>
+                <PLANINFO>
+                    <PLANCODE>{}</PLANCODE>
+                </PLANINFO>
+            </CONTRACTINFO>
+        </REQUESTINFO>'''.format(cust_id, plan_code)
+
+        res = self.client.service.AddContract(addplan_info_xml, self.ref_no)
+
+        self.response_code, self.response_msg = res[0], res[1]
+
+    def response(self):
+        """Parse response for AddContract."""
+
+        if self.response_code == 200:
+            res_tree = et.fromstring(self.response_msg)
+
+            self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
+            self.txn_msg = res_tree.findtext('.//MESSAGE')
+            self.error_no = res_tree.findtext('.//ERRORNO')
+
+
 class GetCustomerInfo(MQSAPI):
     """Define GetCustomerInfo API."""
 
