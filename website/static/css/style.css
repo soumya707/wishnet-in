@@ -251,9 +251,16 @@ nav {
 
 /* ABOUT US */
 
+/* About us */
+.about-card {
+    min-width: 15rem;
+    max-width: 20rem;
+}
+
 /* Ventures */
 .venture-img {
-    height: 15em;
+    height: 15rem;
+    width: 100%;
 }
 
 /* PAYMENT */

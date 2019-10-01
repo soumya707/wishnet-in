@@ -17,23 +17,23 @@ Wish Net today is present in Kolkata and across many cities and towns in Bengal.
 </div> <!-- container -->
 
 <div class="container p-3 bg-light-grey">
-  <div class="card-deck">
+  <div class="card-deck justify-content-sm-center">
 
-    <div class="card shadow">
+    <div class="card shadow about-card">
       <div class="card-body">
         <h4 class="card-title text-center text-red">OUR VISION</h4>
         <p class="card-text text-justify py-1">An organization that adds value to the entire eco-system including the customers, business partners, employees and the society.</p>
       </div>
     </div>
 
-    <div class="card shadow">
+    <div class="card shadow about-card">
       <div class="card-body">
         <h4 class="card-title text-center text-red">OUR MISSION</h4>
         <p class="card-text text-justify py-1">It is important to bring to our customers the virtues of internet at affordable rates without compromising on the experience and security aspects.</p>
       </div>
     </div>
 
-    <div class="card shadow">
+    <div class="card shadow about-card">
       <div class="card-body">
         <h4 class="card-title text-center text-red">OUR VALUES</h4>
         <p class="card-text text-justify py-1">Achieving the steepest organizational goals without deviating from the path of discipline and integrity.</p>
@@ -51,7 +51,7 @@ Wish Net today is present in Kolkata and across many cities and towns in Bengal.
 
   <div class="row text-center border">
     {% for venture in ventures %}
-    <div class="col-sm-6 {{ loop.cycle('bg-white', 'bg-light-grey')}}">
+    <div class="col-md-6 {{ loop.cycle('bg-white', 'bg-light-grey')}}">
       <img src="{{ url_for('static', filename='img/logo/{}.svg'.format(venture.pic)) }}"
            class="venture-img">
       <h1 class="text-red text-center">{{ venture.name }}</h1>
