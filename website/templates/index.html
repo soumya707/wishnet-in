@@ -119,18 +119,18 @@
     <div class="heading-underline-center"></div>
   </h3>
 
-    <div class="card-deck p-3 pb-5 text-center">
+    <div class="card-deck justify-content-around p-3 pb-5 text-center">
 
       {% for download in downloads %}
       <div class="card shadow-lg download-cards">
         <div class="row no-gutters">
 
-          <div class="col-4">
+          <div class="col-sm-4">
             <img src="{{ url_for('static', filename='img/downloads/{}.svg'.format(download.img_id)) }}"
                  class="card-img download-img pt-2">
           </div> <!-- col -->
 
-          <div class="col-8">
+          <div class="col-sm-8">
             <div class="card-body">
               <h4 class="text-red text-left">{{ download.name }}</h4>
               <p class="card-text text-justify">{{ download.text }}</p>

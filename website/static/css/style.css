@@ -162,6 +162,7 @@ nav {
 /* Best plans */
 .plan-card {
     transition: 0.3s;
+    min-width: 11rem;
 }
 
 .plan-card:hover {
@@ -175,6 +176,8 @@ nav {
 /* Downloads */
 .download-cards {
     box-shadow: 3px 3px 2px #808080 !important;
+    min-width: 300px;
+    max-width: 300px;
 }
 
 .download-img {
