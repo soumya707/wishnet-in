@@ -176,8 +176,8 @@ nav {
 /* Downloads */
 .download-cards {
     box-shadow: 3px 3px 2px #808080 !important;
-    min-width: 300px;
-    max-width: 300px;
+    min-width: 18rem;
+    max-width: 21rem;
 }
 
 .download-img {
@@ -245,16 +245,27 @@ nav {
 }
 
 /* LOCATE US */
+.hq-card {
+    min-width: 20rem;
+}
+
 .hq-card img {
     height: 10rem;
+}
+
+.regional-office-card {
+    min-width: 20rem;
+    max-width: 25rem;
 }
 
 /* ABOUT US */
 
 /* About us */
 .about-card {
-    min-width: 15rem;
-    max-width: 20rem;
+    min-width: 20rem;
+    max-width: 25rem;
+    min-height: 11rem;
+    max-height: 11rem;
 }
 
 /* Ventures */
