@@ -847,7 +847,7 @@ def set_password():
     )
 
 
-@app.route('/portal', methods=['GET'])
+@app.route('/portal/', methods=['GET'])
 def portal():
     """Route for self-care portal."""
     # user not logged in
@@ -1280,9 +1280,9 @@ def transaction_history():
         )
 
 
-@app.route('/portal/change_password', methods=['GET', 'POST'])
-def change_password():
-    """Route for self-care portal password change."""
+@app.route('/portal/update_profile', methods=['GET', 'POST'])
+def update_profile():
+    """Route for self-care portal profile update."""
     # user not logged in
     if not session.get('user_logged_in'):
         flash('You have not logged in yet.', 'danger')
@@ -1328,10 +1328,10 @@ def change_password():
                     , 'danger'
                 )
 
-            return redirect(url_for('change_password'))
+            return redirect(url_for('update_profile'))
 
         # GET request
         return render_template(
-            'change_password.html',
+            'update_profile.html',
             form=form,
         )
