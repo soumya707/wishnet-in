@@ -729,7 +729,10 @@ def forgot():
             redirect_to = 'verify_otp'
 
             # send SMS
-            mobile_no = customer.mobile_no
+            customer_info = CustomerInfo.query.filter_by(
+                customer_no=form.customer_no.data
+            ).first()
+            mobile_no = customer_info.mobile_no
             sms_msg = (
                 '{} is your OTP for resetting password. Team Wishnet.'
             ).format(totp.generate().token)
