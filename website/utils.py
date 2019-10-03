@@ -20,11 +20,7 @@ def order_no_gen():
 def send_sms(url, data):
     """Send SMS to customer."""
     res = requests.get(url, params=data)
-
-    if res.status_code == requests.codes.accepted:
-        return True
-    else:
-        return False
+    return res.ok
 
 
 def verify_mqs_topup(topup):
