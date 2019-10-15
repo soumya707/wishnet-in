@@ -141,7 +141,7 @@ def get_cust_no():
                     'username': app.config['SMS_USERNAME'],
                     'password': app.config['SMS_PASSWORD'],
                     'from': app.config['SMS_SENDER'],
-                    'to': f'91{mobile_no}',
+                    'to': '91{}'.format(mobile_no),
                     'text': sms_msg,
                 }
             )
@@ -679,7 +679,7 @@ def register():
                     'username': app.config['SMS_USERNAME'],
                     'password': app.config['SMS_PASSWORD'],
                     'from': app.config['SMS_SENDER'],
-                    'to': f'91{mobile_no}',
+                    'to': '91{}'.format(mobile_no),
                     'text': sms_msg,
                 }
             )
@@ -743,7 +743,7 @@ def forgot():
                     'username': app.config['SMS_USERNAME'],
                     'password': app.config['SMS_PASSWORD'],
                     'from': app.config['SMS_SENDER'],
-                    'to': f'91{mobile_no}',
+                    'to': '91{}'.format(mobile_no),
                     'text': sms_msg,
                 }
             )
