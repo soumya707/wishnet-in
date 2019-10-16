@@ -351,7 +351,7 @@ def verify_response(gateway):
 
         # RAZORPAY
         elif gateway == 'razorpay':
-            notes = session['notes']
+            notes = request.form['notes']
             session_var_prefix = notes['pay_source']
             txn_type = notes['txn_type']
             # store response data
@@ -668,7 +668,10 @@ def register():
             redirect_to = 'verify_otp'
 
             # send SMS
-            mobile_no = customer.mobile_no
+            customer_info = CustomerInfo.query.filter_by(
+                customer_no=form.customer_no.data
+            ).first()
+            mobile_no = customer_info.mobile_no
             sms_msg = (
                 '{} is your OTP for self-care registration. Team Wishnet.'
             ).format(totp.generate().token)
