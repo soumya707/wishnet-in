@@ -295,20 +295,20 @@ def verify_response(gateway):
 
                     elif txn_type == 'addplan':
                         # AddPlan in MQS
-                        add_plan = AddPlan(app)
-                        add_plan.request(
+                        addplan = AddPlan(app)
+                        addplan.request(
                             session[f'{session_var_prefix}_customer_no'],
                             session[f'{session_var_prefix}_plan_code']
                         )
-                        add_plan.response()
+                        addplan.response()
 
-                        data['addplan_ref_id'] = top_up.ref_no
+                        data['addplan_ref_id'] = addplan.ref_no
                         data['addplan_datetime'] = datetime.now().\
                             strftime("%Y-%m-%d %H:%M:%S.%f")
 
                         # verify MQS AddPlan status
                         db_entry_status, status, msg, msg_stat = \
-                            verify_mqs_addplan(add_plan)
+                            verify_mqs_addplan(addplan)
 
                         data['addplan_status'] = db_entry_status
                         status = status
