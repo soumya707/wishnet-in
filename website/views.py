@@ -1198,8 +1198,8 @@ def close_docket():
             close_ticket.request(ticket_no)
             close_ticket.response()
 
-            # check if success
-            if close_ticket.error_no == '0':
+            # check if success or closed by non-customer
+            if close_ticket.error_no == '0' or close_ticket.error_no == '99070':
                 ticket = Ticket.query.filter_by(
                     ticket_no=session['portal_open_ticket_no']
                 ).first()
