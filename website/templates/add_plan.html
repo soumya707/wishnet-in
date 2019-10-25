@@ -71,6 +71,16 @@
         Razorpay
       </label>
     </div>
+
+    <!-- TERMS AND CONDITIONS -->
+    <div class="form-check form-check pt-2">
+      <input class="form-check-input" type="checkbox" name="t&c" id="t-and-c"
+             value="paytm" form="payment-form" required>
+      <label class="form-check-label" for="t-and-c">
+        I have read and agree to the <a href="{{ url_for('terms_and_conditions') }}">Terms and Conditions</a>
+      </label>
+    </div>
+
     <!-- PAY -->
     <div class="pt-3">
       <input type="submit" class="btn btn-red" name="pay" value="Pay"

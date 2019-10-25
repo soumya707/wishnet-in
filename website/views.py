@@ -552,6 +552,12 @@ def privacy():
     return render_template('privacy.html')
 
 
+@app.route('/terms_and_conditions')
+def terms_and_conditions():
+    """Route for terms and conditions."""
+    return render_template('terms_and_conditions.html')
+
+
 # Self-care routes
 
 @app.route('/login', methods=['GET', 'POST'])
