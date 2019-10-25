@@ -2,9 +2,9 @@
 
 """Define helper functions for accessing MQS API."""
 
-from datetime import datetime
 import random
 import string
+from datetime import datetime
 
 from lxml import etree as et
 from suds.client import Client
