@@ -76,20 +76,20 @@ class GetCustomerNumberForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     """Class for authentication form."""
-    customer_no = StringField('Customer Number', validators=[InputRequired()])
+    customer_no = StringField('Customer ID', validators=[InputRequired()])
     password = PasswordField('Password', validators=[InputRequired()])
     submit = SubmitField('Sign in')
 
 
 class RegistrationForm(FlaskForm):
     """Class for registration form."""
-    customer_no = StringField('Customer Number', validators=[InputRequired()])
+    customer_no = StringField('Customer ID', validators=[InputRequired()])
     submit = SubmitField('Get OTP')
 
 
 class ForgotPasswordForm(FlaskForm):
     """Class for forgot password form."""
-    customer_no = StringField('Customer Number', validators=[InputRequired()])
+    customer_no = StringField('Customer ID', validators=[InputRequired()])
     submit = SubmitField('Get OTP')
 
 
