@@ -15,7 +15,7 @@ class RechargeForm(FlaskForm):
     user_id = StringField(
         'User ID',
         validators=[InputRequired()],
-        render_kw={'placeholder': 'Customer Number'})
+        render_kw={'placeholder': 'Customer ID'})
     submit = SubmitField('Insta-Recharge')
 
 
