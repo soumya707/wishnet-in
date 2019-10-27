@@ -291,6 +291,12 @@ def verify_response(gateway):
                             verify_mqs_topup(top_up)
 
                         data['topup_status'] = db_entry_status
+
+                        # fill empty string for the add plan data
+                        data['addplan_ref_id'] = ''
+                        data['addplan_datetime'] = ''
+                        data['addplan_status'] = ''
+
                         status = status
 
                     elif txn_type == 'addplan':
@@ -311,6 +317,12 @@ def verify_response(gateway):
                             verify_mqs_addplan(addplan)
 
                         data['addplan_status'] = db_entry_status
+
+                        # fill empty string for the topup data
+                        data['topup_ref_id'] = ''
+                        data['topup_datetime'] = ''
+                        data['topup_status'] = ''
+
                         status = status
 
                     flash(msg, msg_stat)
@@ -390,6 +402,12 @@ def verify_response(gateway):
                         verify_mqs_topup(top_up)
 
                     recharge_data['topup_status'] = db_entry_status
+
+                    # fill empty string for the add plan data
+                    data['addplan_ref_id'] = ''
+                    data['addplan_datetime'] = ''
+                    data['addplan_status'] = ''
+
                     status = status
 
                 elif txn_type == 'addplan':
@@ -410,6 +428,12 @@ def verify_response(gateway):
                         verify_mqs_addplan(addplan)
 
                     data['addplan_status'] = db_entry_status
+
+                    # fill empty string for the topup data
+                    data['topup_ref_id'] = ''
+                    data['topup_datetime'] = ''
+                    data['topup_status'] = ''
+
                     status = status
 
                 flash(msg, msg_stat)
