@@ -73,6 +73,41 @@ class EditorModelView(ModelView):
         )
 
 
+class NOCModelView(ModelView):
+    def is_accessible(self):
+        return (
+            current_user.is_active and
+            current_user.is_authenticated and
+            (current_user.has_role('noc') or
+             current_user.has_role('editor') or
+             current_user.has_role('superuser'))
+        )
+
+
+class HRModelView(ModelView):
+    def is_accessible(self):
+        return (
+            current_user.is_active and
+            current_user.is_authenticated and
+            (current_user.has_role('hr') or
+             current_user.has_role('noc') or
+             current_user.has_role('editor') or
+             current_user.has_role('superuser'))
+        )
+
+
+class DeskModelView(ModelView):
+    def is_accessible(self):
+        return (
+            current_user.is_active and
+            current_user.is_authenticated and
+            (current_user.has_role('desk') or
+             current_user.has_role('noc') or
+             current_user.has_role('editor') or
+             current_user.has_role('superuser'))
+        )
+
+
 class CustomFileView(FileAdmin):
 
     allowed_extensions = (

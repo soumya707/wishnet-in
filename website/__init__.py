@@ -58,8 +58,7 @@ Session(app)
 from website import views
 from website.models import *
 from website.security.models import Role, User
-from website.security.models import (
-    CustomFileView, EditorModelView, SuperuserModelView)
+from website.security.models import *
 
 
 # Setup Flask-Security
@@ -80,25 +79,23 @@ admin.add_view(EditorModelView(BestPlans, db.session, category='Index'))
 admin.add_view(EditorModelView(Downloads, db.session, category='Index'))
 admin.add_view(EditorModelView(Ventures, db.session, category='Index'))
 admin.add_view(EditorModelView(UnlimitedPlan, db.session, category='Plans'))
-admin.add_view(EditorModelView(FTTHPlan, db.session, category='Plans'))
-admin.add_view(EditorModelView(BizPlan, db.session, category='Plans'))
-admin.add_view(EditorModelView(FUPPlan, db.session, category='Plans'))
-admin.add_view(EditorModelView(RegionalOffices, db.session, category='Info'))
-admin.add_view(EditorModelView(FAQ, db.session, category='Info'))
-admin.add_view(EditorModelView(JobVacancy, db.session, category='Info'))
-admin.add_view(SuperuserModelView(
-    CustomerInfo, db.session, category='Customer Info'))
-admin.add_view(SuperuserModelView(
+admin.add_view(NOCModelView(FTTHPlan, db.session, category='Plans'))
+admin.add_view(NOCModelView(BizPlan, db.session, category='Plans'))
+admin.add_view(NOCModelView(FUPPlan, db.session, category='Plans'))
+admin.add_view(HRModelView(RegionalOffices, db.session, category='Info'))
+admin.add_view(HRModelView(FAQ, db.session, category='Info'))
+admin.add_view(HRModelView(JobVacancy, db.session, category='Info'))
+admin.add_view(NOCModelView(CustomerInfo, db.session, category='Customer Info'))
+admin.add_view(NOCModelView(
     CustomerLogin, db.session, category='Customer Info'))
-admin.add_view(EditorModelView(
+admin.add_view(DeskModelView(
     NewConnection, db.session, category='New Connection'))
-admin.add_view(EditorModelView(
+admin.add_view(NOCModelView(
     AvailableLocations, db.session, category='New Connection'))
-admin.add_view(EditorModelView(TariffInfo, db.session, category='Transaction'))
-admin.add_view(EditorModelView(RechargeEntry, db.session,
-                               category='Transaction'))
-admin.add_view(EditorModelView(TicketInfo, db.session, category='Ticket'))
-admin.add_view(EditorModelView(Ticket, db.session, category='Ticket'))
+admin.add_view(NOCModelView(TariffInfo, db.session, category='Transaction'))
+admin.add_view(DeskModelView(RechargeEntry, db.session, category='Transaction'))
+admin.add_view(NOCModelView(TicketInfo, db.session, category='Ticket'))
+admin.add_view(NOCModelView(Ticket, db.session, category='Ticket'))
 
 
 # define a context processor for merging flask-admin's template context into the
