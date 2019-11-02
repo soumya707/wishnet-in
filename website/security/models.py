@@ -55,6 +55,11 @@ class User(db.Model, UserMixin):
 
 # Flask-Admin access-based views
 class SuperuserModelView(ModelView):
+
+    # export models
+    can_export = True
+    export_types = ['csv', 'xlsx']
+
     def is_accessible(self):
         return (
             current_user.is_active and
@@ -74,6 +79,11 @@ class EditorModelView(ModelView):
 
 
 class NOCModelView(ModelView):
+
+    # export models
+    can_export = True
+    export_types = ['csv', 'xlsx']
+
     def is_accessible(self):
         return (
             current_user.is_active and
@@ -97,6 +107,11 @@ class HRModelView(ModelView):
 
 
 class DeskModelView(ModelView):
+
+    # export models
+    can_export = True
+    export_types = ['csv', 'xlsx']
+
     def is_accessible(self):
         return (
             current_user.is_active and
