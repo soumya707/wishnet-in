@@ -60,6 +60,10 @@ class SuperuserModelView(ModelView):
     can_export = True
     export_types = ['csv', 'xlsx']
 
+    # use modals for adding and editing
+    create_modal = True
+    edit_modal = True
+
     def is_accessible(self):
         return (
             current_user.is_active and
@@ -83,6 +87,10 @@ class NOCModelView(ModelView):
     # export models
     can_export = True
     export_types = ['csv', 'xlsx']
+
+    # use modals for adding and editing
+    create_modal = True
+    edit_modal = True
 
     def is_accessible(self):
         return (
@@ -111,6 +119,10 @@ class DeskModelView(ModelView):
     # export models
     can_export = True
     export_types = ['csv', 'xlsx']
+
+    # use modals for adding and editing
+    create_modal = True
+    edit_modal = True
 
     def is_accessible(self):
         return (
