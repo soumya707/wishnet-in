@@ -64,6 +64,9 @@ class SuperuserModelView(ModelView):
     create_modal = True
     edit_modal = True
 
+    # allow setting page size
+    can_set_page_size = True
+
     def is_accessible(self):
         return (
             current_user.is_active and
@@ -91,6 +94,9 @@ class NOCModelView(ModelView):
     # use modals for adding and editing
     create_modal = True
     edit_modal = True
+
+    # allow setting page size
+    can_set_page_size = True
 
     def is_accessible(self):
         return (
@@ -123,6 +129,9 @@ class DeskModelView(ModelView):
     # use modals for adding and editing
     create_modal = True
     edit_modal = True
+
+    # allow setting page size
+    can_set_page_size = True
 
     def is_accessible(self):
         return (
