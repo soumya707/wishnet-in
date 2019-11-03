@@ -292,7 +292,7 @@ class RechargeEntry(db.Model):
         return self.wishnet_payment_order_id
 
 
-# Retrieve customer number
+# Customer information
 class CustomerInfo(db.Model):
     """Class for representing customer basic info."""
 
@@ -309,7 +309,7 @@ class CustomerInfo(db.Model):
         return self.customer_no
 
 
-# Get self-login details
+# Customer self-care portal details
 class CustomerLogin(db.Model):
     """Class for representing customer login authentication."""
 
@@ -323,7 +323,27 @@ class CustomerLogin(db.Model):
         return self.customer_no
 
 
-# Ticket information
+# Self-care profile update requests
+class UpdateProfileRequest(db.Model):
+    """Class for representing self-care profile update requests."""
+
+    __bind_key__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_no = db.Column(db.String(100), nullable=False)
+    new_phone_no = db.Column(db.String(15), nullable=True)
+    new_email = db.Column(db.String(100), nullable=True)
+    status = db.Column(db.Integer, nullable=False, default=0)
+    request_date = db.Column(db.Date(), nullable=False,
+                             default=datetime.now().astimezone().date())
+    request_time = db.Column(db.Time(), nullable=False,
+                             default=datetime.now().astimezone().time())
+
+    def __str__(self):
+        return self.customer_no
+
+
+# Ticket templates
 class TicketInfo(db.Model):
     """Class for representing information regarding tickets."""
 
@@ -339,7 +359,7 @@ class TicketInfo(db.Model):
         return self.ticket_nature_desc
 
 
-# Save and retrieve tickets
+# Ticket information
 class Ticket(db.Model):
     """Class for representing tickets."""
 
