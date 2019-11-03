@@ -103,3 +103,15 @@ def add_new_ticket_to_db(data):
     )
     db.session.add(ticket)
     db.session.commit()
+
+
+@celery.task
+def add_profile_update_request_to_db(data):
+    """Asynchronously add self-care profile update request to database."""
+    update_profile = UpdateProfileRequest(
+        customer_no=data['customer_no'],
+        new_phone_no=data['new_phone_no'],
+        new_email=data['new_email'],
+    )
+    db.session.add(update_profile)
+    db.session.commit()

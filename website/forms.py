@@ -109,8 +109,8 @@ class SetPasswordForm(FlaskForm):
     submit = SubmitField('Set New Password')
 
 
-class UpdateProfileForm(FlaskForm):
-    """Class for updating profile form."""
+class ChangePasswordForm(FlaskForm):
+    """Class for changing password form."""
     old_password = PasswordField('Old Password', validators=[
         InputRequired(),
     ])
@@ -122,6 +122,28 @@ class UpdateProfileForm(FlaskForm):
         InputRequired(),
     ])
     submit = SubmitField('Set New Password')
+
+
+class UpdateProfileForm(FlaskForm):
+    """Class for updating profile form."""
+    phone_no_msg = 'Invalid mobile no.'
+    email_msg = 'Invalid e-mail address'
+
+    new_phone_no = StringField(
+        'New mobile no.',
+        validators=[
+            Optional(),
+            Regexp(r'^\d{1,10}$', message=phone_no_msg)
+        ]
+    )
+    new_email_address = StringField(
+        'New e-mail address',
+        validators=[
+            Optional(),
+            Email(message=email_msg)
+        ]
+    )
+    submit = SubmitField('Submit Request')
 
 
 class NewTicketForm(FlaskForm):

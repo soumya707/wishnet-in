@@ -1316,16 +1316,16 @@ def transaction_history():
         )
 
 
-@app.route('/portal/update_profile', methods=['GET', 'POST'])
-def update_profile():
-    """Route for self-care portal profile update."""
+@app.route('/portal/change_password', methods=['GET', 'POST'])
+def change_password():
+    """Route for self-care portal password change."""
     # user not logged in
     if not session.get('user_logged_in'):
         flash('You have not logged in yet.', 'danger')
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
-        form = UpdateProfileForm()
+        form = ChangePasswordForm()
 
         if form.validate_on_submit():
             customer = CustomerLogin.query.filter_by(
@@ -1364,6 +1364,37 @@ def update_profile():
                     , 'danger'
                 )
 
+            return redirect(url_for('change_password'))
+
+        # GET request
+        return render_template(
+            'change_password.html',
+            form=form,
+        )
+
+
+@app.route('/portal/update_profile', methods=['GET', 'POST'])
+def update_profile():
+    """Route for self-care portal profile update."""
+    # user not logged in
+    if not session.get('user_logged_in'):
+        flash('You have not logged in yet.', 'danger')
+        return redirect(url_for('login'))
+    # user logged in
+    elif session.get('user_logged_in'):
+        form = UpdateProfileForm()
+
+        if form.validate_on_submit():
+            form_data = {
+                'customer_no': session['portal_customer_no'],
+                'new_phone_no': form.new_phone_no.data,
+                'new_email': form.new_email_address.data
+            }
+
+            # add data to db async
+            add_profile_update_request_to_db.delay(form_data)
+
+            flash('Profile update request sent successfully!', 'success')
             return redirect(url_for('update_profile'))
 
         # GET request
