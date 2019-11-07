@@ -375,3 +375,14 @@ class Ticket(db.Model):
     opening_date = db.Column(db.DateTime(), nullable=False,
                              default=datetime.now().astimezone())
     closing_date = db.Column(db.DateTime(), nullable=True)
+
+
+# Zone ID and plans
+class ZoneIDWithPlanCode(db.Model):
+    """Class for representing zone IDs with their plan code."""
+
+    __bind_key__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    zone_id = db.Column(db.String(50), nullable=False)
+    plan_code = db.Column(db.String(10), nullable=False)
