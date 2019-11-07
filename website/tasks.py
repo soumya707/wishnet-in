@@ -41,6 +41,8 @@ def add_new_connection_data_to_db(data):
         phone_no=data['phone_no'],
         email=data['email'],
         remark=data['remark'],
+        date=data['date'],
+        time=data['time'],
     )
     db.session.add(connection)
     db.session.commit()
@@ -100,6 +102,7 @@ def add_new_ticket_to_db(data):
         category_desc=data['category_desc'],
         nature_desc=data['nature_desc'],
         remarks=data['remarks'],
+        opening_date=data['opening_date'],
     )
     db.session.add(ticket)
     db.session.commit()
@@ -112,6 +115,8 @@ def add_profile_update_request_to_db(data):
         customer_no=data['customer_no'],
         new_phone_no=data['new_phone_no'],
         new_email=data['new_email'],
+        request_date=data['request_date'],
+        request_time=data['request_time'],
     )
     db.session.add(update_profile)
     db.session.commit()

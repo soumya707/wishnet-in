@@ -526,6 +526,8 @@ def new_conn():
             'phone_no': form.phone_no.data,
             'email': form.email_address.data,
             'remark': form.remark.data,
+            'date': datetime.now().astimezone().date(),
+            'time': datetime.now().astimezone().time(),
         }
 
         # add data to db async
@@ -1182,6 +1184,7 @@ def new_docket():
                         'category_desc': category_desc,
                         'nature_desc': nature_desc,
                         'remarks': remarks,
+                        'opening_date': datetime.now().astimezone(),
                     }
                     add_new_ticket_to_db(ticket_data)
 
@@ -1388,7 +1391,9 @@ def update_profile():
             form_data = {
                 'customer_no': session['portal_customer_no'],
                 'new_phone_no': form.new_phone_no.data,
-                'new_email': form.new_email_address.data
+                'new_email': form.new_email_address.data,
+                'request_date': datetime.now().astimezone().date(),
+                'request_time': datetime.now().astimezone().time(),
             }
 
             # add data to db async
