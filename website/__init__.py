@@ -90,6 +90,8 @@ admin.add_view(NOCModelView(
     CustomerLogin, db.session, category='Customer Info'))
 admin.add_view(NOCModelView(
     UpdateProfileRequest, db.session, category='Customer Info'))
+admin.add_view(NOCModelView(
+    ZoneIDWithPlanCode, db.session, category='Customer Info'))
 admin.add_view(DeskModelView(
     NewConnection, db.session, category='New Connection'))
 admin.add_view(NOCModelView(
