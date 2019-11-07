@@ -301,9 +301,13 @@ class CustomerInfo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_no = db.Column(db.String(100), nullable=False)
     customer_name = db.Column(db.String(400), nullable=False)
+    first_name = db.Column(db.String(50), nullable=True)
+    last_name = db.Column(db.String(50), nullable=True)
     user_name = db.Column(db.String(20), nullable=False)
     mobile_no = db.Column(db.String(15), nullable=True)
     ip_addr = db.Column(db.String(20), nullable=True)
+    zip_code = db.Column(db.String(10), nullable=True)
+    zone_id = db.Column(db.String(50), nullable=True)
 
     def __str__(self):
         return self.customer_no
