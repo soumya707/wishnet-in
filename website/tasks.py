@@ -115,6 +115,7 @@ def add_profile_update_request_to_db(data):
         customer_no=data['customer_no'],
         new_phone_no=data['new_phone_no'],
         new_email=data['new_email'],
+        status=data['status'],
         request_date=data['request_date'],
         request_time=data['request_time'],
     )

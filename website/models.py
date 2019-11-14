@@ -337,7 +337,7 @@ class UpdateProfileRequest(db.Model):
     customer_no = db.Column(db.String(100), nullable=False)
     new_phone_no = db.Column(db.String(15), nullable=True)
     new_email = db.Column(db.String(100), nullable=True)
-    status = db.Column(db.Integer, nullable=False, default=0)
+    status = db.Column(db.String(10), nullable=False)
     request_date = db.Column(db.Date(), nullable=False,
                              default=datetime.now().astimezone().date())
     request_time = db.Column(db.Time(), nullable=False,

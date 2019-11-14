@@ -71,6 +71,25 @@ def verify_mqs_addplan(add_plan):
     return db_entry_status, status, msg, msg_stat
 
 
+def verify_mqs_updateprofile(update_profile):
+    """Verify the update profile status in MQS."""
+    # success in MQS
+    if update_profile.error_no == '0':
+        db_entry_status = 'SUCCESS'
+        msg = 'Profile updated successfully!'
+        msg_stat = 'success'
+    # failure in MQS
+    else:
+        db_entry_status = 'FAILURE'
+        msg = (
+            'There was an error while updating your profile. '
+            'Please open a ticket or contact us.'
+        )
+        msg_stat = 'danger'
+
+    return db_entry_status, msg, msg_stat
+
+
 def generate_otp_secret(filepath):
     """Generates OTP secret key and stores it in filepath."""
     path = Path(filepath)

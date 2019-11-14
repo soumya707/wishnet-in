@@ -150,6 +150,8 @@ class GetCustomerInfo(MQSAPI):
         self.response_msg = None
         self.txn_no = None
         self.txn_msg = None
+        self.first_name = None
+        self.last_name = None
         self.name = None
         self.cust_no = None
         self.address = None
@@ -186,6 +188,8 @@ class GetCustomerInfo(MQSAPI):
 
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
+            self.first_name = res_tree.findtext('.//FIRSTNAME')
+            self.last_name = res_tree.findtext('.//LASTNAME')
             self.name = '{} {} {}'.format(
                 res_tree.findtext('.//FIRSTNAME').capitalize(),
                 res_tree.findtext('.//MIDDLENAME').capitalize(),
@@ -244,6 +248,8 @@ class GetCustomerInfo(MQSAPI):
     def to_dict(self):
         """Define interface to dict."""
         return {
+            'first_name': self.first_name,
+            'last_name': self.last_name,
             'name': self.name,
             'cust_no': self.cust_no,
             'address': self.address,
@@ -405,6 +411,123 @@ class CloseTicket(MQSAPI):
 
     def response(self):
         """Parse response for CloseTicket."""
+
+        if self.response_code == 200:
+            res_tree = et.fromstring(self.response_msg)
+
+            self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
+            self.txn_msg = res_tree.findtext('.//MESSAGE')
+            self.error_no = res_tree.findtext('.//ERRORNO')
+
+
+class UpdateProfile(MQSAPI):
+    """Define ModifyCustomer API."""
+
+    def __init__(self, app, **kwargs):
+        super(UpdateProfile, self).__init__(app, **kwargs)
+        self.response_code = None
+        self.response_msg = None
+        self.txn_no = None
+        self.txn_msg = None
+        self.error_no = None
+
+    def request(self, cust_id, first_name, last_name, email, mobile_no):
+        """Send request for UpdateProfile."""
+
+        # only email needs to be changed
+        if email and not mobile_no:
+            update_profile_info_xml = '''
+            <REQUESTINFO>
+                <KEY_NAMEVALUE>
+                    <KEY_NAME>CUSTOMERNO</KEY_NAME>
+                    <KEY_VALUE>{customer_no}</KEY_VALUE>
+                </KEY_NAMEVALUE>
+                <CUSTOMERINFO>
+                    <CUSTOMERTYPE>NORMAL</CUSTOMERTYPE>
+                    <CATEGORY>ISP</CATEGORY>
+                    <INDIVIDUAL>Y</INDIVIDUAL>
+                    <FIRSTNAME>{first_name}</FIRSTNAME>
+                    <LASTNAME>{last_name}</LASTNAME>
+                    <OPENTITY>WSUPD</OPENTITY>
+                    <CONTACTINFO>
+                        <EMAIL>{email}</EMAIL>
+                    </CONTACTINFO>
+                    <ADDRESSINFO>
+                    </ADDRESSINFO>
+                </CUSTOMERINFO>
+            </REQUESTINFO>'''.format(
+                customer_no=cust_id,
+                first_name=first_name,
+                last_name=last_name,
+                email=email
+            )
+
+        # only mobile no. needs to be changed
+        elif not email and mobile_no:
+            update_profile_info_xml = '''
+            <REQUESTINFO>
+                <KEY_NAMEVALUE>
+                    <KEY_NAME>CUSTOMERNO</KEY_NAME>
+                    <KEY_VALUE>{customer_no}</KEY_VALUE>
+                </KEY_NAMEVALUE>
+                <CUSTOMERINFO>
+                    <CUSTOMERTYPE>NORMAL</CUSTOMERTYPE>
+                    <CATEGORY>ISP</CATEGORY>
+                    <INDIVIDUAL>Y</INDIVIDUAL>
+                    <FIRSTNAME>{first_name}</FIRSTNAME>
+                    <LASTNAME>{last_name}</LASTNAME>
+                    <OPENTITY>WSUPD</OPENTITY>
+                    <CONTACTINFO>
+                        <MOBILEPHONE>{mobile_no}</MOBILEPHONE>
+                    </CONTACTINFO>
+                    <ADDRESSINFO>
+                    </ADDRESSINFO>
+                </CUSTOMERINFO>
+            </REQUESTINFO>'''.format(
+                customer_no=cust_id,
+                first_name=first_name,
+                last_name=last_name,
+                mobile_no=mobile_no
+            )
+
+        # both email and mobile no. needs to be changed
+        elif email and mobile_no:
+            update_profile_info_xml = '''
+            <REQUESTINFO>
+                <KEY_NAMEVALUE>
+                    <KEY_NAME>CUSTOMERNO</KEY_NAME>
+                    <KEY_VALUE>{customer_no}</KEY_VALUE>
+                </KEY_NAMEVALUE>
+                <CUSTOMERINFO>
+                    <CUSTOMERTYPE>NORMAL</CUSTOMERTYPE>
+                    <CATEGORY>ISP</CATEGORY>
+                    <INDIVIDUAL>Y</INDIVIDUAL>
+                    <FIRSTNAME>{first_name}</FIRSTNAME>
+                    <LASTNAME>{last_name}</LASTNAME>
+                    <OPENTITY>WSUPD</OPENTITY>
+                    <CONTACTINFO>
+                        <EMAIL>{email}</EMAIL>
+                        <MOBILEPHONE>{mobile_no}</MOBILEPHONE>
+                    </CONTACTINFO>
+                    <ADDRESSINFO>
+                    </ADDRESSINFO>
+                </CUSTOMERINFO>
+            </REQUESTINFO>'''.format(
+                customer_no=cust_id,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                mobile_no=mobile_no
+            )
+
+        res = self.client.service.ModifyCustomer(
+            update_profile_info_xml, self.ref_no
+        )
+
+        self.response_code, self.response_msg = res[0], res[1]
+
+    def response(self):
+        """Parse response for UpdateProfile."""
 
         if self.response_code == 200:
             res_tree = et.fromstring(self.response_msg)

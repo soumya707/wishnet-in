@@ -1388,10 +1388,25 @@ def update_profile():
         form = UpdateProfileForm()
 
         if form.validate_on_submit():
+            # Update profile details in MQS
+            profile = UpdateProfile(app)
+            profile.request(
+                cust_id=session['portal_customer_no'],
+                first_name=session['portal_customer_data']['first_name'],
+                last_name=session['portal_customer_data']['last_name'],
+                email=form.new_email_address.data,
+                mobile_no=form.new_phone_no.data
+            )
+            profile.response()
+
+            # verify MQS ModifyCustomer status
+            db_status, msg, msg_stat = verify_mqs_updateprofile(profile)
+
             form_data = {
                 'customer_no': session['portal_customer_no'],
                 'new_phone_no': form.new_phone_no.data,
                 'new_email': form.new_email_address.data,
+                'status': db_status,
                 'request_date': datetime.now().astimezone().date(),
                 'request_time': datetime.now().astimezone().time(),
             }
@@ -1399,7 +1414,7 @@ def update_profile():
             # add data to db async
             add_profile_update_request_to_db.delay(form_data)
 
-            flash('Profile update request sent successfully!', 'success')
+            flash(msg, msg_stat)
             return redirect(url_for('update_profile'))
 
         # GET request
