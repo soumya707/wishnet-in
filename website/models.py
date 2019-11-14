@@ -389,5 +389,6 @@ class ZoneIDWithPlanCode(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     zone_id = db.Column(db.String(50), nullable=False)
-    plan_code = db.Column(db.String(10), nullable=False)
+    plan_code = db.Column(db.String(50), nullable=False)
+    plan_code_mqs = db.Column(db.String(50), nullable=True)
     status = db.Column(db.String(10), nullable=False, default='ACTIVE')
