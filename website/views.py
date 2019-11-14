@@ -1059,14 +1059,38 @@ def add_plan():
             # check if session variable exists for available plans
             if not session.get('portal_available_plans'):
                 user_data = session['portal_customer_data']
+                zone_id = CustomerInfo.query\
+                                      .options(FromCache(CACHE))\
+                                      .filter_by(
+                                          customer_no=
+                                          session['portal_customer_no']
+                                      )\
+                                      .first()\
+                                      .zone_id
+                zone_eligible_plan_codes = [
+                    zone.plan_code_mqs
+                    for zone in ZoneIDWithPlanCode\
+                    .query.filter(
+                        and_(
+                            ZoneIDWithPlanCode.zone_id == zone_id,
+                            ZoneIDWithPlanCode.status == 'ACTIVE'
+                        )
+                    ).all()
+                ]
                 plans = {
                     row.plan_code: row
                     for row in TariffInfo.query.options(FromCache(CACHE)).all()
                 }
-                # get available plans
+
+                # get available plans for the user
                 # {plan_name: (price, plan_code) }
                 available_plan_codes = set(plans.keys()).\
                     difference(user_data['all_plans'])
+
+                # get eligible plans for the user (based on the zone ID)
+                eligible_plan_codes = available_plan_codes.\
+                    intersection(zone_eligible_plan_codes)
+
                 available_plans = {
                     plans[plan_code].plan_name: (
                         plans[plan_code].price,
