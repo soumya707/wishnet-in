@@ -13,7 +13,7 @@ from flask_sqlalchemy_caching import FromCache
 from flask_wtf.csrf import CSRFProtect
 from passlib.exc import MalformedTokenError, TokenError
 from passlib.hash import pbkdf2_sha256
-from sqlalchemy import or_
+from sqlalchemy import and_, or_
 
 from website import CACHE, TOTPFACTORY, app
 from website.forms import *
