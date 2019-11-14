@@ -26,7 +26,7 @@
 
       <div class="content-section">
 
-        <form method="POST">
+        <form method="POST" id="log-in-form">
           {{ form.hidden_tag() }}
           <fieldset class="form-group">
 
@@ -43,7 +43,7 @@
         </fieldset> <!-- fieldset -->
 
         <!-- SUBMIT -->
-        {{ render_submit(form.submit) }}
+        {{ render_submit(form.submit, id="log-in-btn") }}
 
       </form>
       </div> <!-- content-section -->
@@ -66,5 +66,24 @@
   </div> <!-- row -->
 
 </div> <!-- container -->
+
+{% endblock %}
+
+{% block scripts %}
+
+  {{ super() }}
+
+  <script>
+
+    $(document).ready(function() {
+
+        // loading stage for login request
+        $("#log-in-form").submit(function(event) {
+                $("#log-in-btn").val("Signing in...");
+        });
+
+    })
+
+  </script>
 
 {% endblock %}

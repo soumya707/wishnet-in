@@ -11,7 +11,7 @@
 
   <div class="content-section">
 
-    <form method="POST">
+    <form method="POST" id="update-profile-form">
       {{ form.hidden_tag() }}
       <fieldset class="form-group">
 
@@ -28,12 +28,31 @@
       </fieldset> <!-- fieldset -->
 
       <!-- SUBMIT -->
-      {{ render_submit(form.submit) }}
+      {{ render_submit(form.submit, id="update-profile-btn") }}
 
     </form>
 
   </div> <!-- content-section -->
 
 </div> <!-- col -->
+
+{% endblock %}
+
+{% block scripts %}
+
+  {{ super() }}
+
+  <script>
+
+    $(document).ready(function() {
+
+        // loading stage for updating profile request
+        $("#update-profile-form").submit(function(event) {
+                $("#update-profile-btn").val("Updating...");
+        });
+
+    })
+
+  </script>
 
 {% endblock %}

@@ -143,7 +143,7 @@ class UpdateProfileForm(FlaskForm):
             Email(message=email_msg)
         ]
     )
-    submit = SubmitField('Submit Request')
+    submit = SubmitField('Update')
 
 
 class NewTicketForm(FlaskForm):
