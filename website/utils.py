@@ -76,7 +76,10 @@ def verify_mqs_updateprofile(update_profile):
     # success in MQS
     if update_profile.error_no == '0':
         db_entry_status = 'SUCCESS'
-        msg = 'Profile updated successfully!'
+        msg = (
+            'Profile updated successfully! The changes will take effect the '
+            'next time you log in.'
+        )
         msg_stat = 'success'
     # failure in MQS
     else:
