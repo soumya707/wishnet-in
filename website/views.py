@@ -1099,8 +1099,9 @@ def add_plan():
                         plans[plan_code].validity,
                         plans[plan_code].plan_type,
                     )
-                    for plan_code in available_plan_codes
+                    for plan_code in eligible_plan_codes
                 }
+
                 # store in session variable
                 session['portal_available_plans'] = available_plans
 
