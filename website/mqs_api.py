@@ -448,7 +448,6 @@ class UpdateProfile(MQSAPI):
                     <INDIVIDUAL>Y</INDIVIDUAL>
                     <FIRSTNAME>{first_name}</FIRSTNAME>
                     <LASTNAME>{last_name}</LASTNAME>
-                    <OPENTITY>WSUPD</OPENTITY>
                     <CONTACTINFO>
                         <EMAIL>{email}</EMAIL>
                     </CONTACTINFO>
@@ -476,7 +475,6 @@ class UpdateProfile(MQSAPI):
                     <INDIVIDUAL>Y</INDIVIDUAL>
                     <FIRSTNAME>{first_name}</FIRSTNAME>
                     <LASTNAME>{last_name}</LASTNAME>
-                    <OPENTITY>WSUPD</OPENTITY>
                     <CONTACTINFO>
                         <MOBILEPHONE>{mobile_no}</MOBILEPHONE>
                     </CONTACTINFO>
@@ -504,7 +502,6 @@ class UpdateProfile(MQSAPI):
                     <INDIVIDUAL>Y</INDIVIDUAL>
                     <FIRSTNAME>{first_name}</FIRSTNAME>
                     <LASTNAME>{last_name}</LASTNAME>
-                    <OPENTITY>WSUPD</OPENTITY>
                     <CONTACTINFO>
                         <EMAIL>{email}</EMAIL>
                         <MOBILEPHONE>{mobile_no}</MOBILEPHONE>
