@@ -67,6 +67,19 @@ a:hover {
     background-color: #FF0000 !important;
 }
 
+.page-link {
+    color: #FF0000;
+}
+
+.page-link:hover, .page-link:focus {
+    color: #880000;
+}
+
+.page-item.active .page-link {
+    background-color: #FF0000;
+    border-color: #FF0000;
+}
+
 .btn-red {
     color: #fff;
     background-color: #FF0000;

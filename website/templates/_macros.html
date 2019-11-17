@@ -40,4 +40,41 @@
   <div class="form-group">
     {{ field(class_='btn btn-red', **kwargs) |safe }}
   </div>
+
+{% endmacro %}
+
+{# render pagination #}
+{% macro render_pagination(pagination, endpoint) %}
+
+  <ul class="pagination">
+      {# previous page #}
+      {% if pagination.has_prev %}
+        <li class="page-item">
+          <a href="{{ url_for(endpoint, page_num=pagination.prev_num) }}" class="page-link">&lt</a>
+        </li>
+      {% endif %}
+
+      {# pages #}
+      {% for page in pagination.iter_pages() %}
+        {% if page %}
+          {% if page != pagination.page %}
+            <li class="page-item">
+              <a href="{{ url_for(endpoint, page_num=page) }}" class="page-link">{{ page }}</a>
+            </li>
+          {% else %}
+            <li class="page-item active">
+              <a href="{{ url_for(endpoint, page_num=page) }}" class="page-link">{{ page }}</a>
+            </li>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+
+      {# next page #}
+      {% if pagination.has_next %}
+        <li class="page-item">
+          <a href="{{ url_for(endpoint, page_num=pagination.next_num) }}" class="page-link">&gt</a>
+        </li>
+      {% endif %}
+  </ul>
+
 {% endmacro %}
