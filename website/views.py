@@ -925,6 +925,7 @@ def portal():
 
         return render_template(
             'portal.html',
+            cust_no=session['portal_customer_no'],
             cust_data=session['portal_customer_data'],
             active_plans=session['portal_active_plans'],
         )
