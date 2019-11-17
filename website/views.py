@@ -297,8 +297,6 @@ def verify_response(gateway):
                         data['addplan_datetime'] = ''
                         data['addplan_status'] = ''
 
-                        status = status
-
                     elif txn_type == 'addplan':
                         # AddPlan in MQS
                         addplan = AddPlan(app)
@@ -322,8 +320,6 @@ def verify_response(gateway):
                         data['topup_ref_id'] = ''
                         data['topup_datetime'] = ''
                         data['topup_status'] = ''
-
-                        status = status
 
                     flash(msg, msg_stat)
 

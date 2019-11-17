@@ -1,4 +1,4 @@
-<!-- render field inline -->
+{# render field inline #}
 {% macro render_field_inline(field) %}
 
     {{ field.label(class_='sr-only') }}
@@ -6,37 +6,38 @@
 
 {% endmacro %}
 
-<!-- render submit inline -->
+{# render submit inline #}
 {% macro render_submit_inline(field) %}
 
     {{ field(class_='btn btn-red mb-2', **kwargs) |safe }}
 
 {% endmacro %}
 
-<!-- render field -->
+{# render field #}
 {% macro render_field(field) %}
 
-<div class="form-group">
-  {{ field.label(class_='form-control-label')  }}
+  <div class="form-group">
+    {{ field.label(class_='form-control-label')  }}
 
-  <!-- display error if invalid -->
-  {% if field.errors %}
-    {{ field(class_='form-control is-invalid') }}
-    <div class="invalid-feedback">
-      {% for error in field.errors %}
-        <span>{{ error }}</span>
-      {% endfor %}
-    </div>
-  {% else %}
-    {{ field(class_='form-control', **kwargs)  |safe}}
-  {% endif %}
+    {# display error if invalid #}
+    {% if field.errors %}
+      {{ field(class_='form-control is-invalid') }}
+      <div class="invalid-feedback">
+        {% for error in field.errors %}
+          <span>{{ error }}</span>
+        {% endfor %}
+      </div>
+    {% else %}
+      {{ field(class_='form-control', **kwargs)  |safe}}
+    {% endif %}
 
-</div> <!-- form-group -->
+  </div>
 
 {% endmacro %}
 
-<!-- render submit -->
+{# render submit #}
 {% macro render_submit(field) %}
+
   <div class="form-group">
     {{ field(class_='btn btn-red', **kwargs) |safe }}
   </div>
