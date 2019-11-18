@@ -392,3 +392,17 @@ class ZoneIDWithPlanCode(db.Model):
     plan_code = db.Column(db.String(50), nullable=False)
     plan_code_mqs = db.Column(db.String(50), nullable=True)
     status = db.Column(db.String(10), nullable=False, default='ACTIVE')
+
+
+# Mobile number update requests
+class MobileNumberUpdateRequest(db.Model):
+    """Class for representing mobile number update requests."""
+
+    __bind_key__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    old_phone_no = db.Column(db.String(10), nullable=False)
+    new_phone_no = db.Column(db.String(10), nullable=False)
+    username_or_ip_address = db.Column(db.String(50), nullable=False)
+    postal_code = db.Column(db.String(6), nullable=False)
+    status = db.Column(db.String(10), nullable=False, default='PENDING')
