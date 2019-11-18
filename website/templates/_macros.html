@@ -1,81 +1,82 @@
 {# render field inline #}
-{% macro render_field_inline(field) %}
+{% macro render_field_inline(field) -%}
 
     {{ field.label(class_='sr-only') }}
     {{ field(class_='form-control mb-2 mr-sm-2', **kwargs) |safe }}
 
-{% endmacro %}
+{%- endmacro %}
 
 {# render submit inline #}
-{% macro render_submit_inline(field) %}
+{% macro render_submit_inline(field) -%}
 
     {{ field(class_='btn btn-red mb-2', **kwargs) |safe }}
 
-{% endmacro %}
+{%- endmacro %}
 
 {# render field #}
-{% macro render_field(field) %}
+{% macro render_field(field) -%}
 
   <div class="form-group">
-    {{ field.label(class_='form-control-label')  }}
+    {{ field.label(class_='form-control-label', **kwargs) |safe  }}
 
     {# display error if invalid #}
-    {% if field.errors %}
+    {% if field.errors -%}
       {{ field(class_='form-control is-invalid') }}
       <div class="invalid-feedback">
-        {% for error in field.errors %}
+        {% for error in field.errors -%}
           <span>{{ error }}</span>
-        {% endfor %}
+        {%- endfor %}
       </div>
-    {% else %}
-      {{ field(class_='form-control', **kwargs)  |safe}}
-    {% endif %}
+    {# display field #}
+    {%- else %}
+      {{ field(class_='form-control') }}
+    {%- endif %}
 
   </div>
 
-{% endmacro %}
+{%- endmacro %}
 
 {# render submit #}
-{% macro render_submit(field) %}
+{% macro render_submit(field) -%}
 
   <div class="form-group">
     {{ field(class_='btn btn-red', **kwargs) |safe }}
   </div>
 
-{% endmacro %}
+{%- endmacro %}
 
 {# render pagination #}
-{% macro render_pagination(pagination, endpoint) %}
+{% macro render_pagination(pagination, endpoint) -%}
 
   <ul class="pagination">
       {# previous page #}
-      {% if pagination.has_prev %}
+      {% if pagination.has_prev -%}
         <li class="page-item">
           <a href="{{ url_for(endpoint, page_num=pagination.prev_num) }}" class="page-link">&lt</a>
         </li>
-      {% endif %}
+      {%- endif %}
 
       {# pages #}
-      {% for page in pagination.iter_pages() %}
-        {% if page %}
-          {% if page != pagination.page %}
+      {% for page in pagination.iter_pages() -%}
+        {% if page -%}
+          {% if page != pagination.page -%}
             <li class="page-item">
               <a href="{{ url_for(endpoint, page_num=page) }}" class="page-link">{{ page }}</a>
             </li>
-          {% else %}
+          {%- else %}
             <li class="page-item active">
               <a href="{{ url_for(endpoint, page_num=page) }}" class="page-link">{{ page }}</a>
             </li>
-          {% endif %}
-        {% endif %}
-      {% endfor %}
+          {%- endif %}
+        {%- endif %}
+      {%- endfor %}
 
       {# next page #}
-      {% if pagination.has_next %}
+      {% if pagination.has_next -%}
         <li class="page-item">
           <a href="{{ url_for(endpoint, page_num=pagination.next_num) }}" class="page-link">&gt</a>
         </li>
-      {% endif %}
+      {%- endif %}
   </ul>
 
-{% endmacro %}
+{%- endmacro %}

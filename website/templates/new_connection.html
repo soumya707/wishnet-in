@@ -31,7 +31,7 @@
             <div class="form-row">
               <!-- FIRST NAME -->
               <div class="col">
-                {{ render_field(form.first_name) }}
+                {{ render_field(form.first_name, class="required-field") }}
               </div> <!-- col -->
               <!-- MIDDLE NAME -->
               <div class="col">
@@ -39,33 +39,33 @@
               </div> <!-- col -->
               <!-- LAST NAME -->
               <div class="col">
-                {{ render_field(form.last_name) }}
+                {{ render_field(form.last_name, class="required-field") }}
               </div> <!-- col -->
             </div> <!-- form row -->
 
             <div class="form-row">
               <!-- ADDRESS -->
               <div class="col">
-                {{ render_field(form.address) }}
+                {{ render_field(form.address, class="required-field") }}
               </div> <!-- col -->
             </div> <!-- row -->
 
             <div class="form-row">
               <!-- LOCATION -->
               <div class="col">
-                {{ render_field(form.location) }}
+                {{ render_field(form.location, class="required-field") }}
               </div> <!-- col -->
               <!-- PIN CODE -->
               <div class="col">
-                {{ render_field(form.postal_code )}}
+                {{ render_field(form.postal_code, class="required-field" )}}
               </div> <!-- col -->
               <!-- MOBILE NO. -->
               <div class="col">
-                {{ render_field(form.phone_no) }}
+                {{ render_field(form.phone_no, class="required-field") }}
               </div> <!-- col -->
               <!-- E-MAIL ADDRESS -->
               <div class="col">
-                {{ render_field(form.email_address) }}
+                {{ render_field(form.email_address, class="required-field") }}
               </div> <!-- col -->
             </div> <!-- form-row -->
 
@@ -77,6 +77,9 @@
             </div> <!-- row -->
 
           </fieldset>
+
+          <!-- REQUIRED FIELDS INFORMATION -->
+          <p><span style="color:red;">*</span> indicates a required field</p>
 
           <!-- SUBMIT -->
           {{ render_submit(form.submit) }}
