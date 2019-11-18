@@ -134,3 +134,14 @@ def add_mobile_number_update_request_to_db(data):
     )
     db.session.add(update_mobile_no)
     db.session.commit()
+
+
+@celery.task
+def add_gst_update_request_to_db(data):
+    """Asynchronously add GST number update request to database."""
+    update_gst = GSTUpdateRequest(
+        customer_no=data['customer_no'],
+        gst_no=data['gst_no'],
+    )
+    db.session.add(update_gst)
+    db.session.commit()

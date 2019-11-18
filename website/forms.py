@@ -188,3 +188,16 @@ class MobileNumberUpdateRequestForm(FlaskForm):
     )
 
     submit = SubmitField('Submit Request')
+
+
+class UpdateGSTForm(FlaskForm):
+    """Class for updating GST information form."""
+    gst_msg = 'Invalid GST number'
+    gst_no = StringField(
+        'GST Number',
+        validators=[
+            InputRequired(),
+            Regexp(r'^[A-Z0-9]{15}$', message=gst_msg)
+        ]
+    )
+    submit = SubmitField('Submit Request')

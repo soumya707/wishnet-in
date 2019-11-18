@@ -56,6 +56,11 @@
           <i class="fas fa-user-edit pl-1"></i>
           <span class="pl-1">Update Profile</span>
         </a>
+        <a class="list-group-item list-group-item-action {% if request.path == url_for('update_gst') %}active{% endif %}"
+           href="{{ url_for('update_gst') }}">
+          <i class="fas fa-file-invoice pl-1"></i>
+          <span class="pl-1">Update GST Information</span>
+        </a>
         <a class="list-group-item list-group-item-action {% if request.path == url_for('logout') %}active{% endif %}"
            href="{{ url_for('logout') }}">
           <i class="fas fa-sign-out-alt pl-1"></i>

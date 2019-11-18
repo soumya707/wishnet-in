@@ -93,6 +93,8 @@ admin.add_view(NOCModelView(
 admin.add_view(NOCModelView(
     MobileNumberUpdateRequest, db.session, category='Customer Info'))
 admin.add_view(NOCModelView(
+    GSTUpdateRequest, db.session, category='Customer Info'))
+admin.add_view(NOCModelView(
     ZoneIDWithPlanCode, db.session, category='Customer Info'))
 admin.add_view(DeskModelView(
     NewConnection, db.session, category='New Connection'))

@@ -406,3 +406,15 @@ class MobileNumberUpdateRequest(db.Model):
     username_or_ip_address = db.Column(db.String(50), nullable=False)
     postal_code = db.Column(db.String(6), nullable=False)
     status = db.Column(db.String(10), nullable=False, default='PENDING')
+
+
+# GST number update requests
+class GSTUpdateRequest(db.Model):
+    """Class for representing GST update requests."""
+
+    __bind_key__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_no = db.Column(db.String(100), nullable=False)
+    gst_no = db.Column(db.String(15), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='NOT VERIFIED')

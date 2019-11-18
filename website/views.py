@@ -1477,3 +1477,38 @@ def update_profile():
             'update_profile.html',
             form=form,
         )
+
+
+@app.route('/portal/update_gst', methods=['GET', 'POST'])
+def update_gst():
+    """Route for self-care GST information update."""
+    # user not logged in
+    if not session.get('user_logged_in'):
+        flash('You have not logged in yet.', 'danger')
+        return redirect(url_for('login'))
+    # user logged in
+    elif session.get('user_logged_in'):
+        form = UpdateGSTForm()
+
+        if form.validate_on_submit():
+            form_data = {
+                'customer_no': session['portal_customer_no'],
+                'gst_no': form.gst_no.data,
+            }
+
+            # add data to db async
+            add_gst_update_request_to_db.delay(form_data)
+
+            flash(
+                (
+                    'GST information update request sent successfully! '
+                    'We will notify you when the procedure is complete.'
+                ), 'success'
+            )
+            return redirect(url_for('update_gst'))
+
+        # GET request
+        return render_template(
+            'update_gst.html',
+            form=form,
+        )
