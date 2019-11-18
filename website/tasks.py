@@ -121,3 +121,16 @@ def add_profile_update_request_to_db(data):
     )
     db.session.add(update_profile)
     db.session.commit()
+
+
+@celery.task
+def add_mobile_number_update_request_to_db(data):
+    """Asynchronously add mobile number update request to database."""
+    update_mobile_no = MobileNumberUpdateRequest(
+        old_phone_no=data['old_phone_no'],
+        new_phone_no=data['new_phone_no'],
+        username_or_ip_address=data['username_or_ip_address'],
+        postal_code=data['postal_code']
+    )
+    db.session.add(update_mobile_no)
+    db.session.commit()

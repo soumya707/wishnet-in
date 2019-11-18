@@ -151,3 +151,40 @@ class NewTicketForm(FlaskForm):
     nature = SelectField('Ticket Nature', validators=[InputRequired()])
     remarks = TextAreaField('Remarks', validators=[Optional()])
     submit = SubmitField('Submit')
+
+
+class MobileNumberUpdateRequestForm(FlaskForm):
+    """Class for requesting mobile number update form (outside portal)."""
+    phone_no_msg = 'Invalid mobile no.'
+    pin_code_msg = 'Invalid postal code'
+
+    old_phone_no = StringField(
+        'Old mobile no.',
+        validators=[
+            Optional(),
+            Regexp(r'^\d{1,10}$', message=phone_no_msg)
+        ]
+    )
+
+    new_phone_no = StringField(
+        'New mobile no.',
+        validators=[
+            Optional(),
+            Regexp(r'^\d{1,10}$', message=phone_no_msg)
+        ]
+    )
+
+    username_or_ip_address = StringField(
+        'Username / IP Address',
+        validators=[InputRequired()]
+    )
+
+    postal_code = StringField(
+        'Pin code',
+        validators=[
+            InputRequired(),
+            Regexp(r'^[7]+\d{1,6}$', message=pin_code_msg)
+        ]
+    )
+
+    submit = SubmitField('Submit Request')

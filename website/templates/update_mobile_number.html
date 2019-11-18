@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% from "_macros.html" import render_field, render_submit %}
 
-{% block title %}Self-care registration{% endblock %}
+{% block title %}Update Mobile Number{% endblock %}
 
 {% block content %}
 
@@ -14,37 +14,48 @@
   <div class="row border-top">
 
     <div class="col-md-4 bg-light-grey p-3">
-      <img class="sidebar-img p-1" src="{{ url_for('static', filename='img/etc/register.svg') }}">
+      <img class="sidebar-img p-1" src="{{ url_for('static', filename='img/etc/update_mobile_number.svg') }}">
       <h5 class="text-justify">
         Be independent, do it yourself</br>For any queries, please contact us at <strong><a href="tel:18004194244" class="text-red">1800-419-4244</a></strong>
       </h5>
     </div> <!-- col -->
 
     <div class="col-md-4 p-3">
-      <h3 class="py-2 text-red">Register</h3>
+      <h3 class="py-2 text-red">Update your Mobile Number</h3>
 
       <div class="content-section">
 
-        <form method="POST">
+        <form method="POST" id="mobile-no-change-form">
           {{ form.hidden_tag() }}
           <fieldset class="form-group">
 
-            <!-- CUSTOMER NUMBER -->
+            <!-- OLD MOBILE NUMBER -->
             <div class="form-row">
-              {{ render_field(form.customer_no) }}
+              {{ render_field(form.old_phone_no) }}
+            </div>
+
+            <!-- NEW MOBILE NUMBER -->
+            <div class="form-row">
+              {{ render_field(form.new_phone_no) }}
+            </div>
+
+            <!-- USERNAME / IP ADDRESS -->
+            <div class="form-row">
+              {{ render_field(form.username_or_ip_address) }}
+            </div>
+
+            <!-- POSTAL CODE -->
+            <div class="form-row">
+              {{ render_field(form.postal_code) }}
             </div>
 
           </fieldset> <!-- fieldset -->
 
           <!-- SUBMIT -->
-          {{ render_submit(form.submit) }}
+          {{ render_submit(form.submit, id="mobile-no-change-btn") }}
 
         </form>
       </div> <!-- content-section -->
-
-      <div class="p-2">
-        The OTP will be sent to your registered mobile number.
-      </div> <!-- info -->
 
     </div> <!-- col -->
 
@@ -53,9 +64,9 @@
       <!-- LIST GROUP -->
       <div class="list-group">
         <a class="list-group-item list-group-item-action outline" href="{{ url_for('get_cust_no') }}">Know your Customer ID</a>
-        <a class="list-group-item list-group-item-action" href="{{ url_for('update_mobile_number') }}">Update Mobile Number</a>
         <a class="list-group-item list-group-item-action outline" href="{{ url_for('login') }}">Self-care Login</a>
-        <a class="list-group-item list-group-item-action outline" href="{{ url_for('forgot') }}">Forgot Password?</a>
+        <a class="list-group-item list-group-item-action outline" href="{{ url_for('register') }}">Self-care Registration</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('forgot') }}">Forgot Password?</a>
       </div> <!-- list-group -->
 
       <!-- DESCRIPTION -->
@@ -66,5 +77,24 @@
   </div> <!-- row -->
 
 </div> <!-- container -->
+
+{% endblock %}
+
+{% block scripts %}
+
+  {{ super() }}
+
+  <script>
+
+    $(document).ready(function() {
+
+        // loading stage for login request
+        $("#mobile-no-change-form").submit(function(event) {
+                $("#mobile-no-change-btn").val("Submitting request...");
+        });
+
+    })
+
+  </script>
 
 {% endblock %}

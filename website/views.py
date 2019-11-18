@@ -881,6 +881,38 @@ def set_password():
     )
 
 
+@app.route('/update_mobile_number', methods=['GET', 'POST'])
+def update_mobile_number():
+    """Route for requesting mobile number update."""
+    form = MobileNumberUpdateRequestForm()
+
+    if form.validate_on_submit():
+        form_data = {
+            'old_phone_no': form.old_phone_no.data,
+            'new_phone_no': form.new_phone_no.data,
+            'username_or_ip_address': form.username_or_ip_address.data,
+            'postal_code': form.postal_code.data,
+        }
+
+        # add data to db async
+        add_mobile_number_update_request_to_db(form_data)
+
+        flash(
+            (
+                'Update request sent successfully! We will confirm you once '
+                'the procedure is complete.'
+            ), 'success'
+        )
+        return redirect(url_for('update_mobile_number'))
+
+    return render_template(
+        'update_mobile_number.html',
+        form=form
+    )
+
+
+# Self-care portal views
+
 @app.route('/portal/', methods=['GET'])
 def portal():
     """Route for self-care portal."""
