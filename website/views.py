@@ -923,6 +923,9 @@ def portal():
 
     # user logged in
     elif session.get('user_logged_in'):
+        # keep the session alive
+        session.modified = True
+
         # check if session variable exists for customer data
         if not session.get('portal_customer_data'):
             # Get customer info
@@ -959,8 +962,6 @@ def portal():
         )
 
 
-# Portal actions
-
 @app.route('/portal/recharge', methods=['GET', 'POST'])
 def recharge():
     """Route for self-care portal recharge."""
@@ -970,6 +971,9 @@ def recharge():
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
+        # keep the session alive
+        session.modified = True
+
         if request.method == 'POST':
             # store amount in session
             session['portal_amount'] = request.form['amount']
@@ -1045,6 +1049,9 @@ def add_plan():
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
+        # keep the session alive
+        session.modified = True
+
         if request.method == 'POST':
             # store amount in session
             session['portal_amount'] = request.form['amount']
@@ -1166,6 +1173,9 @@ def docket():
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
+        # keep the session alive
+        session.modified = True
+
         tickets = Ticket.query.filter_by(
             customer_no=session['portal_customer_no']
         ).all()
@@ -1197,6 +1207,9 @@ def new_docket():
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
+        # keep the session alive
+        session.modified = True
+
         # open ticket exists
         if not session.get('portal_open_ticket_no'):
             form = NewTicketForm()
@@ -1276,6 +1289,9 @@ def close_docket():
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
+        # keep the session alive
+        session.modified = True
+
         # open ticket exists
         if session.get('portal_open_ticket_no'):
             ticket_no = session.get('portal_open_ticket_no')
@@ -1328,6 +1344,9 @@ def usage():
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
+        # keep the session alive
+        session.modified = True
+
         # check if session variable exists for customer username
         if not session.get('portal_username'):
             customer = CustomerInfo.query.filter_by(
@@ -1363,6 +1382,9 @@ def transaction_history(page_num):
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
+        # keep the session alive
+        session.modified = True
+
         # retrieve data from db
         transactions = RechargeEntry.query.filter_by(
             customer_no=session['portal_customer_no']
@@ -1383,6 +1405,9 @@ def change_password():
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
+        # keep the session alive
+        session.modified = True
+
         form = ChangePasswordForm()
 
         if form.validate_on_submit():
@@ -1440,6 +1465,9 @@ def update_profile():
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
+        # keep the session alive
+        session.modified = True
+
         form = UpdateProfileForm()
 
         if form.validate_on_submit():
@@ -1488,6 +1516,9 @@ def update_gst():
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
+        # keep the session alive
+        session.modified = True
+
         form = UpdateGSTForm()
 
         if form.validate_on_submit():
