@@ -8,36 +8,45 @@
 
   <h3 class="py-2 text-red">Customer Info</h3>
 
-  <!-- CUSTOMER INFO -->
+  {# CUSTOMER INFO #}
   <table class="table table-striped table-bordered table-responsive-sm">
     <tbody>
-      <!-- CUSTOMER ID -->
+      {# CUSTOMER ID #}
       <tr>
         <th scope="row">Customer ID</th>
           <td>{{ cust_no }}</td>
         </th>
       </tr>
-      <!-- CUSTOMER NAME -->
+      {# CUSTOMER NAME #}
       <tr>
         <th scope="row">Customer Name</th>
         <td>{{ cust_data.name }}</td>
       </tr>
-      <!-- CUSTOMER ADDRESS -->
+      {# CUSTOMER ADDRESS #}
       <tr>
         <th scope="row">Address</th>
         <td>{{ cust_data.address }}</td>
       </tr>
-      <!-- CUSTOMER CONTACT NUMBER -->
+      {# CUSTOMER CONTACT NUMBER #}
       <tr>
         <th scope="row">Mobile number</th>
         <td>{{ cust_data.contact_no }}</td>
       </tr>
-      <!-- CUSTOMER EMAIL ADDRESS -->
+      {# CUSTOMER EMAIL ADDRESS #}
       <tr>
         <th scope="row">E-mail Address</th>
         <td>{{ cust_data.email }}</td>
       </tr>
-      <!-- CUSTOMER PARTNER -->
+      {# CUSTOMER GST #}
+      <tr>
+        <th scope="row">GSTIN</th>
+        {% if gstin %}
+          <td>{{ gstin }}</td>
+        {% else %}
+          <td>NOT REGISTERED</td>
+        {% endif %}
+      </tr>
+      {# CUSTOMER PARTNER #}
       <tr>
         <th scope="row">LCO</th>
         <td>{{ cust_data.partner }}</td>
@@ -45,22 +54,22 @@
     </tbody>
   </table>
 
-  <!-- ACTIVE PLANS -->
+  {# ACTIVE PLANS #}
   <h3 class="py-2 text-red">Active Plans</h3>
 
   {% if not active_plans %}
-  <h5 class="py-4 text-red">You don't have any active plans.</h5>
+    <h5 class="py-4 text-red">You don't have any active plans.</h5>
   {% elif active_plans %}
-  <table class="table table-striped table-bordered table-responsive-sm">
-    <tbody>
-      {% for name, (_, validity, _) in active_plans.items() %}
-      <tr scope="row">
-        <th>{{ name }}</th>
-        <td>Validity: {{ validity }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+    <table class="table table-striped table-bordered table-responsive-sm">
+      <tbody>
+        {% for name, (_, validity, _) in active_plans.items() %}
+          <tr scope="row">
+            <th>{{ name }}</th>
+            <td>Validity: {{ validity }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   {% endif %}
 
 </div> <!-- col -->

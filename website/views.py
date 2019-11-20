@@ -655,6 +655,7 @@ def logout():
         session['user_logged_in'] = False
         # remove portal customer data storage
         session.pop('portal_customer_no', None)
+        session.pop('portal_customer_gst', None)
         session.pop('portal_customer_data', None)
         session.pop('portal_active_plans', None)
         session.pop('portal_inactive_plans', None)
@@ -664,7 +665,7 @@ def logout():
         session.pop('portal_username', None)
     # user not logged in (invalid access to route)
     elif not session.get('user_logged_in'):
-        flash('You are not logged in yet.', 'danger')
+        flash('Please log in.', 'danger')
 
     return redirect(url_for('login'))
 
@@ -954,10 +955,25 @@ def portal():
             # store in session variable
             session['portal_active_plans'] = active_plans
 
+        # check if session variable exists for GSTIN
+        if not session.get('portal_customer_gst'):
+            customer_gst = \
+                GSTUpdateRequest.query.\
+                filter(
+                    and_(
+                        GSTUpdateRequest.customer_no == \
+                        session['portal_customer_no'],
+                        GSTUpdateRequest.status == 'REGISTERED'
+                    )
+                ).first()
+            session['portal_customer_gst'] = \
+                customer_gst.gst_no if customer_gst else None
+
         return render_template(
             'portal.html',
             cust_no=session['portal_customer_no'],
             cust_data=session['portal_customer_data'],
+            gstin=session['portal_customer_gst'],
             active_plans=session['portal_active_plans'],
         )
 
@@ -1095,14 +1111,11 @@ def add_plan():
             # check if session variable exists for available plans
             if not session.get('portal_available_plans'):
                 user_data = session['portal_customer_data']
-                zone_id = CustomerInfo.query\
-                                      .options(FromCache(CACHE))\
-                                      .filter_by(
-                                          customer_no=
-                                          session['portal_customer_no']
-                                      )\
-                                      .first()\
-                                      .zone_id
+                zone_id = \
+                    CustomerInfo.query.\
+                    options(FromCache(CACHE)).\
+                    filter_by(customer_no=session['portal_customer_no']).\
+                    first().zone_id
                 zone_eligible_plan_codes = [
                     zone.plan_code_mqs
                     for zone in ZoneIDWithPlanCode\
@@ -1120,12 +1133,12 @@ def add_plan():
 
                 # get available plans for the user
                 # {plan_name: (price, plan_code) }
-                available_plan_codes = set(plans.keys()).\
-                    difference(user_data['all_plans'])
+                available_plan_codes = \
+                    set(plans.keys()).difference(user_data['all_plans'])
 
                 # get eligible plans for the user (based on the zone ID)
-                eligible_plan_codes = available_plan_codes.\
-                    intersection(zone_eligible_plan_codes)
+                eligible_plan_codes = \
+                    available_plan_codes.intersection(zone_eligible_plan_codes)
 
                 available_plans = {
                     plans[plan_code].plan_name: (
