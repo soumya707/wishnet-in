@@ -287,6 +287,7 @@ class RechargeEntry(db.Model):
     refund_amount = db.Column(db.String(10), nullable=True)
     refund_datetime = db.Column(db.String(50), nullable=True)
     refund_status = db.Column(db.String(10), nullable=True)
+    ref_id = db.Column(db.String(20), nullable=True)
 
     def __str__(self):
         return self.wishnet_payment_order_id
@@ -301,12 +302,9 @@ class CustomerInfo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_no = db.Column(db.String(100), nullable=False)
     customer_name = db.Column(db.String(400), nullable=False)
-    first_name = db.Column(db.String(50), nullable=True)
-    last_name = db.Column(db.String(50), nullable=True)
     user_name = db.Column(db.String(20), nullable=False)
     mobile_no = db.Column(db.String(15), nullable=True)
     ip_addr = db.Column(db.String(20), nullable=True)
-    zip_code = db.Column(db.String(10), nullable=True)
     zone_id = db.Column(db.String(50), nullable=True)
 
     def __str__(self):
@@ -418,3 +416,22 @@ class GSTUpdateRequest(db.Model):
     customer_no = db.Column(db.String(100), nullable=False)
     gst_no = db.Column(db.String(15), nullable=False)
     status = db.Column(db.String(20), nullable=False, default='NOT VERIFIED')
+# Softphone information
+class SoftphoneInfo(db.Model):
+    """Class for representing Softphone information."""
+
+    __bind_key__ = 'softphone'
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_no = db.Column(db.String(100), nullable=True)
+    customer_name = db.Column(db.String(400), nullable=True)
+    customer_mob = db.Column(db.String(10), nullable=True)
+    softphone_number = db.Column(db.String(20), nullable=True)
+    did_number = db.Column(db.String(20), nullable=True)
+    allowable_download_limit = db.Column(db.String(20), nullable=True)
+    alloted_download_counter = db.Column(db.String(20), nullable=True)
+    status = db.Column(db.String(20), nullable=True)
+    series_id = db.Column(db.String(20), nullable=True)
+
+    def __str__(self):
+        return self.customer_no
