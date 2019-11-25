@@ -3,12 +3,17 @@
 """Define functions for Razorpay transactions."""
 
 import razorpay
-import requests
 
 from website import app
 
 
-def make_order(order_id, customer_no, customer_mobile_no, amount, pay_source):
+def make_order(
+        order_id,
+        customer_no,
+        customer_mobile_no,
+        customer_email,
+        amount,
+        pay_source):
     """Generate an order from Razorpay."""
 
     post_data = {
@@ -20,15 +25,12 @@ def make_order(order_id, customer_no, customer_mobile_no, amount, pay_source):
             'customer_no': customer_no,
             'pay_source': pay_source[0],
             'txn_type': pay_source[1],
-        },
+        }
     }
 
-    order_resp = requests.post(
-        'https://api.razorpay.com/v1/orders',
-        auth=(app.config['RAZORPAY_KEY'], app.config['RAZORPAY_SECRET']),
-        json=post_data,
-        headers={'Content-Type': 'application/json'}
-    ).json()
+    client = razorpay.Client(auth=(app.config['RAZORPAY_KEY'],
+                                   app.config['RAZORPAY_SECRET']))
+    order_resp = client.order.create(data=post_data)
 
     razorpay_order_id = order_resp['id']
 
@@ -36,7 +38,12 @@ def make_order(order_id, customer_no, customer_mobile_no, amount, pay_source):
         'key_id': app.config['RAZORPAY_KEY'],
         'name': 'Wish Net Pvt. Ltd.',
         'order_id': razorpay_order_id,
+        'prefill[email]': app.config['RAZORPAY_DEFAULT_MAIL'] \
+        if not customer_email else customer_email,
         'prefill[contact]': customer_mobile_no,
+        'notes[customer_no]': customer_no,
+        'notes[pay_source]': pay_source[0],
+        'notes[txn_type]': pay_source[1],
         'callback_url': app.config['RAZORPAY_CALLBACKURL'],
     }
 
@@ -48,4 +55,15 @@ def verify_signature(response):
 
     client = razorpay.Client(auth=(app.config['RAZORPAY_KEY'],
                                    app.config['RAZORPAY_SECRET']))
-    return client.utility.verify_payment_signature(response)
+    client.utility.verify_payment_signature(response)
+
+
+def get_notes(razorpay_order_id):
+    """Receive metadata sent as payload to Razopay."""
+
+    client = razorpay.Client(auth=(app.config['RAZORPAY_KEY'],
+                                   app.config['RAZORPAY_SECRET']))
+    resp = client.order.fetch(razorpay_order_id)
+    notes = resp['notes']
+
+    return notes['customer_no'], notes['pay_source'], notes['txn_type']

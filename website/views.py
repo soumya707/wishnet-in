@@ -13,6 +13,7 @@ from flask_sqlalchemy_caching import FromCache
 from flask_wtf.csrf import CSRFProtect
 from passlib.exc import MalformedTokenError, TokenError
 from passlib.hash import pbkdf2_sha256
+from razorpay.errors import BadRequestError, SignatureVerificationError
 from sqlalchemy import and_, or_
 
 from website import CACHE, TOTPFACTORY, app
@@ -21,7 +22,7 @@ from website.models import *
 from website.mqs_api import *
 from website.paytm_utils import (
     initiate_transaction, verify_final_status, verify_transaction)
-from website.razorpay_utils import make_order, verify_signature
+from website.razorpay_utils import get_notes, make_order, verify_signature
 from website.tasks import *
 from website.utils import *
 
@@ -215,10 +216,14 @@ def insta_recharge(order_id):
                 order_id=order_id,
                 customer_no=session['insta_customer_no'],
                 customer_mobile_no=session['insta_customer_mobile_no'],
+                customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
                 amount=request.form['amount'],
                 # list is used for passing data; check Razorpay docs
                 pay_source=['insta', 'recharge'],
             )
+
+            # store Razorpay order id for verification later
+            session['razorpay_order_id'] = form_data['order_id']
 
         return render_template(
             '{}_pay.html'.format(request.form['gateway']),
@@ -359,22 +364,39 @@ def verify_response(gateway):
 
         # RAZORPAY
         elif gateway == 'razorpay':
-            notes = request.form['notes']
-            session_var_prefix = notes['pay_source']
-            txn_type = notes['txn_type']
+            # verify signature
+            verify_params = {
+                'razorpay_order_id': session['razorpay_order_id'],
+                'razorpay_payment_id': request.form.get('razorpay_payment_id'),
+                'razorpay_signature': request.form.get('razorpay_signature')
+            }
+
+            try:
+                verify_signature(verify_params)
+                verified = True
+            except (SignatureVerificationError, BadRequestError) as _:
+                verified = False
+
+            # get metadata of order (skipping customer no.)
+            _, session_var_prefix, txn_type = get_notes(
+                session['razorpay_order_id']
+            )
+
             # store response data
-            recharge_data = {
+            data = {
                 'customer_no': session[f'{session_var_prefix}_customer_no'],
                 'wishnet_order_id': session[f'{session_var_prefix}_order_id'],
                 'payment_gateway': 'Razorpay',
+                'txn_order_id': session['razorpay_order_id'],
                 'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
             }
 
-            verified = verify_signature(request.form)
+            # remove Razorpay order id from session storage
+            session.pop('razorpay_order_id', None)
+
             # signature verification success
             if verified:
                 data.update(
-                    txn_order_id=request.form['razorpay_order_id'],
                     txn_amount=session[f'{session_var_prefix}_amount'],
                     txn_status='SUCCESS',
                 )
@@ -397,14 +419,12 @@ def verify_response(gateway):
                     db_entry_status, status, msg, msg_stat = \
                         verify_mqs_topup(top_up)
 
-                    recharge_data['topup_status'] = db_entry_status
+                    data['topup_status'] = db_entry_status
 
                     # fill empty string for the add plan data
                     data['addplan_ref_id'] = ''
                     data['addplan_datetime'] = ''
                     data['addplan_status'] = ''
-
-                    status = status
 
                 elif txn_type == 'addplan':
                     # AddPlan in MQS
@@ -430,15 +450,12 @@ def verify_response(gateway):
                     data['topup_datetime'] = ''
                     data['topup_status'] = ''
 
-                    status = status
-
                 flash(msg, msg_stat)
 
             # signature verification failure
             # data tampered during transaction
             else:
                 data.update(
-                    txn_order_id='',
                     txn_amount='',
                     txn_status='SIGNATURE VERIFICATION FAILURE',
                     topup_ref_id='',
@@ -1019,10 +1036,14 @@ def recharge():
                     order_id=session['portal_order_id'],
                     customer_no=session['portal_customer_no'],
                     customer_mobile_no=customer_data['contact_no'],
+                    customer_email=customer_data['email'],
                     amount=session['portal_amount'],
                     # list is used for passing data; check Razorpay docs
                     pay_source=['portal', 'recharge'],
                 )
+
+                # store Razorpay order id for verification later
+                session['razorpay_order_id'] = form_data['order_id']
 
             return render_template(
                 '{}_pay.html'.format(request.form['gateway']),
@@ -1097,10 +1118,14 @@ def add_plan():
                     order_id=session['portal_order_id'],
                     customer_no=session['portal_customer_no'],
                     customer_mobile_no=customer_data['contact_no'],
+                    customer_email=customer_data['email'],
                     amount=session['portal_amount'],
                     # list is used for passing data; check Razorpay docs
                     pay_source=['portal', 'addplan'],
                 )
+
+                # store Razorpay order id for verification later
+                session['razorpay_order_id'] = form_data['order_id']
 
             return render_template(
                 '{}_pay.html'.format(request.form['gateway']),
