@@ -232,10 +232,8 @@ class GetCustomerInfo(MQSAPI):
             ]
             # get a consolidated plan list
             # [(contract_status, plan_code, validity)]
-            plans_with_validity = [
-                plan for plan
-                in zip(contract_status, self.all_plans, validities)
-            ]
+            plans_with_validity = \
+                list(zip(contract_status, self.all_plans, validities))
             # filter active plans
             self.active_plans = [
                 plan for plan in plans_with_validity if plan[0] == 'Active'
