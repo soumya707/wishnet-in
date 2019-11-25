@@ -378,6 +378,9 @@ class Ticket(db.Model):
                              default=datetime.now().astimezone())
     closing_date = db.Column(db.DateTime(), nullable=True)
 
+    def __str__(self):
+        return self.ticket_no
+
 
 # Zone ID and plans
 class ZoneIDWithPlanCode(db.Model):
@@ -390,6 +393,9 @@ class ZoneIDWithPlanCode(db.Model):
     plan_code = db.Column(db.String(50), nullable=False)
     plan_code_mqs = db.Column(db.String(50), nullable=True)
     status = db.Column(db.String(10), nullable=False, default='ACTIVE')
+
+    def __str__(self):
+        return self.zone_id
 
 
 # Mobile number update requests
@@ -405,6 +411,9 @@ class MobileNumberUpdateRequest(db.Model):
     postal_code = db.Column(db.String(6), nullable=False)
     status = db.Column(db.String(10), nullable=False, default='PENDING')
 
+    def __str__(self):
+        return self.username_or_ip_address
+
 
 # GST number update requests
 class GSTUpdateRequest(db.Model):
@@ -416,6 +425,11 @@ class GSTUpdateRequest(db.Model):
     customer_no = db.Column(db.String(100), nullable=False)
     gst_no = db.Column(db.String(15), nullable=False)
     status = db.Column(db.String(20), nullable=False, default='NOT VERIFIED')
+
+    def __str__(self):
+        return self.customer_no
+
+
 # Softphone information
 class SoftphoneInfo(db.Model):
     """Class for representing Softphone information."""
