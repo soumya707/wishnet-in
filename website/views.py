@@ -1273,8 +1273,11 @@ def new_docket():
                         'category_desc': category_desc,
                         'nature_desc': nature_desc,
                         'remarks': remarks,
-                        'opening_date': datetime.now().astimezone(),
+                        'opening_date': datetime.now().astimezone().date(),
+                        'opening_time': datetime.now().astimezone().time()
                     }
+
+                    # add new ticket to db async
                     add_new_ticket_to_db(ticket_data)
 
                     msg = SUCCESSFUL_DOCKET_GEN
@@ -1329,7 +1332,8 @@ def close_docket():
                     ticket_no=session['portal_open_ticket_no']
                 ).first()
                 ticket.status = 'Closed'
-                ticket.closing_date = datetime.now().astimezone()
+                ticket.closing_date = datetime.now().astimezone().date()
+                ticket.closing_time = datetime.now().astimezone().time()
                 # close ticket in db
                 db = current_app.extensions['sqlalchemy'].db
                 db.session.add(ticket)
