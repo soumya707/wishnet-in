@@ -1020,7 +1020,7 @@ def recharge():
                     order_id=session['portal_order_id'],
                     customer_no=session['portal_customer_no'],
                     customer_mobile_no=customer_data['contact_no'],
-                    customer_email=customer_data['email'],
+                    customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
                     amount=session['portal_amount'],
                     # list is used for passing data; check Razorpay docs
                     pay_source=['portal', 'recharge'],
@@ -1102,7 +1102,7 @@ def add_plan():
                     order_id=session['portal_order_id'],
                     customer_no=session['portal_customer_no'],
                     customer_mobile_no=customer_data['contact_no'],
-                    customer_email=customer_data['email'],
+                    customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
                     amount=session['portal_amount'],
                     # list is used for passing data; check Razorpay docs
                     pay_source=['portal', 'addplan'],
