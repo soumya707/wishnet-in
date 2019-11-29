@@ -209,10 +209,8 @@ class NewConnection(db.Model):
     remark = db.Column(db.Text, nullable=True)
     source = db.Column(db.String(10), nullable=False, default='website')
     cust_add = db.Column(db.String(20), nullable=False, default='ADD_CUST')
-    date = db.Column(db.Date(), nullable=False,
-                     default=datetime.now().astimezone().date())
-    time = db.Column(db.Time(), nullable=False,
-                     default=datetime.now().astimezone().time())
+    date = db.Column(db.Date, nullable=False)
+    time = db.Column(db.Time, nullable=False)
 
     def __str__(self):
         return self.query_no
@@ -339,10 +337,8 @@ class UpdateProfileRequest(db.Model):
     new_phone_no = db.Column(db.String(15), nullable=True)
     new_email = db.Column(db.String(100), nullable=True)
     status = db.Column(db.String(10), nullable=False)
-    request_date = db.Column(db.Date(), nullable=False,
-                             default=datetime.now().astimezone().date())
-    request_time = db.Column(db.Time(), nullable=False,
-                             default=datetime.now().astimezone().time())
+    request_date = db.Column(db.Date, nullable=False)
+    request_time = db.Column(db.Time, nullable=False)
 
     def __str__(self):
         return self.customer_no
