@@ -146,6 +146,8 @@ def add_gst_update_request_to_db(data):
     update_gst = GSTUpdateRequest(
         customer_no=data['customer_no'],
         gst_no=data['gst_no'],
+        request_date=data['request_date'],
+        request_time=data['request_time']
     )
     db.session.add(update_gst)
     db.session.commit()

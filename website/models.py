@@ -424,6 +424,8 @@ class GSTUpdateRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_no = db.Column(db.String(100), nullable=False)
     gst_no = db.Column(db.String(15), nullable=False)
+    request_date = db.Column(db.Date, nullable=False)
+    request_time = db.Column(db.Time, nullable=False)
     status = db.Column(db.String(20), nullable=False, default='NOT VERIFIED')
 
     def __str__(self):
