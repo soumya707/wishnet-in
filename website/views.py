@@ -1542,6 +1542,8 @@ def update_gst():
             form_data = {
                 'customer_no': session['portal_customer_no'],
                 'gst_no': form.gst_no.data,
+                'request_date': datetime.now().astimezone().date(),
+                'request_time': datetime.now().astimezone().time(),
             }
 
             # add data to db async
