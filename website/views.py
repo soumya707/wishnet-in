@@ -18,6 +18,7 @@ from sqlalchemy import and_, or_
 
 from website import CACHE, TOTPFACTORY, app
 from website.forms import *
+from website.messages import *
 from website.models import *
 from website.mqs_api import *
 from website.paytm_utils import (
@@ -47,53 +48,55 @@ def index():
     if form.validate_on_submit():
         user = form.user_id.data
 
-        # Get active plans (reference no. of this API call is passed forward)
-        user_contracts = ContractsByKey(app)
-        user_contracts.request(user)
-        user_contracts.response()
+        # Get customer info
+        customer = CustomerInfo.query.filter_by(customer_no=user).first()
 
-        # user has active plans
-        if user_contracts.valid_user:
-            plans = {
-                row.plan_code: row
-                for row in TariffInfo.query.options(FromCache(CACHE)).all()
-            }
-            # Get active plans for the user
-            # {plan_name: (price, validity, plan_code)}
-            active_plans = {
-                plans[plan_code].plan_name: (
-                    plans[plan_code].price, validity_period, plan_code
+        # Check if customer data is available in the db
+        # user data available in the db
+        if customer is not None:
+            # Get active plans (ref no. of this API call is passed forward)
+            user_contracts = ContractsByKey(app)
+            user_contracts.request(user)
+            user_contracts.response()
+
+            # Check if user has active plans
+            # user has active plans
+            if user_contracts.valid_user:
+                plans = {
+                    row.plan_code: row
+                    for row in TariffInfo.query.options(FromCache(CACHE)).all()
+                }
+                # Get active plans for the user
+                # {plan_name: (price, validity, plan_code)}
+                active_plans = {
+                    plans[plan_code].plan_name: (
+                        plans[plan_code].price, validity_period, plan_code
+                    )
+                    for (plan_code, validity_period) in
+                    user_contracts.active_plans if plan_code in plans
+                }
+
+                # store data in the session variables
+                session['insta_active_plans'] = active_plans
+                session['insta_customer_no'] = customer.customer_no
+                session['insta_customer_name'] = customer.customer_name
+                session['insta_customer_mobile_no'] = customer.mobile_no
+                session['insta_order_id'] = user_contracts.ref_no
+
+                return redirect(
+                    url_for(
+                        'insta_recharge',
+                        order_id=session['insta_order_id'],
+                    )
                 )
-                for (plan_code, validity_period) in user_contracts.active_plans
-                if plan_code in plans
-            }
-
-            # Get customer info
-            customer = CustomerInfo.query.filter_by(customer_no=user).first()
-
-            session['insta_active_plans'] = active_plans
-            session['insta_customer_no'] = customer.customer_no
-            session['insta_customer_name'] = customer.customer_name
-            session['insta_customer_mobile_no'] = customer.mobile_no
-            session['insta_order_id'] = user_contracts.ref_no
-
-            return redirect(
-                url_for(
-                    'insta_recharge',
-                    order_id=session['insta_order_id'],
-                )
-            )
-        # user does not have active plans
-        elif not user_contracts.valid_user:
-            flash(
-                (
-                    'There is an issue with insta-recharge for your '
-                    'account. Please use self-care or call us.'
-                ), 'danger'
-            )
-            return redirect(
-                url_for('index')
-            )
+            # user does not have active plans
+            elif not user_contracts.valid_user:
+                flash(NO_ACTIVE_PLANS, 'danger')
+                return redirect(url_for('index'))
+        # user data not available in the db; might be a new user
+        else:
+            flash(USER_NOT_FOUND_IN_DB, 'danger')
+            return redirect(url_for('index'))
 
     # GET request
     carousel_images = CarouselImages.query.options(FromCache(CACHE)).all()
@@ -131,10 +134,8 @@ def get_cust_no():
         # credentials okay and data available
         if customer is not None and customer.mobile_no is not str():
             # send SMS
-            mobile_no = customer.mobile_no
-            sms_msg = '{} is your customer number. Team Wishnet.'.format(
-                customer.customer_no
-            )
+            mobile_no = customer.mobile_no.strip()
+            sms_msg = SMS_CUSTOMER_NO.format(customer.customer_no)
 
             successful = send_sms(
                 app.config['SMS_URL'],
@@ -148,37 +149,21 @@ def get_cust_no():
             )
 
             if successful:
-                text = (
-                    'Customer number has been sent to your registered '
-                    'mobile number.'
-                )
+                text = CUSTOMER_NO_SENT
                 status = 'success'
 
             else:
-                text = 'There was some problem, please try again.'
+                text = CUSTOMER_NO_NOT_SENT
                 status = 'danger'
 
             flash(text, status)
 
         # mobile number not available
         elif customer is not None and customer.mobile_no is str():
-            flash(
-                (
-                    'No registered mobile number found. '
-                    'Please get your mobile number registered with us.'
-                )
-                , 'danger'
-            )
+            flash(NO_MOBILE_NO, 'danger')
         # invalid credentials
         elif customer is None:
-            flash(
-                (
-                    'Couldn\'t retrieve details with the provided '
-                    'credentials. Try again with valid credentials or '
-                    'contact us.'
-                )
-                , 'danger'
-            )
+            flash(INVALID_CUSTOMER, 'danger')
 
         return redirect(url_for('get_cust_no'))
 
@@ -352,8 +337,8 @@ def verify_response(gateway):
                     )
                     status = 'unsuccessful'
                     flash(
-                        'Payment incomplete! Please check with {}.'.\
-                        format(gateway.capitalize()), 'danger'
+                        INCOMPLETE_PAYMENT.format(gateway.capitalize()),
+                        'danger'
                     )
             # checksumhash verification failure
             # data tampered during transaction
@@ -370,7 +355,7 @@ def verify_response(gateway):
                     addplan_status='',
                 )
                 status = 'unsuccessful'
-                flash('Payment failed! Please try again.', 'danger')
+                flash(UNSUCCESSFUL_PAYMENT, 'danger')
 
         # RAZORPAY
         elif gateway == 'razorpay':
@@ -486,7 +471,7 @@ def verify_response(gateway):
                     addplan_status='',
                 )
                 status = 'unsuccessful'
-                flash('Transaction failed! Please try again.', 'danger')
+                flash(UNSUCCESSFUL_PAYMENT, 'danger')
 
         # add transaction data to db async
         add_txn_data_to_db.delay(data)
@@ -569,7 +554,7 @@ def new_conn():
         # send mail async
         send_async_new_connection_mail.delay(form.email_address.data, query_no)
 
-        flash('Request sent successfully!', 'success')
+        flash(SUCCESSFUL_NEW_CONN_REQUEST, 'success')
         return redirect(url_for('new_conn'))
 
     return render_template('new_connection.html', form=form)
@@ -647,27 +632,17 @@ def login():
                 session['portal_customer_no'] = customer.customer_no
             else:
                 redirect_to = 'login'
-                flash(
-                    (
-                        'Incorrect password for the given customer number. '
-                        'Please try again.'
-                    ), 'danger'
-                )
+                flash(INCORRECT_PWD, 'danger')
 
         # non-registered customer
         elif customer is not None and customer.password_hash is None:
             redirect_to = 'register'
-            flash(
-                (
-                    'You have not registered for the self-care portal. '
-                    'Please register before proceeding.'
-                ), 'danger'
-            )
+            flash(NON_REGISTERED_USER, 'danger')
 
         # invalid customer
         else:
             redirect_to = 'login'
-            flash('Invalid customer number.', 'danger')
+            flash(USER_NOT_FOUND_IN_DB, 'danger')
 
         return redirect(url_for(redirect_to))
 
@@ -687,7 +662,7 @@ def logout():
     """Route for self-care logout."""
     # user logged in already
     if session.get('user_logged_in'):
-        flash('You have been successfully logged out.', 'success')
+        flash(SUCCESSFUL_LOGOUT, 'success')
         # revoke session entry
         session['user_logged_in'] = False
         # remove portal customer data storage
@@ -702,7 +677,7 @@ def logout():
         session.pop('portal_username', None)
     # user not logged in (invalid access to route)
     elif not session.get('user_logged_in'):
-        flash('Please log in.', 'danger')
+        flash(LOG_IN_FIRST, 'danger')
 
     return redirect(url_for('login'))
 
@@ -723,7 +698,7 @@ def register():
         # valid customer and valid password
         if customer is not None and customer.password_hash is not None:
             redirect_to = 'login'
-            flash('You are already registered. Try logging in.', 'info')
+            flash(ALREADY_REGISTERED, 'info')
 
         # non-registered customer
         elif customer is not None and customer.password_hash is None:
@@ -737,10 +712,8 @@ def register():
             customer_info = CustomerInfo.query.filter_by(
                 customer_no=form.customer_no.data
             ).first()
-            mobile_no = customer_info.mobile_no
-            sms_msg = (
-                '{} is your OTP for self-care registration. Team Wishnet.'
-            ).format(totp.generate().token)
+            mobile_no = customer_info.mobile_no.strip()
+            sms_msg = SMS_REG_OTP.format(totp.generate().token)
 
             successful = send_sms(
                 app.config['SMS_URL'],
@@ -754,11 +727,11 @@ def register():
             )
 
             if successful:
-                text = 'OTP has been sent to your registered mobile number.'
+                text = OTP_SENT
                 status = 'success'
 
             else:
-                text = 'There was some problem, please try again.'
+                text = OTP_NOT_SENT
                 status = 'danger'
 
             flash(text, status)
@@ -766,7 +739,7 @@ def register():
         # invalid customer
         else:
             redirect_to = 'register'
-            flash('Invalid customer number.', 'danger')
+            flash(USER_NOT_FOUND_IN_DB, 'danger')
 
         return redirect(url_for(redirect_to))
 
@@ -801,10 +774,8 @@ def forgot():
             customer_info = CustomerInfo.query.filter_by(
                 customer_no=form.customer_no.data
             ).first()
-            mobile_no = customer_info.mobile_no
-            sms_msg = (
-                '{} is your OTP for resetting password. Team Wishnet.'
-            ).format(totp.generate().token)
+            mobile_no = customer_info.mobile_no.strip()
+            sms_msg = SMS_PWD_RESET_OTP.format(totp.generate().token)
 
             successful = send_sms(
                 app.config['SMS_URL'],
@@ -818,11 +789,11 @@ def forgot():
             )
 
             if successful:
-                text = 'OTP has been sent to your registered mobile number.'
+                text = OTP_SENT
                 status = 'success'
 
             else:
-                text = 'There was some problem, please try again.'
+                text = OTP_NOT_SENT
                 status = 'danger'
 
             flash(text, status)
@@ -830,17 +801,12 @@ def forgot():
         # non-registered customer
         elif customer is not None and customer.password_hash is None:
             redirect_to = 'register'
-            flash(
-                (
-                    'You have not registered for the self-care portal. '
-                    'Please register before proceeding.'
-                ), 'danger'
-            )
+            flash(NON_REGISTERED_USER, 'danger')
 
         # invalid customer
         else:
             redirect_to = 'forgot'
-            flash('Invalid customer number.', 'danger')
+            flash(USER_NOT_FOUND_IN_DB, 'danger')
 
         return redirect(url_for(redirect_to))
 
@@ -878,7 +844,7 @@ def verify_otp():
         elif not otp_verified:
             session.pop('customer_no', None)
             redirect_to = 'login'
-            flash('OTP verification failed. Please try again.', 'danger')
+            flash(OTP_VERIFY_FAILED, 'danger')
 
         return redirect(url_for(redirect_to))
 
@@ -910,7 +876,7 @@ def set_password():
         # remove customer number from session storage
         session.pop('customer_no', None)
 
-        flash('Password saved successfully!', 'success')
+        flash(SUCCESSFUL_PWD_SAVE, 'success')
         return redirect(url_for('login'))
 
     return render_template(
@@ -935,12 +901,7 @@ def update_mobile_number():
         # add data to db async
         add_mobile_number_update_request_to_db(form_data)
 
-        flash(
-            (
-                'Update request sent successfully! We will confirm you once '
-                'the procedure is complete.'
-            ), 'success'
-        )
+        flash(SUCCESSFUL_MOBILE_NO_UPDATE_REQUEST, 'success')
         return redirect(url_for('update_mobile_number'))
 
     return render_template(
@@ -956,7 +917,7 @@ def portal():
     """Route for self-care portal."""
     # user not logged in
     if not session.get('user_logged_in'):
-        flash('You have not logged in yet.', 'danger')
+        flash(LOG_IN_FIRST, 'danger')
         return redirect(url_for('login'))
 
     # user logged in
@@ -1020,7 +981,7 @@ def recharge():
     """Route for self-care portal recharge."""
     # user not logged in
     if not session.get('user_logged_in'):
-        flash('You have not logged in yet.', 'danger')
+        flash(LOG_IN_FIRST, 'danger')
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
@@ -1102,7 +1063,7 @@ def add_plan():
     """Route for self-care portal add plan."""
     # user not logged in
     if not session.get('user_logged_in'):
-        flash('You have not logged in yet.', 'danger')
+        flash(LOG_IN_FIRST, 'danger')
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
@@ -1227,7 +1188,7 @@ def docket():
     """Route for self-care portal docket."""
     # user not logged in
     if not session.get('user_logged_in'):
-        flash('You have not logged in yet.', 'danger')
+        flash(LOG_IN_FIRST, 'danger')
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
@@ -1261,7 +1222,7 @@ def new_docket():
     """Route for self-care new docket."""
     # user not logged in
     if not session.get('user_logged_in'):
-        flash('You have not logged in yet.', 'danger')
+        flash(LOG_IN_FIRST, 'danger')
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
@@ -1313,10 +1274,10 @@ def new_docket():
                     }
                     add_new_ticket_to_db(ticket_data)
 
-                    msg = 'Docket generated successfully.'
+                    msg = SUCCESSFUL_DOCKET_GEN
                     status = 'success'
                 else:
-                    msg = 'Docket could not be generated. Please try again.'
+                    msg = UNSUCCESSFUL_DOCKET_GEN
                     status = 'danger'
 
                 flash(msg, status)
@@ -1343,7 +1304,7 @@ def close_docket():
     """Route for self-care close docket."""
     # user not logged in
     if not session.get('user_logged_in'):
-        flash('You have not logged in yet.', 'danger')
+        flash(LOG_IN_FIRST, 'danger')
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
@@ -1371,22 +1332,19 @@ def close_docket():
                 db.session.add(ticket)
                 db.session.commit()
 
-                msg = 'Docket: {} closed successfully.'.format(ticket_no)
+                msg = SUCCESSFUL_DOCKET_CLOSE.format(ticket_no)
                 status = 'success'
 
                 # remove data from session variable
                 session.pop('portal_open_ticket_no', None)
 
             else:
-                msg = (
-                    'Docket: {} couldn\'t be closed successfully, please try '
-                    'again.'
-                ).format(ticket_no)
+                msg = UNSUCCESSFUL_DOCKET_CLOSE.format(ticket_no)
                 status = 'danger'
 
         # no open ticket exists
         elif not session.get('portal_open_ticket_no'):
-            msg = 'No open ticket exists.'
+            msg = NO_DOCKETS
             status = 'danger'
 
         flash(msg, status)
@@ -1398,7 +1356,7 @@ def usage():
     """Route for self-care portal usage."""
     # user not logged in
     if not session.get('user_logged_in'):
-        flash('You have not logged in yet.', 'danger')
+        flash(LOG_IN_FIRST, 'danger')
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
@@ -1436,7 +1394,7 @@ def transaction_history(page_num):
     """Route for self-care transaction history."""
     # user not logged in
     if not session.get('user_logged_in'):
-        flash('You have not logged in yet.', 'danger')
+        flash(LOG_IN_FIRST, 'danger')
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
@@ -1459,7 +1417,7 @@ def change_password():
     """Route for self-care portal password change."""
     # user not logged in
     if not session.get('user_logged_in'):
-        flash('You have not logged in yet.', 'danger')
+        flash(LOG_IN_FIRST, 'danger')
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
@@ -1483,10 +1441,7 @@ def change_password():
             if pwd_verified:
                 # check if the old and new passwords are same
                 if form.old_password.data == form.new_password.data:
-                    flash(
-                        'You can\'t use your old password as the new one.'
-                        , 'danger'
-                    )
+                    flash(SET_NEW_PWD, 'danger')
                 else:
                     # generate new hashed password and store
                     hashed_pwd = pbkdf2_sha256.hash(str(form.new_password.data))
@@ -1497,13 +1452,10 @@ def change_password():
                     db.session.add(customer)
                     db.session.commit()
 
-                    flash('Password saved successfully!', 'success')
+                    flash(NEW_PWD_SET, 'success')
             # old password is incorrect
             else:
-                flash(
-                    'Old password entered is incorrect, please try again.'
-                    , 'danger'
-                )
+                flash(INCORRECT_OLD_PWD, 'danger')
 
             return redirect(url_for('change_password'))
 
@@ -1519,7 +1471,7 @@ def update_profile():
     """Route for self-care portal profile update."""
     # user not logged in
     if not session.get('user_logged_in'):
-        flash('You have not logged in yet.', 'danger')
+        flash(LOG_IN_FIRST, 'danger')
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
@@ -1541,7 +1493,7 @@ def update_profile():
             profile.response()
 
             # verify MQS ModifyCustomer status
-            db_status, msg, msg_stat = verify_mqs_updateprofile(profile)
+            db_status, flash_msg, msg_status = verify_mqs_updateprofile(profile)
 
             form_data = {
                 'customer_no': session['portal_customer_no'],
@@ -1555,7 +1507,7 @@ def update_profile():
             # add data to db async
             add_profile_update_request_to_db.delay(form_data)
 
-            flash(msg, msg_stat)
+            flash(flash_msg, msg_status)
             return redirect(url_for('update_profile'))
 
         # GET request
@@ -1570,7 +1522,7 @@ def update_gst():
     """Route for self-care GST information update."""
     # user not logged in
     if not session.get('user_logged_in'):
-        flash('You have not logged in yet.', 'danger')
+        flash(LOG_IN_FIRST, 'danger')
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
@@ -1588,12 +1540,7 @@ def update_gst():
             # add data to db async
             add_gst_update_request_to_db.delay(form_data)
 
-            flash(
-                (
-                    'GST information update request sent successfully! '
-                    'We will notify you when the procedure is complete.'
-                ), 'success'
-            )
+            flash(SUCCESSFUL_GST_UPDATE_REQUEST, 'success')
             return redirect(url_for('update_gst'))
 
         # GET request
