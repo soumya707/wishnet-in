@@ -38,8 +38,7 @@ def make_order(
         'key_id': app.config['RAZORPAY_KEY'],
         'name': 'Wish Net Pvt. Ltd.',
         'order_id': razorpay_order_id,
-        'prefill[email]': app.config['RAZORPAY_DEFAULT_MAIL'] \
-        if not customer_email else customer_email,
+        'prefill[email]': customer_email,
         'prefill[contact]': customer_mobile_no,
         'notes[customer_no]': customer_no,
         'notes[pay_source]': pay_source[0],
