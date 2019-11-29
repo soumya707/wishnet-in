@@ -250,12 +250,22 @@ def verify_response(gateway):
             session_var_prefix, txn_type = \
                 request.form['MERC_UNQ_REF'].split('_')
 
+            # get zone id for table entry
+            zone_id = CustomerInfo.query.\
+                options(FromCache(CACHE)).\
+                filter_by(
+                    customer_no=session[f'{session_var_prefix}_customer_no']
+                ).first().zone_id
+
             # store response data
             data = {
                 'customer_no': session[f'{session_var_prefix}_customer_no'],
+                'customer_zone_id': zone_id,
                 'wishnet_order_id': session[f'{session_var_prefix}_order_id'],
                 'payment_gateway': 'Paytm',
                 'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
+                'txn_date': datetime.now().astimezone().date(),
+                'txn_time': datetime.now().astimezone().time(),
             }
 
             # initial checksum verification
@@ -382,13 +392,23 @@ def verify_response(gateway):
                 session['razorpay_order_id']
             )
 
+            # get zone id for table entry
+            zone_id = CustomerInfo.query.\
+                options(FromCache(CACHE)).\
+                filter_by(
+                    customer_no=session[f'{session_var_prefix}_customer_no']
+                ).first().zone_id
+
             # store response data
             data = {
                 'customer_no': session[f'{session_var_prefix}_customer_no'],
+                'customer_zone_id': zone_id,
                 'wishnet_order_id': session[f'{session_var_prefix}_order_id'],
                 'payment_gateway': 'Razorpay',
                 'txn_order_id': session['razorpay_order_id'],
                 'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
+                'txn_date': datetime.now().astimezone().date(),
+                'txn_time': datetime.now().astimezone().time(),
             }
 
             # remove Razorpay order id from session storage

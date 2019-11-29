@@ -76,11 +76,14 @@ def add_txn_data_to_db(data):
     """Asynchronously add transaction data to database."""
     txn = RechargeEntry(
         customer_no=data['customer_no'],
+        customer_zone_id=data['customer_zone_id'],
         wishnet_payment_order_id=data['wishnet_order_id'],
         payment_gateway=data['payment_gateway'],
         payment_gateway_order_id=data['txn_order_id'],
         payment_amount=data['txn_amount'],
         payment_datetime=data['txn_datetime'],
+        payment_date=data['txn_date'],
+        payment_time=data['txn_time'],
         payment_status=data['txn_status'],
         mq_topup_reference_id=data['topup_ref_id'],
         mq_topup_datetime=data['topup_datetime'],
