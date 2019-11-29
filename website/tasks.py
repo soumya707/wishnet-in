@@ -106,6 +106,7 @@ def add_new_ticket_to_db(data):
         nature_desc=data['nature_desc'],
         remarks=data['remarks'],
         opening_date=data['opening_date'],
+        opening_time=data['opening_time']
     )
     db.session.add(ticket)
     db.session.commit()

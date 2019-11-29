@@ -373,9 +373,10 @@ class Ticket(db.Model):
     nature_desc = db.Column(db.String(50), nullable=False)
     remarks = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(10), nullable=False, default='Open')
-    opening_date = db.Column(db.DateTime(), nullable=False,
-                             default=datetime.now().astimezone())
-    closing_date = db.Column(db.DateTime(), nullable=True)
+    opening_date = db.Column(db.Date, nullable=False)
+    opening_time = db.Column(db.Time, nullable=False)
+    closing_date = db.Column(db.Date, nullable=True)
+    closing_time = db.Column(db.Time, nullable=True)
 
     def __str__(self):
         return self.ticket_no
