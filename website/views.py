@@ -282,20 +282,21 @@ def verify_response(gateway):
                         )
                         top_up.response()
 
-                        data['topup_ref_id'] = top_up.ref_no
-                        data['topup_datetime'] = datetime.now().\
-                            strftime("%Y-%m-%d %H:%M:%S.%f")
-
                         # verify MQS TopUp status
-                        db_entry_status, status, msg, msg_stat = \
+                        db_entry_status, status, flash_msg, msg_stat = \
                             verify_mqs_topup(top_up)
 
-                        data['topup_status'] = db_entry_status
-
-                        # fill empty string for the add plan data
-                        data['addplan_ref_id'] = ''
-                        data['addplan_datetime'] = ''
-                        data['addplan_status'] = ''
+                        # update data to be passed further
+                        data.update(
+                            topup_ref_id=top_up.ref_no,
+                            topup_datetime=datetime.now().strftime(
+                                "%Y-%m-%d %H:%M:%S.%f"
+                            ),
+                            topup_status=db_entry_status,
+                            addplan_ref_id='',
+                            addplan_datetime='',
+                            addplan_status=''
+                        )
 
                     elif txn_type == 'addplan':
                         # AddPlan in MQS
@@ -306,22 +307,23 @@ def verify_response(gateway):
                         )
                         addplan.response()
 
-                        data['addplan_ref_id'] = addplan.ref_no
-                        data['addplan_datetime'] = datetime.now().\
-                            strftime("%Y-%m-%d %H:%M:%S.%f")
-
                         # verify MQS AddPlan status
-                        db_entry_status, status, msg, msg_stat = \
+                        db_entry_status, status, flash_msg, msg_stat = \
                             verify_mqs_addplan(addplan)
 
-                        data['addplan_status'] = db_entry_status
+                        # update data to be passed further
+                        data.update(
+                            addplan_ref_id=addplan.ref_no,
+                            addplan_datetime=datetime.now().strftime(
+                                "%Y-%m-%d %H:%M:%S.%f"
+                            ),
+                            addplan_status=db_entry_status,
+                            topup_ref_id='',
+                            topup_datetime='',
+                            topup_status=''
+                        )
 
-                        # fill empty string for the topup data
-                        data['topup_ref_id'] = ''
-                        data['topup_datetime'] = ''
-                        data['topup_status'] = ''
-
-                    flash(msg, msg_stat)
+                    flash(flash_msg, msg_stat)
 
                 # Transaction Status failure
                 else:
@@ -415,21 +417,21 @@ def verify_response(gateway):
                     )
                     top_up.response()
 
-                    data['topup_ref_id'] = top_up.ref_no
-                    data['topup_datetime'] = datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S.%f"
-                    )
-
                     # verify MQS TopUp status
-                    db_entry_status, status, msg, msg_stat = \
+                    db_entry_status, status, flash_msg, msg_stat = \
                         verify_mqs_topup(top_up)
 
-                    data['topup_status'] = db_entry_status
-
-                    # fill empty string for the add plan data
-                    data['addplan_ref_id'] = ''
-                    data['addplan_datetime'] = ''
-                    data['addplan_status'] = ''
+                    # update data to be passed further
+                    data.update(
+                        topup_ref_id=top_up.ref_no,
+                        topup_datetime=datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S.%f"
+                        ),
+                        topup_status=db_entry_status,
+                        addplan_ref_id='',
+                        addplan_datetime='',
+                        addplan_status=''
+                    )
 
                 elif txn_type == 'addplan':
                     # AddPlan in MQS
@@ -440,22 +442,23 @@ def verify_response(gateway):
                     )
                     addplan.response()
 
-                    data['addplan_ref_id'] = addplan.ref_no
-                    data['addplan_datetime'] = datetime.now().\
-                        strftime("%Y-%m-%d %H:%M:%S.%f")
-
                     # verify MQS AddPlan status
-                    db_entry_status, status, msg, msg_stat = \
+                    db_entry_status, status, flash_msg, msg_stat = \
                         verify_mqs_addplan(addplan)
 
-                    data['addplan_status'] = db_entry_status
+                    # update data to be passed further
+                    data.update(
+                        addplan_ref_id=addplan.ref_no,
+                        addplan_datetime=datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S.%f"
+                        ),
+                        addplan_status=db_entry_status,
+                        topup_ref_id='',
+                        topup_datetime='',
+                        topup_status=''
+                    )
 
-                    # fill empty string for the topup data
-                    data['topup_ref_id'] = ''
-                    data['topup_datetime'] = ''
-                    data['topup_status'] = ''
-
-                flash(msg, msg_stat)
+                flash(flash_msg, msg_stat)
 
             # signature verification failure
             # data tampered during transaction
