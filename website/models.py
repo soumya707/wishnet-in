@@ -270,14 +270,14 @@ class RechargeEntry(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     customer_no = db.Column(db.String(100), nullable=False)
-    customer_zone_id = db.Column(db.String(50), nullable=False)
+    customer_zone_id = db.Column(db.String(50), nullable=True)
     wishnet_payment_order_id = db.Column(db.String(20), nullable=False)
     payment_gateway = db.Column(db.String(10), nullable=False)
     payment_gateway_order_id = db.Column(db.String(100), nullable=False)
     payment_amount = db.Column(db.String(10), nullable=False)
     payment_datetime = db.Column(db.String(50), nullable=False)
-    payment_date = db.Column(db.Date, nullable=False)
-    payment_time = db.Column(db.Time, nullable=False)
+    payment_date = db.Column(db.Date, nullable=True)
+    payment_time = db.Column(db.Time, nullable=True)
     payment_status = db.Column(db.String(200), nullable=False)
     mq_topup_reference_id = db.Column(db.String(20), nullable=False)
     mq_topup_datetime = db.Column(db.String(50), nullable=False)
@@ -374,7 +374,7 @@ class Ticket(db.Model):
     remarks = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(10), nullable=False, default='Open')
     opening_date = db.Column(db.Date, nullable=False)
-    opening_time = db.Column(db.Time, nullable=False)
+    opening_time = db.Column(db.Time, nullable=True)
     closing_date = db.Column(db.Date, nullable=True)
     closing_time = db.Column(db.Time, nullable=True)
 
@@ -424,8 +424,8 @@ class GSTUpdateRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_no = db.Column(db.String(100), nullable=False)
     gst_no = db.Column(db.String(15), nullable=False)
-    request_date = db.Column(db.Date, nullable=False)
-    request_time = db.Column(db.Time, nullable=False)
+    request_date = db.Column(db.Date(), nullable=True)
+    request_time = db.Column(db.Time, nullable=True)
     status = db.Column(db.String(20), nullable=False, default='NOT VERIFIED')
 
     def __str__(self):

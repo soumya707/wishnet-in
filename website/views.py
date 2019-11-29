@@ -1300,7 +1300,6 @@ def new_docket():
         elif session.get('portal_open_ticket_no'):
             return render_template(
                 'new_docket.html',
-                # form=form,
                 allowed=False,
             )
 
