@@ -309,7 +309,10 @@ class CustomerInfo(db.Model):
     mobile_no = db.Column(db.String(15), nullable=True)
     ip_addr = db.Column(db.String(20), nullable=True)
     zone_id = db.Column(db.String(50), nullable=True)
+    email_id = db.Column(db.String(100), nullable=True)
     zone_name = db.Column(db.String(100), nullable=True)
+    using_wishtalk = db.Column(db.String(3), nullable=False,
+                               default='NO')
     package = db.Column(db.String(100), nullable=True)
     soft_limit = db.Column(db.Integer, nullable=True)
     ott_limit = db.Column(db.Integer, nullable=True)
