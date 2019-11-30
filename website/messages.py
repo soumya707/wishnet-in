@@ -75,7 +75,7 @@ UNSUCCESSFUL_PROFILE_UPDATE = (
 )
 
 # INCOMPLETE PAYMENT
-INCOMPLETE_PAYMENT = 'Payment incomplete! Please check with {}.'
+INCOMPLETE_PAYMENT = 'Payment incomplete! Please try again.'
 
 # UNSUCCESSFUL PAYMENT
 UNSUCCESSFUL_PAYMENT = 'Payment failed! Please try again.'

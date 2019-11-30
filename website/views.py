@@ -224,7 +224,7 @@ def insta_recharge(order_id):
         )
 
 
-@app.route('/verify/<gateway>', methods=['POST'])
+@app.route('/verify/<gateway>', methods=['GET', 'POST'])
 @CSRF.exempt
 def verify_response(gateway):
     """Route for verifying response for payment."""
@@ -329,7 +329,7 @@ def verify_response(gateway):
                 else:
                     data.update(
                         txn_amount='',
-                        txn_status='FAILURE',
+                        txn_status='INCOMPLETE',
                         topup_ref_id='',
                         topup_datetime='',
                         topup_status='',
@@ -338,10 +338,8 @@ def verify_response(gateway):
                         addplan_status='',
                     )
                     status = 'unsuccessful'
-                    flash(
-                        INCOMPLETE_PAYMENT.format(gateway.capitalize()),
-                        'danger'
-                    )
+                    flash(INCOMPLETE_PAYMENT, 'danger')
+
             # checksumhash verification failure
             # data tampered during transaction
             elif not verified:
@@ -484,6 +482,55 @@ def verify_response(gateway):
                 f'{session_var_prefix}_receipt',
                 order_id=session[f'{session_var_prefix}_order_id'],
                 status=status
+            )
+        )
+
+    # handle Razorpay transaction cancel
+    elif request.method == 'GET':
+        # get metadata of order (skipping customer no. and txn type)
+        _, session_var_prefix, _ = get_notes(
+            session['razorpay_order_id']
+        )
+
+        # get zone id for table entry
+        zone_id = CustomerInfo.query.\
+            options(FromCache(CACHE)).\
+            filter_by(
+                customer_no=session[f'{session_var_prefix}_customer_no']
+            ).first().zone_id
+
+        # prepare data to be sent to db
+        data = {
+            'customer_no': session[f'{session_var_prefix}_customer_no'],
+            'customer_zone_id': zone_id,
+            'wishnet_order_id': session[f'{session_var_prefix}_order_id'],
+            'payment_gateway': 'Razorpay',
+            'txn_order_id': session['razorpay_order_id'],
+            'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
+            'txn_date': datetime.now().astimezone().date(),
+            'txn_time': datetime.now().astimezone().time(),
+            'txn_amount': '',
+            'txn_status': 'INCOMPLETE',
+            'topup_ref_id': '',
+            'topup_datetime': '',
+            'topup_status': '',
+            'addplan_ref_id': '',
+            'addplan_datetime': '',
+            'addplan_status': '',
+        }
+        # remove Razorpay order id from session storage
+        session.pop('razorpay_order_id', None)
+
+        flash(INCOMPLETE_PAYMENT, 'danger')
+
+        # add transaction data to db async
+        add_txn_data_to_db.delay(data)
+
+        return redirect(
+            url_for(
+                f'{session_var_prefix}_receipt',
+                order_id=session[f'{session_var_prefix}_order_id'],
+                status='unsuccessful'
             )
         )
 

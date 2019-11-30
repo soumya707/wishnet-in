@@ -44,6 +44,7 @@ def make_order(
         'notes[pay_source]': pay_source[0],
         'notes[txn_type]': pay_source[1],
         'callback_url': app.config['RAZORPAY_CALLBACKURL'],
+        'cancel_url': app.config['RAZORPAY_CANCELURL']
     }
 
     return razorpay_params
