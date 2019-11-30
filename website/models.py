@@ -257,6 +257,8 @@ class TariffInfo(db.Model):
     speed = db.Column(db.Integer, nullable=False)
     validity = db.Column(db.Integer, nullable=False)
     plan_type = db.Column(db.String(50), nullable=False)
+    softphone = db.Column(db.Integer, nullable=True)
+    ott = db.Column(db.Integer, nullable=True)
 
     def __str__(self):
         return self.plan_name
@@ -307,6 +309,10 @@ class CustomerInfo(db.Model):
     mobile_no = db.Column(db.String(15), nullable=True)
     ip_addr = db.Column(db.String(20), nullable=True)
     zone_id = db.Column(db.String(50), nullable=True)
+    zone_name = db.Column(db.String(100), nullable=True)
+    package = db.Column(db.String(100), nullable=True)
+    soft_limit = db.Column(db.Integer, nullable=True)
+    ott_limit = db.Column(db.Integer, nullable=True)
 
     def __str__(self):
         return self.customer_no
