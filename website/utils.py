@@ -21,8 +21,18 @@ def order_no_gen():
 
 def send_sms(url, data):
     """Send SMS to customer."""
-    res = requests.get(url, params=data)
-    return res.ok
+    try:
+        # avoid slow responses from server by setting a timeout of 5 seconds
+        res = requests.get(url, params=data, timeout=5)
+        # check if request is successful
+        if res.ok:
+            success = True
+        else:
+            success = False
+    except ConnectionError as _:
+        success = False
+
+    return success
 
 
 def verify_mqs_topup(topup):
