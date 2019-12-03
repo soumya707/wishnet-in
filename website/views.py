@@ -670,9 +670,7 @@ def logout():
         session['user_logged_in'] = False
         # remove portal customer data storage
         session.pop('portal_customer_no', None)
-        session.pop('portal_customer_gst', None)
         session.pop('portal_customer_data', None)
-        session.pop('portal_active_plans', None)
         session.pop('portal_inactive_plans', None)
         session.pop('portal_available_plans', None)
         session.pop('portal_order_no', None)
@@ -997,45 +995,34 @@ def portal():
             # add customer data to session for quick access
             session['portal_customer_data'] = user_info.to_dict()
 
-        # check if session variable exists for active plans
-        if not session.get('portal_active_plans'):
-            user_data = session['portal_customer_data']
-            plans = {
-                row.plan_code: row
-                for row in TariffInfo.query.options(FromCache(CACHE)).all()
-            }
-            # Get active plans for the user
-            # {plan_name: (price, validity, plan_code)}
-            active_plans = {
-                plans[plan_code].plan_name: (
-                    plans[plan_code].price, validity_period, plan_code
-                )
-                for (_, plan_code, validity_period) in user_data['active_plans']
-                if plan_code in plans
-            }
-            # store in session variable
-            session['portal_active_plans'] = active_plans
+        plans = {
+            row.plan_code: row
+            for row in TariffInfo.query.options(FromCache(CACHE)).all()
+        }
+        # Get active plans for the user
+        # {plan_name: validity_period }
+        active_plans = {
+            plans[plan_code].plan_name: validity_period
+            for (_, plan_code, validity_period) in
+            session['portal_customer_data']['active_plans']
+            if plan_code in plans
+        }
 
-        # check if session variable exists for GSTIN
-        if not session.get('portal_customer_gst'):
-            customer_gst = \
-                GSTUpdateRequest.query.\
-                filter(
-                    and_(
-                        GSTUpdateRequest.customer_no == \
-                        session['portal_customer_no'],
-                        GSTUpdateRequest.status == 'REGISTERED'
-                    )
-                ).first()
-            session['portal_customer_gst'] = \
-                customer_gst.gst_no if customer_gst else None
+        # Get GSTIN for customer
+        customer_gst = GSTUpdateRequest.query.filter(
+            and_(
+                GSTUpdateRequest.customer_no == \
+                session['portal_customer_no'],
+                GSTUpdateRequest.status == 'REGISTERED'
+            )
+        ).first()
 
         return render_template(
             'portal.html',
             cust_no=session['portal_customer_no'],
             cust_data=session['portal_customer_data'],
-            gstin=session['portal_customer_gst'],
-            active_plans=session['portal_active_plans'],
+            gstin=customer_gst,
+            active_plans=active_plans
         )
 
 
