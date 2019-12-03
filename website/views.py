@@ -671,9 +671,9 @@ def logout():
         # remove portal customer data storage
         session.pop('portal_customer_no', None)
         session.pop('portal_customer_data', None)
-        session.pop('portal_inactive_plans', None)
         session.pop('portal_available_plans', None)
         session.pop('portal_order_id', None)
+        session.pop('portal_plan_code', None)
         session.pop('portal_open_ticket_no', None)
     # user not logged in (invalid access to route)
     elif not session.get('user_logged_in'):
@@ -1037,7 +1037,39 @@ def recharge():
         # keep the session alive
         session.modified = True
 
-        if request.method == 'POST':
+        if request.method == 'GET':
+            plans = {
+                row.plan_code: row
+                for row in TariffInfo.query.options(FromCache(CACHE)).all()
+            }
+            # Get active plans for the user
+            # {plan_name: (price, validity, plan_code)}
+            active_plans = {
+                plans[plan_code].plan_name: (
+                    plans[plan_code].price, validity_period, plan_code
+                )
+                for (_, plan_code, validity_period) in
+                session['portal_customer_data']['active_plans']
+                if plan_code in plans
+            }
+            # Get inactive plans for the user
+            # {plan_name: (price, validity, plan_code) }
+            inactive_plans = {
+                plans[plan_code].plan_name: (
+                    plans[plan_code].price, validity_period, plan_code
+                )
+                for (_, plan_code, validity_period) in
+                session['portal_customer_data']['inactive_plans']
+                if plan_code in plans
+            }
+
+            return render_template(
+                'recharge.html',
+                active_plans=active_plans,
+                inactive_plans=inactive_plans,
+            )
+
+        elif request.method == 'POST':
             # store amount in session
             session['portal_amount'] = request.form['amount']
             # store selected plan code in session
@@ -1045,16 +1077,14 @@ def recharge():
             # generate and store a transaction id
             session['portal_order_id'] = order_no_gen()
 
-            # retrieve customer data
-            customer_data = session['portal_customer_data']
-
             # Check payment gateway
             if request.form['gateway'] == 'paytm':
                 # Get Paytm form data
                 form_data = initiate_transaction(
                     order_id=session['portal_order_id'],
                     customer_no=session['portal_customer_no'],
-                    customer_mobile_no=customer_data['contact_no'],
+                    customer_mobile_no=\
+                    session['portal_customer_data']['contact_no'],
                     amount=request.form['amount'],
                     # _ is used as the delimiter; check Paytm docs
                     pay_source='portal_recharge',
@@ -1065,9 +1095,10 @@ def recharge():
                 form_data = make_order(
                     order_id=session['portal_order_id'],
                     customer_no=session['portal_customer_no'],
-                    customer_mobile_no=customer_data['contact_no'],
+                    customer_mobile_no=\
+                    session['portal_customer_data']['contact_no'],
                     customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
-                    amount=session['portal_amount'],
+                    amount=request.form['amount'],
                     # list is used for passing data; check Razorpay docs
                     pay_source=['portal', 'recharge'],
                 )
@@ -1078,32 +1109,6 @@ def recharge():
             return render_template(
                 '{}_pay.html'.format(request.form['gateway']),
                 form=form_data,
-            )
-
-        elif request.method == 'GET':
-            # check if session variable exists for inactive plans
-            if not session.get('portal_inactive_plans'):
-                user_data = session['portal_customer_data']
-                plans = {
-                    row.plan_code: row
-                    for row in TariffInfo.query.options(FromCache(CACHE)).all()
-                }
-                # get inactive plans
-                # {plan_name: (price, validity, plan_code) }
-                inactive_plans = {
-                    plans[plan_code].plan_name: (
-                        plans[plan_code].price, validity_period, plan_code
-                    )
-                    for (_, plan_code, validity_period) in
-                    user_data['inactive_plans'] if plan_code in plans
-                }
-                # store in session variable
-                session['portal_inactive_plans'] = inactive_plans
-
-            return render_template(
-                'recharge.html',
-                active_plans=session['portal_active_plans'],
-                inactive_plans=session['portal_inactive_plans'],
             )
 
 
