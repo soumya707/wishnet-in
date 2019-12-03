@@ -494,7 +494,7 @@ def insta_receipt(order_id):
         amount=session['insta_amount'],
         date_and_time=request.args.get('txn_datetime'),
         txn_status=request.args.get('status'),
-        txn_no=order_id,
+        txn_no=order_id
     )
 
 
@@ -1213,20 +1213,18 @@ def add_plan():
             )
 
 
-@app.route('/portal/receipt/<order_id>/<status>')
-def portal_receipt(order_id, status):
+@app.route('/portal/receipt/<order_id>')
+def portal_receipt(order_id):
     """Route to transaction receipt."""
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cust_data = session['portal_customer_data']
 
     return render_template(
         'portal_receipt.html',
         customer_no=session['portal_customer_no'],
-        customer_name=cust_data['name'],
+        customer_name=session['portal_customer_data']['name'],
         amount=session['portal_amount'],
-        date_and_time=current_time,
-        txn_status=status,
-        txn_no=order_id,
+        date_and_time=request.args.get('txn_datetime'),
+        txn_status=request.args.get('status'),
+        txn_no=order_id
     )
 
 
