@@ -3,6 +3,7 @@
 """Views for the website."""
 
 
+import json
 import random
 import string
 from datetime import datetime, timedelta
@@ -76,17 +77,14 @@ def index():
                     user_contracts.active_plans if plan_code in plans
                 }
 
-                # store data in the session variables
-                session['insta_active_plans'] = active_plans
-                session['insta_customer_no'] = customer.customer_no
-                session['insta_customer_name'] = customer.customer_name
-                session['insta_customer_mobile_no'] = customer.mobile_no
-                session['insta_order_id'] = user_contracts.ref_no
-
                 return redirect(
                     url_for(
                         'insta_recharge',
-                        order_id=session['insta_order_id'],
+                        order_id=user_contracts.ref_no,
+                        customer_no=customer.customer_no,
+                        customer_name=customer.customer_name,
+                        customer_mobile_no=customer.mobile_no,
+                        active_plans=json.dumps(active_plans),
                     )
                 )
             # user does not have active plans
@@ -199,11 +197,11 @@ def insta_recharge(order_id):
             # Get Razorpay form data
             form_data = make_order(
                 order_id=order_id,
-                customer_no=session['insta_customer_no'],
-                customer_mobile_no=session['insta_customer_mobile_no'],
+                customer_no=request.form['customer_no'],
+                customer_mobile_no=request.form['customer_mobile_no'],
                 customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
                 amount=request.form['amount'],
-                # list is used for passing data; check Razorpay docs
+                # list is used for passing data; check razorpay_utils
                 pay_source=['insta', 'recharge'],
             )
 
@@ -213,14 +211,6 @@ def insta_recharge(order_id):
         return render_template(
             '{}_pay.html'.format(request.form['gateway']),
             form=form_data,
-        )
-
-    elif request.method == 'GET':
-        return render_template(
-            'insta_recharge.html',
-            customer_no=session['insta_customer_no'],
-            customer_name=session['insta_customer_name'],
-            active_plans=session['insta_active_plans'],
         )
 
 
@@ -530,23 +520,23 @@ def verify_response(gateway):
             url_for(
                 f'{session_var_prefix}_receipt',
                 order_id=session[f'{session_var_prefix}_order_id'],
-                status='unsuccessful'
+                status='unsuccessful',
+                txn_datetime=data['txn_datetime']
             )
         )
 
 
-@app.route('/receipt/<order_id>/<status>')
-def insta_receipt(order_id, status):
+@app.route('/receipt/<order_id>')
+def insta_receipt(order_id):
     """Route to transaction receipt."""
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     return render_template(
         'receipt.html',
         customer_no=session['insta_customer_no'],
         customer_name=session['insta_customer_name'],
         amount=session['insta_amount'],
-        date_and_time=current_time,
-        txn_status=status,
+        date_and_time=request.args.get('txn_datetime'),
+        txn_status=request.args.get('status'),
         txn_no=order_id,
     )
 

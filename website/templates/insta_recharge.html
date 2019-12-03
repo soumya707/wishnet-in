@@ -45,11 +45,16 @@
         <h3 class="py-2 text-red">Active Plans</h3>
 
         <form method="POST" id="payment-form">
+              <!-- CSRF token -->
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
+              <!-- Customer number -->
+              <input type="hidden" name="customer_no" value="{{ customer_no }}">
+              <!-- Customer name -->
+              <input type="hidden" name="customer_name" value="{{ customer_name }}">
+              <!-- Customer mobile number -->
+              <input type="hidden" name="customer_mobile_no" value="{{ customer_mobile_no }}">
               <!-- Transaction amount -->
               <input type="hidden" name="amount" value="" id="total-price-input">
-
               <!-- Selected plan code -->
               <input type="hidden" name="plan_code" value="" id="selected-plan-code">
 
