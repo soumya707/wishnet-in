@@ -112,84 +112,41 @@ def index():
     )
 
 
-@app.route('/get_customer_number', methods=['GET', 'POST'])
-def get_cust_no():
-    """Route for getting customer number."""
-    form = GetCustomerNumberForm()
-
-    if form.validate_on_submit():
-        user = form.username.data
-        ip_addr = form.ip_address.data
-
-        # query with `or` condition
-        customer = CustomerInfo.query.filter(
-            or_(
-                CustomerInfo.user_name == user,
-                CustomerInfo.ip_addr == ip_addr
-            )
-        ).first()
-
-        # credentials okay and data available
-        if customer is not None and customer.mobile_no is not str():
-            # send SMS
-            mobile_no = customer.mobile_no.strip()
-            sms_msg = SMS_CUSTOMER_NO.format(customer.customer_no)
-
-            successful = send_sms(
-                app.config['SMS_URL'],
-                {
-                    'username': app.config['SMS_USERNAME'],
-                    'password': app.config['SMS_PASSWORD'],
-                    'from': app.config['SMS_SENDER'],
-                    'to': '91{}'.format(mobile_no),
-                    'text': sms_msg,
-                }
-            )
-
-            if successful:
-                text = CUSTOMER_NO_SENT
-                status = 'success'
-
-            else:
-                text = CUSTOMER_NO_NOT_SENT
-                status = 'danger'
-
-            flash(text, status)
-
-        # mobile number not available
-        elif customer is not None and customer.mobile_no is str():
-            flash(NO_MOBILE_NO, 'danger')
-        # invalid credentials
-        elif customer is None:
-            flash(INVALID_CUSTOMER, 'danger')
-
-        return redirect(url_for('get_cust_no'))
-
-    # GET request
-    return render_template(
-        'customer_no.html',
-        form=form
-    )
-
-
 @app.route('/insta_recharge/<order_id>', methods=['GET', 'POST'])
 def insta_recharge(order_id):
     """Route for insta-recharge."""
-    if request.method == 'POST':
+
+    if request.method == 'GET':
+
+        return render_template(
+            'insta_recharge.html',
+            customer_no=request.args.get('customer_no'),
+            customer_name=request.args.get('customer_name'),
+            customer_mobile_no=request.args.get('customer_mobile_no'),
+            active_plans=json.loads(request.args.get('active_plans')),
+        )
+
+    elif request.method == 'POST':
+        # store customer number in session
+        session['insta_customer_no'] = request.form['customer_no']
+        # store customer name in session
+        session['insta_customer_name'] = request.form['customer_name']
         # store amount in session
         session['insta_amount'] = request.form['amount']
         # store selected plan code in session
         session['insta_plan_code'] = request.form['plan_code']
+        # store order id in session
+        session['insta_order_id'] = order_id
 
         # Check payment gateway
         if request.form['gateway'] == 'paytm':
             # Get Paytm form data
             form_data = initiate_transaction(
                 order_id=order_id,
-                customer_no=session['insta_customer_no'],
-                customer_mobile_no=session['insta_customer_mobile_no'],
+                customer_no=request.form['customer_no'],
+                customer_mobile_no=request.form['customer_mobile_no'],
                 amount=request.form['amount'],
-                # _ is used as the delimiter; check Paytm docs
+                # _ is used as the delimiter; check paytm_utils
                 pay_source='insta_recharge',
             )
 
@@ -238,7 +195,7 @@ def verify_response(gateway):
                 'customer_zone_id': zone_id,
                 'wishnet_order_id': session[f'{session_var_prefix}_order_id'],
                 'payment_gateway': 'Paytm',
-                'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
+                'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 'txn_date': datetime.now().astimezone().date(),
                 'txn_time': datetime.now().astimezone().time(),
             }
@@ -280,7 +237,7 @@ def verify_response(gateway):
                         data.update(
                             topup_ref_id=top_up.ref_no,
                             topup_datetime=datetime.now().strftime(
-                                "%Y-%m-%d %H:%M:%S.%f"
+                                "%Y-%m-%d %H:%M:%S"
                             ),
                             topup_status=db_entry_status,
                             addplan_ref_id='',
@@ -305,7 +262,7 @@ def verify_response(gateway):
                         data.update(
                             addplan_ref_id=addplan.ref_no,
                             addplan_datetime=datetime.now().strftime(
-                                "%Y-%m-%d %H:%M:%S.%f"
+                                "%Y-%m-%d %H:%M:%S"
                             ),
                             addplan_status=db_entry_status,
                             topup_ref_id='',
@@ -381,7 +338,7 @@ def verify_response(gateway):
                 'wishnet_order_id': session[f'{session_var_prefix}_order_id'],
                 'payment_gateway': 'Razorpay',
                 'txn_order_id': session['razorpay_order_id'],
-                'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
+                'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 'txn_date': datetime.now().astimezone().date(),
                 'txn_time': datetime.now().astimezone().time(),
             }
@@ -413,7 +370,7 @@ def verify_response(gateway):
                     data.update(
                         topup_ref_id=top_up.ref_no,
                         topup_datetime=datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S.%f"
+                            "%Y-%m-%d %H:%M:%S"
                         ),
                         topup_status=db_entry_status,
                         addplan_ref_id='',
@@ -438,7 +395,7 @@ def verify_response(gateway):
                     data.update(
                         addplan_ref_id=addplan.ref_no,
                         addplan_datetime=datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S.%f"
+                            "%Y-%m-%d %H:%M:%S"
                         ),
                         addplan_status=db_entry_status,
                         topup_ref_id='',
@@ -496,7 +453,7 @@ def verify_response(gateway):
             'wishnet_order_id': session[f'{session_var_prefix}_order_id'],
             'payment_gateway': 'Razorpay',
             'txn_order_id': session['razorpay_order_id'],
-            'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
+            'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             'txn_date': datetime.now().astimezone().date(),
             'txn_time': datetime.now().astimezone().time(),
             'txn_amount': '',
@@ -720,6 +677,66 @@ def logout():
         flash(LOG_IN_FIRST, 'danger')
 
     return redirect(url_for('login'))
+
+
+@app.route('/get_customer_number', methods=['GET', 'POST'])
+def get_cust_no():
+    """Route for getting customer number."""
+    form = GetCustomerNumberForm()
+
+    if form.validate_on_submit():
+        user = form.username.data
+        ip_addr = form.ip_address.data
+
+        # query with `or` condition
+        customer = CustomerInfo.query.filter(
+            or_(
+                CustomerInfo.user_name == user,
+                CustomerInfo.ip_addr == ip_addr
+            )
+        ).first()
+
+        # credentials okay and data available
+        if customer is not None and customer.mobile_no is not str():
+            # send SMS
+            mobile_no = customer.mobile_no.strip()
+            sms_msg = SMS_CUSTOMER_NO.format(customer.customer_no)
+
+            successful = send_sms(
+                app.config['SMS_URL'],
+                {
+                    'username': app.config['SMS_USERNAME'],
+                    'password': app.config['SMS_PASSWORD'],
+                    'from': app.config['SMS_SENDER'],
+                    'to': '91{}'.format(mobile_no),
+                    'text': sms_msg,
+                }
+            )
+
+            if successful:
+                text = CUSTOMER_NO_SENT
+                status = 'success'
+
+            else:
+                text = CUSTOMER_NO_NOT_SENT
+                status = 'danger'
+
+            flash(text, status)
+
+        # mobile number not available
+        elif customer is not None and customer.mobile_no is str():
+            flash(NO_MOBILE_NO, 'danger')
+        # invalid credentials
+        elif customer is None:
+            flash(INVALID_CUSTOMER, 'danger')
+
+        return redirect(url_for('get_cust_no'))
+
+    # GET request
+    return render_template(
+        'customer_no.html',
+        form=form
+    )
 
 
 @app.route('/register', methods=['GET', 'POST'])
