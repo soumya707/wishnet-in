@@ -673,7 +673,7 @@ def logout():
         session.pop('portal_customer_data', None)
         session.pop('portal_inactive_plans', None)
         session.pop('portal_available_plans', None)
-        session.pop('portal_order_no', None)
+        session.pop('portal_order_id', None)
         session.pop('portal_open_ticket_no', None)
     # user not logged in (invalid access to route)
     elif not session.get('user_logged_in'):
