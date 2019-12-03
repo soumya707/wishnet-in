@@ -671,7 +671,6 @@ def logout():
         # remove portal customer data storage
         session.pop('portal_customer_no', None)
         session.pop('portal_customer_data', None)
-        session.pop('portal_available_plans', None)
         session.pop('portal_order_id', None)
         session.pop('portal_plan_code', None)
         session.pop('portal_open_ticket_no', None)
@@ -1124,7 +1123,54 @@ def add_plan():
         # keep the session alive
         session.modified = True
 
-        if request.method == 'POST':
+        if request.method == 'GET':
+            zone_id = \
+                CustomerInfo.query.\
+                options(FromCache(CACHE)).\
+                filter_by(customer_no=session['portal_customer_no']).\
+                first().zone_id
+
+            # Get eligible plan codes for the user
+            zone_eligible_plan_codes = [
+                zone.plan_code_mqs
+                for zone in ZoneIDWithPlanCode.query.\
+                filter(
+                    and_(
+                        ZoneIDWithPlanCode.zone_id == zone_id,
+                        ZoneIDWithPlanCode.status == 'ACTIVE'
+                    )
+                ).all()
+            ]
+
+            plans = {
+                row.plan_code: row
+                for row in TariffInfo.query.options(FromCache(CACHE)).all()
+            }
+
+            # Get available plans for the user
+            # {plan_name: (price, plan_code) }
+            available_plan_codes = \
+                set(plans.keys()).\
+                difference(session['portal_customer_data']['all_plans']).\
+                intersection(zone_eligible_plan_codes)
+
+            available_plans = {
+                plans[plan_code].plan_name: (
+                    plans[plan_code].price,
+                    plan_code,
+                    plans[plan_code].speed,
+                    plans[plan_code].validity,
+                    plans[plan_code].plan_type,
+                )
+                for plan_code in available_plan_codes
+            }
+
+            return render_template(
+                'add_plan.html',
+                available_plans=available_plans,
+            )
+
+        elif request.method == 'POST':
             # store amount in session
             session['portal_amount'] = request.form['amount']
             # store selected plan code in session
@@ -1132,16 +1178,14 @@ def add_plan():
             # generate and store a transaction id
             session['portal_order_id'] = order_no_gen()
 
-            # retrieve customer data
-            customer_data = session['portal_customer_data']
-
             # Check payment gateway
             if request.form['gateway'] == 'paytm':
                 # Get Paytm form data
                 form_data = initiate_transaction(
                     order_id=session['portal_order_id'],
                     customer_no=session['portal_customer_no'],
-                    customer_mobile_no=customer_data['contact_no'],
+                    customer_mobile_no=\
+                    session['portal_customer_data']['contact_no'],
                     amount=request.form['amount'],
                     # _ is used as the delimiter; check Paytm docs
                     pay_source='portal_addplan',
@@ -1152,9 +1196,10 @@ def add_plan():
                 form_data = make_order(
                     order_id=session['portal_order_id'],
                     customer_no=session['portal_customer_no'],
-                    customer_mobile_no=customer_data['contact_no'],
+                    customer_mobile_no=\
+                    session['portal_customer_data']['contact_no'],
                     customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
-                    amount=session['portal_amount'],
+                    amount=request.form['amount'],
                     # list is used for passing data; check Razorpay docs
                     pay_source=['portal', 'addplan'],
                 )
@@ -1165,58 +1210,6 @@ def add_plan():
             return render_template(
                 '{}_pay.html'.format(request.form['gateway']),
                 form=form_data,
-            )
-
-        elif request.method == 'GET':
-            # check if session variable exists for available plans
-            if not session.get('portal_available_plans'):
-                user_data = session['portal_customer_data']
-                zone_id = \
-                    CustomerInfo.query.\
-                    options(FromCache(CACHE)).\
-                    filter_by(customer_no=session['portal_customer_no']).\
-                    first().zone_id
-                zone_eligible_plan_codes = [
-                    zone.plan_code_mqs
-                    for zone in ZoneIDWithPlanCode\
-                    .query.filter(
-                        and_(
-                            ZoneIDWithPlanCode.zone_id == zone_id,
-                            ZoneIDWithPlanCode.status == 'ACTIVE'
-                        )
-                    ).all()
-                ]
-                plans = {
-                    row.plan_code: row
-                    for row in TariffInfo.query.options(FromCache(CACHE)).all()
-                }
-
-                # get available plans for the user
-                # {plan_name: (price, plan_code) }
-                available_plan_codes = \
-                    set(plans.keys()).difference(user_data['all_plans'])
-
-                # get eligible plans for the user (based on the zone ID)
-                eligible_plan_codes = \
-                    available_plan_codes.intersection(zone_eligible_plan_codes)
-
-                available_plans = {
-                    plans[plan_code].plan_name: (
-                        plans[plan_code].price,
-                        plan_code,
-                        plans[plan_code].speed,
-                        plans[plan_code].validity,
-                        plans[plan_code].plan_type,
-                    )
-                    for plan_code in eligible_plan_codes
-                }
-
-                # store in session variable
-                session['portal_available_plans'] = available_plans
-
-            return render_template(
-                'add_plan.html',
-                available_plans=session['portal_available_plans'],
             )
 
 
