@@ -599,6 +599,12 @@ def terms_and_conditions():
     return render_template('terms_and_conditions.html')
 
 
+@app.route('/end_user_license_wishtalk')
+def end_user_license_wishtalk():
+    """Route for end user license of Wishtalk."""
+    return render_template('end_user_license_wishtalk.html')
+
+
 # Self-care routes
 
 @app.route('/login', methods=['GET', 'POST'])
