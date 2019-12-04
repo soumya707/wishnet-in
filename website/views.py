@@ -293,7 +293,7 @@ def verify_response(gateway):
                 data.update(
                     txn_order_id='',
                     txn_amount='',
-                    txn_status='CHECKSUM VERIFICATION FAILURE',
+                    txn_status='VERIFICATION FAILURE',
                     topup_ref_id='',
                     topup_datetime='',
                     topup_status='',
@@ -410,7 +410,7 @@ def verify_response(gateway):
             else:
                 data.update(
                     txn_amount='',
-                    txn_status='SIGNATURE VERIFICATION FAILURE',
+                    txn_status='VERIFICATION FAILURE',
                     topup_ref_id='',
                     topup_datetime='',
                     topup_status='',
