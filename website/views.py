@@ -428,7 +428,8 @@ def verify_response(gateway):
             url_for(
                 f'{session_var_prefix}_receipt',
                 order_id=session[f'{session_var_prefix}_order_id'],
-                status=status
+                status=status,
+                txn_datetime=data['txn_datetime']
             )
         )
 
