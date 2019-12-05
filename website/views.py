@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 
 from flask import (
     current_app, flash, redirect, render_template, request, session, url_for)
+from flask_paginate import Pagination, get_page_args
 from flask_sqlalchemy_caching import FromCache
 from flask_wtf.csrf import CSRFProtect
 from passlib.exc import MalformedTokenError, TokenError
@@ -1425,7 +1426,7 @@ def usage():
 
         # Get start and end dates for usage data
         today = datetime.now().astimezone().date()
-        past = today - timedelta(days=60)
+        past = today - timedelta(days=90)
 
         # Get usage data using API call
         usage_details = GetUsageDetails()
@@ -1436,9 +1437,30 @@ def usage():
         )
         usage_details.response()
 
+        # Get page, per page and offset parameter names
+        page, per_page, offset = get_page_args(
+            page_parameter='page',
+            per_page_parameter='per_page'
+        )
+
+        # Get required entries
+        pagination_usage = get_usage(usage_details.usage, offset, per_page)
+
+        pagination = Pagination(
+            page=page,
+            per_page=per_page,
+            total=len(usage_details.usage),
+            css_framework='bootstrap4',
+            prev_label='&lt',
+            next_label='&gt'
+        )
+
         return render_template(
             'usage.html',
-            usage_details=usage_details.usage
+            usage_details=pagination_usage,
+            page=page,
+            per_page=per_page,
+            pagination=pagination
         )
 
 

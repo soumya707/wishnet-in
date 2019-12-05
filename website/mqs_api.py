@@ -602,8 +602,9 @@ class GetUsageDetails():
                 for upload in res_tree.iterfind('.//free_upload')
             ]
             ip_addr = [ip.text for ip in res_tree.iterfind('.//user_ip')]
-            self.usage = [
-                entry for entry in zip(
+
+            self.usage = list(
+                zip(
                     plans, login_time, usage_time, download, upload, ip_addr
                 )
-            ]
+            )

@@ -28,6 +28,7 @@ celery = "*"
 razorpay = "*"
 cryptography = "*"
 gunicorn = {extras = ["gevent"],version = "*"}
+flask-paginate = "*"
 
 [requires]
 python_version = "3.6"

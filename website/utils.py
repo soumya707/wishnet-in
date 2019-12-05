@@ -123,3 +123,8 @@ def retrieve_otp_secret(filepath):
         return {
             str(rows[-1].get('date')): str(rows[-1].get('key'))
         }
+
+
+def get_usage(usage, offset=0, per_page=10):
+    """Helper function for retrieving paginated usage information."""
+    return usage[offset: offset + per_page]
