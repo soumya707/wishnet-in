@@ -41,7 +41,7 @@
           <i class="fas fa-chart-pie pl-1"></i>
           <span class="pl-1">Usage Details</span>
         </a>
-        <a class="list-group-item list-group-item-action {% if '/transaction_history' in request.path %}active{% endif %}"
+        <a class="list-group-item list-group-item-action {% if request.path == url_for('transaction_history') %}active{% endif %}"
            href="{{ url_for('transaction_history', page_num=1) }}">
           <i class="fas fa-file-invoice-dollar pl-1"></i>
           <span class="pl-1">Online Transaction History</span>

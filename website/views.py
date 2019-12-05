@@ -1464,8 +1464,8 @@ def usage():
         )
 
 
-@app.route('/portal/transaction_history/<int:page_num>')
-def transaction_history(page_num):
+@app.route('/portal/transaction_history')
+def transaction_history():
     """Route for self-care transaction history."""
     # user not logged in
     if not session.get('user_logged_in'):
@@ -1476,14 +1476,21 @@ def transaction_history(page_num):
         # keep the session alive
         session.modified = True
 
-        # retrieve data from db
+        # Get page number
+        page_num = request.args.get('page', type=int, default=1)
+
+        # Retrieve data from db
         transactions = RechargeEntry.query.filter_by(
             customer_no=session['portal_customer_no']
-        ).paginate(per_page=20, page=page_num, error_out=False)
+        ).paginate(per_page=10, page=page_num, error_out=False)
 
         return render_template(
             'transaction_history.html',
-            transactions=transactions
+            transactions=transactions,
+            page=page_num
+        )
+
+
         )
 
 
