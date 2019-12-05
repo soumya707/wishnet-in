@@ -315,9 +315,7 @@ class ContractsByKey(MQSAPI):
                         [plan.text for plan in res_tree.iterfind('.//EndDate')]
                     )
                 )
-                self.active_plans = [
-                    entry for entry in zip(plans, end_dates)
-                ]
+                self.active_plans = list(zip(plans, end_dates))
             else:
                 self.valid_user = False
 

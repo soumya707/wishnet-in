@@ -5,7 +5,7 @@
 
 # DISPLAYED IN INSTA-RECHARGE FOR USER HAVING NO ACTIVE PLANS
 NO_ACTIVE_PLANS = (
-    'There is an issue with insta-recharge for your account. '
+    'There are no active plans for your account. '
     'Please use self-care or call us.'
 )
 

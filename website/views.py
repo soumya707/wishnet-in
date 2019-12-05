@@ -60,8 +60,7 @@ def index():
             user_contracts.request(user)
             user_contracts.response()
 
-            # Check if user has active plans
-            # user has active plans
+            # User is valid in MQS
             if user_contracts.valid_user:
                 plans = {
                     row.plan_code: row
@@ -77,19 +76,26 @@ def index():
                     user_contracts.active_plans if plan_code in plans
                 }
 
-                return redirect(
-                    url_for(
-                        'insta_recharge',
-                        order_id=user_contracts.ref_no,
-                        customer_no=customer.customer_no,
-                        customer_name=customer.customer_name,
-                        customer_mobile_no=customer.mobile_no,
-                        active_plans=json.dumps(active_plans),
+                # Has active plans
+                if active_plans:
+                    return redirect(
+                        url_for(
+                            'insta_recharge',
+                            order_id=user_contracts.ref_no,
+                            customer_no=customer.customer_no,
+                            customer_name=customer.customer_name,
+                            customer_mobile_no=customer.mobile_no,
+                            active_plans=json.dumps(active_plans),
+                        )
                     )
-                )
-            # user does not have active plans
+                # No active plans
+                elif not active_plans:
+                    flash(NO_ACTIVE_PLANS, 'danger')
+                    return redirect(url_for('index'))
+
+            # User is invalid in MQS
             elif not user_contracts.valid_user:
-                flash(NO_ACTIVE_PLANS, 'danger')
+                flash(USER_NOT_FOUND_IN_DB, 'danger')
                 return redirect(url_for('index'))
         # user data not available in the db; might be a new user
         else:
