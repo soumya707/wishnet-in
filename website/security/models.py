@@ -161,3 +161,62 @@ class CustomFileView(FileAdmin):
             (current_user.has_role('editor') or
              current_user.has_role('superuser'))
         )
+
+
+class CustomerInfoModelView(ModelView):
+
+    # export models
+    can_export = True
+    export_types = ['csv', 'xlsx']
+
+    # use modals for adding and editing
+    create_modal = True
+    edit_modal = True
+
+    # allow setting page size
+    can_set_page_size = True
+
+    # allow searching
+    column_searchable_list = ['customer_no']
+
+    # allow filtering
+    column_filters = ['zone_id']
+
+    def is_accessible(self):
+        return (
+            current_user.is_active and
+            current_user.is_authenticated and
+            (current_user.has_role('noc') or
+             current_user.has_role('editor') or
+             current_user.has_role('superuser'))
+        )
+
+
+class RechargeEntryModelView(ModelView):
+
+    # export models
+    can_export = True
+    export_types = ['csv', 'xlsx']
+
+    # use modals for adding and editing
+    create_modal = True
+    edit_modal = True
+
+    # allow setting page size
+    can_set_page_size = True
+
+    # allow searching
+    column_searchable_list = ['customer_no']
+
+    # allow filtering
+    column_filters = ['payment_gateway']
+
+    def is_accessible(self):
+        return (
+            current_user.is_active and
+            current_user.is_authenticated and
+            (current_user.has_role('desk') or
+             current_user.has_role('noc') or
+             current_user.has_role('editor') or
+             current_user.has_role('superuser'))
+        )

@@ -57,7 +57,6 @@ Session(app)
 
 from website import views
 from website.models import *
-from website.security.models import Role, User
 from website.security.models import *
 
 
@@ -85,7 +84,11 @@ admin.add_view(NOCModelView(FUPPlan, db.session, category='Plans'))
 admin.add_view(HRModelView(RegionalOffices, db.session, category='Info'))
 admin.add_view(HRModelView(FAQ, db.session, category='Info'))
 admin.add_view(HRModelView(JobVacancy, db.session, category='Info'))
-admin.add_view(NOCModelView(CustomerInfo, db.session, category='Customer Info'))
+admin.add_view(
+    CustomerInfoModelView(
+        CustomerInfo, db.session, category='Customer Info'
+    )
+)
 admin.add_view(NOCModelView(
     CustomerLogin, db.session, category='Customer Info'))
 admin.add_view(NOCModelView(
@@ -101,7 +104,11 @@ admin.add_view(DeskModelView(
 admin.add_view(NOCModelView(
     AvailableLocations, db.session, category='New Connection'))
 admin.add_view(NOCModelView(TariffInfo, db.session, category='Transaction'))
-admin.add_view(DeskModelView(RechargeEntry, db.session, category='Transaction'))
+admin.add_view(
+    RechargeEntryModelView(
+        RechargeEntry, db.session, category='Transaction'
+    )
+)
 admin.add_view(NOCModelView(TicketInfo, db.session, category='Ticket'))
 admin.add_view(NOCModelView(Ticket, db.session, category='Ticket'))
 
