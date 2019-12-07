@@ -77,8 +77,13 @@ def index():
                     user_contracts.active_plans if plan_code in plans
                 }
 
+                # No active plans
+                if not active_plans:
+                    flash(NO_ACTIVE_PLANS, 'danger')
+                    return redirect(url_for('index'))
+
                 # Has active plans
-                if active_plans:
+                elif active_plans:
                     return redirect(
                         url_for(
                             'insta_recharge',
@@ -89,10 +94,6 @@ def index():
                             active_plans=json.dumps(active_plans),
                         )
                     )
-                # No active plans
-                elif not active_plans:
-                    flash(NO_ACTIVE_PLANS, 'danger')
-                    return redirect(url_for('index'))
 
             # User is invalid in MQS
             elif not user_contracts.valid_user:
