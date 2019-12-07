@@ -138,6 +138,11 @@ a:hover {
     height: 0.2rem;
 }
 
+.pay-logo {
+    width: 6em;
+    height: auto;
+}
+
 /* LAYOUT */
 
 /* contents above navbar on medium and large screens */

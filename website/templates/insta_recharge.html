@@ -90,17 +90,30 @@
 
       <!-- PAYMENT GATEWAY -->
       <div class="form-check form-check-inline">
-        <input class="form-check-input" type="radio" name="gateway" id="paytm-gatway"
-               value="paytm" form="payment-form" checked>
-        <label class="form-check-label pt-1" for="paytm-gateway">
-          Paytm
+        <input class="form-check-input"
+               type="radio"
+               name="gateway"
+               id="paytm-gateway"
+               value="paytm"
+               form="payment-form" checked>
+        <label class="form-check-label p-2" for="paytm-gateway">
+          <span class="invisible">Paytm</span>
+          <img class="pay-logo float-left"
+               src="{{ url_for('static', filename='img/logo/paytm.svg') }}">
         </label>
       </div>
+
       <div class="form-check form-check-inline">
-        <input class="form-check-input" type="radio" name="gateway" id="razorpay-gateway"
-               value="razorpay" form="payment-form">
-        <label class="form-check-label pt-1" for="razorpay-gateway">
-          Razorpay
+        <input class="form-check-input"
+               type="radio"
+               name="gateway"
+               id="razorpay-gateway"
+               value="razorpay"
+               form="payment-form">
+        <label class="form-check-label p-2" for="razorpay-gateway">
+          <span class="invisible">Razorpay</span>
+          <img class="pay-logo float-left"
+               src="{{ url_for('static', filename='img/logo/razorpay.svg') }}">
         </label>
       </div>
 
