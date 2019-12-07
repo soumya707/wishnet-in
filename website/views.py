@@ -755,7 +755,7 @@ def register():
     form = RegistrationForm()
 
     if form.validate_on_submit():
-        # get customer info
+        # get customer from login db
         customer = CustomerLogin.query.filter_by(
             customer_no=form.customer_no.data
         ).first()
@@ -763,48 +763,58 @@ def register():
         redirect_to = None
 
         # valid customer and valid password
-        if customer is not None and customer.password_hash is not None:
+        if customer is not None and customer.password_hash is not str():
             redirect_to = 'login'
             flash(ALREADY_REGISTERED, 'info')
 
         # non-registered customer
-        elif customer is not None and customer.password_hash is None:
-            # generate OTP
-            totp = TOTPFACTORY.new()
-            session['otp_data'] = totp.to_dict()
-            session['customer_no'] = form.customer_no.data
-            redirect_to = 'verify_otp'
-
-            # send SMS
+        elif customer is not None and customer.password_hash is str():
+            # get customer info
             customer_info = CustomerInfo.query.filter_by(
                 customer_no=form.customer_no.data
             ).first()
-            mobile_no = customer_info.mobile_no.strip()
-            sms_msg = SMS_REG_OTP.format(totp.generate().token)
 
-            successful = send_sms(
-                app.config['SMS_URL'],
-                {
-                    'username': app.config['SMS_USERNAME'],
-                    'password': app.config['SMS_PASSWORD'],
-                    'from': app.config['SMS_SENDER'],
-                    'to': '91{}'.format(mobile_no),
-                    'text': sms_msg,
-                }
-            )
+            # mobile no. exists in db
+            if customer_info.mobile_no is not str():
+                # generate OTP
+                totp = TOTPFACTORY.new()
+                session['otp_data'] = totp.to_dict()
+                session['customer_no'] = form.customer_no.data
+                redirect_to = 'verify_otp'
 
-            if successful:
-                text = OTP_SENT
-                status = 'success'
+                # send SMS
+                mobile_no = customer_info.mobile_no.strip()
+                sms_msg = SMS_REG_OTP.format(totp.generate().token)
 
-            else:
-                text = OTP_NOT_SENT
-                status = 'danger'
+                successful = send_sms(
+                    app.config['SMS_URL'],
+                    {
+                        'username': app.config['SMS_USERNAME'],
+                        'password': app.config['SMS_PASSWORD'],
+                        'from': app.config['SMS_SENDER'],
+                        'to': '91{}'.format(mobile_no),
+                        'text': sms_msg,
+                    }
+                )
 
-            flash(text, status)
+                # successfully sent OTP
+                if successful:
+                    text = OTP_SENT
+                    status = 'success'
+
+                # OTP not sent
+                else:
+                    text = OTP_NOT_SENT
+                    status = 'danger'
+
+                    flash(text, status)
+
+            # mobile no. does not exist in db
+            elif customer_info.mobile_no is str():
+                flash(NO_MOBILE_NO, 'danger')
 
         # invalid customer
-        else:
+        elif customer is None:
             redirect_to = 'register'
             flash(USER_NOT_FOUND_IN_DB, 'danger')
 
