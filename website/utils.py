@@ -23,7 +23,7 @@ def send_sms(url, data):
     """Send SMS to customer."""
     try:
         # avoid slow responses from server by setting a timeout of 5 seconds
-        res = requests.get(url, params=data, timeout=5)
+        res = requests.get(url, params=data, timeout=10)
         # check if request is successful
         if res.ok:
             success = True
