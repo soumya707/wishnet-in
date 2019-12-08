@@ -708,7 +708,7 @@ def get_cust_no():
         ).first()
 
         # credentials okay and data available
-        if customer is not None and customer.mobile_no is not str():
+        if customer is not None and customer.mobile_no is not None:
             # send SMS
             mobile_no = customer.mobile_no.strip()
             sms_msg = SMS_CUSTOMER_NO.format(customer.customer_no)
@@ -735,7 +735,7 @@ def get_cust_no():
             flash(text, status)
 
         # mobile number not available
-        elif customer is not None and customer.mobile_no is str():
+        elif customer is not None and customer.mobile_no is None:
             flash(NO_MOBILE_NO, 'danger')
         # invalid credentials
         elif customer is None:
