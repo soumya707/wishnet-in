@@ -70,47 +70,70 @@ PATH = op.join(op.dirname(__file__), 'static')
 
 # add defined models as views to admin portal
 admin.add_view(CustomFileView(PATH, '/static/', name='Static Files'))
+
 admin.add_view(SuperuserModelView(User, db.session, category='Access'))
 admin.add_view(SuperuserModelView(Role, db.session, category='Access'))
+
 admin.add_view(EditorModelView(CarouselImages, db.session, category='Index'))
 admin.add_view(EditorModelView(Services, db.session, category='Index'))
 admin.add_view(EditorModelView(BestPlans, db.session, category='Index'))
 admin.add_view(EditorModelView(Downloads, db.session, category='Index'))
 admin.add_view(EditorModelView(Ventures, db.session, category='Index'))
-admin.add_view(EditorModelView(UnlimitedPlan, db.session, category='Plans'))
+
+admin.add_view(NOCModelView(UnlimitedPlan, db.session, category='Plans'))
 admin.add_view(NOCModelView(FTTHPlan, db.session, category='Plans'))
 admin.add_view(NOCModelView(BizPlan, db.session, category='Plans'))
 admin.add_view(NOCModelView(FUPPlan, db.session, category='Plans'))
+
 admin.add_view(HRModelView(RegionalOffices, db.session, category='Info'))
 admin.add_view(HRModelView(FAQ, db.session, category='Info'))
 admin.add_view(HRModelView(JobVacancy, db.session, category='Info'))
+
 admin.add_view(
     CustomerInfoModelView(
         CustomerInfo, db.session, category='Customer Info'
     )
 )
-admin.add_view(NOCModelView(
-    CustomerLogin, db.session, category='Customer Info'))
-admin.add_view(NOCModelView(
-    UpdateProfileRequest, db.session, category='Customer Info'))
+admin.add_view(
+    CustomerLoginModelView(
+        CustomerLogin, db.session, category='Customer Info'
+    )
+)
+admin.add_view(
+    UpdateProfileRequestModelView(
+        UpdateProfileRequest, db.session, category='Customer Info'
+    )
+)
 admin.add_view(NOCModelView(
     MobileNumberUpdateRequest, db.session, category='Customer Info'))
-admin.add_view(NOCModelView(
-    GSTUpdateRequest, db.session, category='Customer Info'))
+admin.add_view(
+    GSTUpdateRequestModelView(
+        GSTUpdateRequest, db.session, category='Customer Info'
+    )
+)
 admin.add_view(NOCModelView(
     ZoneIDWithPlanCode, db.session, category='Customer Info'))
-admin.add_view(DeskModelView(
-    NewConnection, db.session, category='New Connection'))
-admin.add_view(NOCModelView(
-    AvailableLocations, db.session, category='New Connection'))
+
+admin.add_view(
+    DeskModelView(
+        NewConnection, db.session, category='New Connection'
+    )
+)
+admin.add_view(
+    NOCModelView(
+        AvailableLocations, db.session, category='New Connection'
+    )
+)
+
 admin.add_view(NOCModelView(TariffInfo, db.session, category='Transaction'))
 admin.add_view(
     RechargeEntryModelView(
         RechargeEntry, db.session, category='Transaction'
     )
 )
+
 admin.add_view(NOCModelView(TicketInfo, db.session, category='Ticket'))
-admin.add_view(NOCModelView(Ticket, db.session, category='Ticket'))
+admin.add_view(TicketModelView(Ticket, db.session, category='Ticket'))
 
 
 # define a context processor for merging flask-admin's template context into the

@@ -165,12 +165,15 @@ class CustomFileView(FileAdmin):
 
 class CustomerInfoModelView(ModelView):
 
+    # disable entry manipulation
+    can_create = False
+    can_delete = False
+
     # export models
     can_export = True
     export_types = ['csv', 'xlsx']
 
-    # use modals for adding and editing
-    create_modal = True
+    # use modal for editing
     edit_modal = True
 
     # allow setting page size
@@ -181,6 +184,78 @@ class CustomerInfoModelView(ModelView):
 
     # allow filtering
     column_filters = ['zone_id']
+
+    def is_accessible(self):
+        return (
+            current_user.is_active and
+            current_user.is_authenticated and
+            (current_user.has_role('noc') or
+             current_user.has_role('editor') or
+             current_user.has_role('superuser'))
+        )
+
+
+class CustomerLoginModelView(ModelView):
+
+    # disable entry manipulation
+    can_create = False
+    can_edit = False
+    can_delete = False
+
+    # allow setting page size
+    can_set_page_size = True
+
+    # allow searching
+    column_searchable_list = ['customer_no']
+
+    def is_accessible(self):
+        return (
+            current_user.is_active and
+            current_user.is_authenticated and
+            (current_user.has_role('noc') or
+             current_user.has_role('editor') or
+             current_user.has_role('superuser'))
+        )
+
+
+class UpdateProfileRequestModelView(ModelView):
+
+    # disable entry manipulation
+    can_create = False
+    can_edit = False
+    can_delete = False
+
+    # allow setting page size
+    can_set_page_size = True
+
+    # allow searching
+    column_searchable_list = ['customer_no']
+
+    def is_accessible(self):
+        return (
+            current_user.is_active and
+            current_user.is_authenticated and
+            (current_user.has_role('noc') or
+             current_user.has_role('editor') or
+             current_user.has_role('superuser'))
+        )
+
+
+class GSTUpdateRequestModelView(ModelView):
+
+    # disable entry manipulation
+    can_create = False
+    can_edit = False
+    can_delete = False
+
+    # allow setting page size
+    can_set_page_size = True
+
+    # allow searching
+    column_searchable_list = ['customer_no']
+
+    # allow filtering
+    column_filters = ['status']
 
     def is_accessible(self):
         return (
@@ -217,6 +292,32 @@ class RechargeEntryModelView(ModelView):
             current_user.is_authenticated and
             (current_user.has_role('desk') or
              current_user.has_role('noc') or
+             current_user.has_role('editor') or
+             current_user.has_role('superuser'))
+        )
+
+
+class TicketModelView(ModelView):
+
+    # disable entry manipulation
+    can_create = False
+    can_edit = False
+    can_delete = False
+
+    # allow setting page size
+    can_set_page_size = True
+
+    # allow searching
+    column_searchable_list = ['customer_no']
+
+    # allow filtering
+    column_filters = ['status']
+
+    def is_accessible(self):
+        return (
+            current_user.is_active and
+            current_user.is_authenticated and
+            (current_user.has_role('noc') or
              current_user.has_role('editor') or
              current_user.has_role('superuser'))
         )
