@@ -764,19 +764,19 @@ def register():
         redirect_to = None
 
         # valid customer and valid password
-        if customer is not None and customer.password_hash is not str():
+        if customer is not None and customer.password_hash is not None:
             redirect_to = 'login'
             flash(ALREADY_REGISTERED, 'info')
 
         # non-registered customer
-        elif customer is not None and customer.password_hash is str():
+        elif customer is not None and customer.password_hash is None:
             # get customer info
             customer_info = CustomerInfo.query.filter_by(
                 customer_no=form.customer_no.data
             ).first()
 
             # mobile no. exists in db
-            if customer_info.mobile_no is not str():
+            if customer_info.mobile_no is not None:
                 # generate OTP
                 totp = TOTPFACTORY.new()
                 session['otp_data'] = totp.to_dict()
@@ -811,7 +811,7 @@ def register():
                     flash(text, status)
 
             # mobile no. does not exist in db
-            elif customer_info.mobile_no is str():
+            elif customer_info.mobile_no is None:
                 flash(NO_MOBILE_NO, 'danger')
 
         # invalid customer
