@@ -40,7 +40,6 @@ def add_new_connection_data_to_db(data):
         postal_code=data['postal_code'],
         phone_no=data['phone_no'],
         email=data['email'],
-        remark=data['remark'],
         date=data['date'],
         time=data['time'],
     )
