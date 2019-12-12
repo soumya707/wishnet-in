@@ -51,7 +51,6 @@ class NewConnectionForm(FlaskForm):
             Email(message=email_msg)
         ]
     )
-    remark = TextAreaField('Remarks', validators=[Length(max=200)])
     submit = SubmitField('Submit')
 
 

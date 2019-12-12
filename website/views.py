@@ -549,7 +549,6 @@ def new_conn():
             'postal_code': form.postal_code.data,
             'phone_no': form.phone_no.data,
             'email': form.email_address.data,
-            'remark': form.remark.data,
             'date': datetime.now().astimezone().date(),
             'time': datetime.now().astimezone().time(),
         }

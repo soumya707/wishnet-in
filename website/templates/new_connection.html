@@ -30,15 +30,15 @@
 
             <div class="form-row">
               <!-- FIRST NAME -->
-              <div class="col">
+              <div class="col-md-4">
                 {{ render_field(form.first_name, class="required-field") }}
               </div> <!-- col -->
               <!-- MIDDLE NAME -->
-              <div class="col">
+              <div class="col-md-4">
                 {{ render_field(form.middle_name) }}
               </div> <!-- col -->
               <!-- LAST NAME -->
-              <div class="col">
+              <div class="col-md-4">
                 {{ render_field(form.last_name, class="required-field") }}
               </div> <!-- col -->
             </div> <!-- form row -->
@@ -52,29 +52,22 @@
 
             <div class="form-row">
               <!-- LOCATION -->
-              <div class="col">
+              <div class="col-md-3">
                 {{ render_field(form.location, class="required-field") }}
               </div> <!-- col -->
               <!-- PIN CODE -->
-              <div class="col">
+              <div class="col-md-3">
                 {{ render_field(form.postal_code, class="required-field" )}}
               </div> <!-- col -->
               <!-- MOBILE NO. -->
-              <div class="col">
+              <div class="col-md-3">
                 {{ render_field(form.phone_no, class="required-field") }}
               </div> <!-- col -->
               <!-- E-MAIL ADDRESS -->
-              <div class="col">
+              <div class="col-md-3">
                 {{ render_field(form.email_address, class="required-field") }}
               </div> <!-- col -->
             </div> <!-- form-row -->
-
-            <div class="form-row">
-              <!-- REMARK -->
-              <div class="col">
-                {{ render_field(form.remark) }}
-              </div> <!-- col -->
-            </div> <!-- row -->
 
           </fieldset>
 

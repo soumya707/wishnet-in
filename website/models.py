@@ -206,7 +206,6 @@ class NewConnection(db.Model):
     postal_code = db.Column(db.String(6), nullable=False)
     phone_no = db.Column(db.String(10), nullable=False)
     email = db.Column(db.String(50), nullable=False)
-    remark = db.Column(db.Text, nullable=True)
     source = db.Column(db.String(10), nullable=False, default='website')
     cust_add = db.Column(db.String(20), nullable=False, default='ADD_CUST')
     date = db.Column(db.Date, nullable=False)
