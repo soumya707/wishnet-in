@@ -148,7 +148,13 @@ class UpdateProfileForm(FlaskForm):
 class NewTicketForm(FlaskForm):
     """Class for submitting a ticket form."""
     nature = SelectField('Ticket Nature', validators=[InputRequired()])
-    remarks = TextAreaField('Remarks', validators=[Optional()])
+    remarks = TextAreaField(
+        'Remarks',
+        validators=[
+            Optional(),
+            Length(max=200)
+        ]
+    )
     submit = SubmitField('Submit')
 
 
