@@ -17,23 +17,23 @@
   <table class="table table-striped table-bordered table-responsive text-nowrap">
     <thead>
       <tr>
-        <th scope="col">Plan name</th>
-        <th scope="col">Login Time</th>
-        <th scope="col">Session Time (in hrs)</th>
-        <th scope="col">Download (in MB)</th>
-        <th scope="col">Upload (in MB)</th>
-        <th scope="col">IP Address</th>
+        <th scope="col" class="text-center">Plan name</th>
+        <th scope="col" class="text-center">Login Time</th>
+        <th scope="col" class="text-center">Session Time (in Hrs.)</th>
+        <th scope="col" class="text-center">Download (in GB)</th>
+        <th scope="col" class="text-center">Upload (in GB)</th>
+        <th scope="col" class="text-center">IP Address</th>
       </tr>
     </thead>
     <tbody>
       {% for usage in usage_details %}
       <tr scope="row">
         <td>{{ usage[0] }}</td>
-        <td>{{ usage[1] }}</td>
-        <td>{{ usage[2] }}</td>
-        <td>{{ usage[3] }}</td>
-        <td>{{ usage[4] }}</td>
-        <td>{{ usage[5] }}</td>
+        <td class="text-center">{{ usage[1] }}</td>
+        <td class="text-center">{{ usage[2] }}</td>
+        <td class="text-center">{{ usage[3] }}</td>
+        <td class="text-center">{{ usage[4] }}</td>
+        <td class="text-center">{{ usage[5] }}</td>
       </tr>
       {% endfor %}
     </tbody>

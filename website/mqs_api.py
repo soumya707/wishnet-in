@@ -594,11 +594,11 @@ class GetUsageDetails():
             ]
             # consistent parsing
             download = [
-                float(download.text)
+                round(float(download.text) / 1024, 2)
                 for download in res_tree.iterfind('.//free_download')
             ]
             upload = [
-                float(upload.text)
+                round(float(upload.text) / 1024, 2)
                 for upload in res_tree.iterfind('.//free_upload')
             ]
             ip_addr = [ip.text for ip in res_tree.iterfind('.//user_ip')]

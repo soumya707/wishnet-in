@@ -17,10 +17,10 @@
   <table class="table table-striped table-bordered table-responsive-sm">
     <thead>
       <tr>
-        <th scope="col"></th>
-        <th scope="col">Plan Name</th>
-        <th scope="col">Validity</th>
-        <th scope="col">Price</th>
+        <th scope="col" class="text-center"></th>
+        <th scope="col" class="text-center">Plan Name</th>
+        <th scope="col" class="text-center">Validity</th>
+        <th scope="col" class="text-center">Price</th>
       </tr>
     </thead>
     <tbody>
@@ -37,8 +37,8 @@
                  {% if loop.first %}checked{% endif %}>
         </td>
         <td>{{ name }}</td>
-        <td>{{ validity }}</td>
-        <td>&#8377 {{ price }}</td>
+        <td class="text-center">{{ validity }}</td>
+        <td class="text-right">&#8377 {{ price }}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -53,10 +53,10 @@
   <table class="table table-striped table-bordered table-responsive-sm">
     <thead>
       <tr>
-        <th scope="col"></th>
-        <th scope="col">Plan Name</th>
-        <th scope="col">Validity</th>
-        <th scope="col">Price</th>
+        <th scope="col" class="text-center"></th>
+        <th scope="col" class="text-center">Plan Name</th>
+        <th scope="col" class="text-center">Validity</th>
+        <th scope="col" class="text-center">Price</th>
       </tr>
     </thead>
     <tbody>
@@ -72,8 +72,8 @@
                  onchange="fillForm(this);">
         </td>
         <td>{{ name }}</td>
-        <td>{{ validity }}</td>
-        <td>&#8377 {{ price }}</td>
+        <td class="text-center">{{ validity }}</td>
+        <td class="text-right">&#8377 {{ price }}</td>
       </tr>
       {% endfor %}
     </tbody>
