@@ -1575,9 +1575,6 @@ def wishtalk():
         )
 
 
-@app.route('/portal/change_password', methods=['GET', 'POST'])
-def change_password():
-    """Route for self-care portal password change."""
 @app.route('/portal/add_softphone', methods=['POST'])
 def wishtalk_add_softphone():
     """Route for self-care portal softphone addition."""
@@ -1765,6 +1762,10 @@ def wishtalk_add_softphone():
             add_softphone_form=add_softphone_form
         )
 
+
+@app.route('/portal/change_password', methods=['GET', 'POST'])
+def change_password():
+    """Route for self-care portal password change."""
     # user not logged in
     if not session.get('user_logged_in'):
         flash(LOG_IN_FIRST, 'danger')
