@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}Instructions for WishTalk{% endblock %}
+
+{% block content %}
+
+<div class="container text-justify p-3">
+  <!-- HEADING -->
+  <h2 class="py-3">Instructions for WishTalk
+    <div class="heading-underline"></div>
+  </h2>
+
+  <!-- CONTENT -->
+  <h3>Android</h3>
+  <p>
+    Please download "WishTalk" app from Google Play Store. After installing, follow the following steps:
+    <ol>
+      <li>
+        In the app, go to Settings -> Basic Setting -> Advanced settings -> General Settings -> Availability and enable "Always running".
+      </li>
+      <li>
+        Then, go to Settings -> Basic Setting -> Advanced settings -> General Settings -> Call quality and enable "High All".
+      </li>
+    </ol>
+  </p>
+
+  <h3>iOS</h3>
+  <p>Please download "Bria Mobile" or any other softphone app from App Store. After installing, use the username and password you received through SMS.</p>
+
+  <h3>Fixed Line Device</h3>
+  <p>Use the username and password you received through SMS. For further configurations, please contact us.</p>
+
+</div> <!-- container -->
+
+{% endblock %}

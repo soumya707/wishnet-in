@@ -1,0 +1,126 @@
+{% extends "self_care_layout.html" %}
+{% from "_macros.html" import render_field, render_submit %}
+
+{% block title %}Self-care Wishtalk{% endblock %}
+
+{% block portal_content %}
+
+<div class="col-md-8 p-3">
+
+  <h3 class="py-2 text-red">WishTalk</h3>
+
+  {# CHECK FOR ELIGIBILITY OF USING SOFTPHONE #}
+  {% if not no_of_softphone_allowed %}
+    <h5 class="py-4 text-red">You do not have any active plans. To use WishTalk, please recharge or add your broadband plan.</h5>
+  {% elif no_of_softphone_allowed %}
+
+    <p>With your existing broadband plan, you can get <span style="color: red;"><strong class="lead">{{ no_of_softphone_allowed }}</strong></span> softphone numbers which can be used with Android / iOS / fixed line devices.</p>
+
+    {# SOFTPHONE NUMBERS #}
+    {% if no_of_softphone_allotted > 0 %}
+
+      <h4 class="py-2">Your Softphone Numbers</h4>
+
+      <table class="table table-striped table-bordered table-responsive-sm">
+        <thead>
+          <tr>
+            <th scope="col" class="text-center">Name of User</th>
+            <th scope="col" class="text-center">Softphone Number</th>
+            <th scope="col" class="text-center">Valid Till</th>
+            <th scope="col" class="text-center">Platform</th>
+            <th scope="col" class="text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in softphone_data %}
+            <tr scope="row">
+              <td>{{ entry.user_name }}</td>
+              <td class="text-center">{{ entry.softphone_no }}</td>
+              <td class="text-center">{{ entry.expiry_dt }}</td>
+              <td class="text-center">{{ entry.softphone_os }}</td>
+              <td class="text-center">{{ entry.softphone_status }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+    {% elif no_of_softphone_alloted == 0 %}
+      <h5 class="py-4 text-red">You do not have any active softphone numbers.</h5>
+    {% endif %}
+
+    {# ADD SOFTPHONE NUMBER #}
+    {% if no_of_softphone_allowed > no_of_softphone_allotted %}
+
+      <h4 class="py-2">Add Softphone Number</h4>
+
+      <div class="content-section">
+        <form action={{ url_for('wishtalk_add_softphone') }}
+              method="POST"
+              onChange="checkOption(this)"
+              id="add-softphone-form">
+              {{ add_softphone_form.hidden_tag() }}
+              <fieldset class="form-group">
+
+                <div class="form-row">
+                  {# USER NAME #}
+                  <div class="col-md-6">
+                    {{ render_field(add_softphone_form.name) }}
+                  </div>
+                  {# SOFTPHONE PLATFORM #}
+                  <div class="col-md-4">
+                    {{ render_field(add_softphone_form.softphone_platform) }}
+                  </div>
+                  {# USER MOBILE NUMBER #}
+                  <div class="col-md-5">
+                    {{ render_field(add_softphone_form.mobile_number) }}
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  {# PASSWORD #}
+                  <div class="col-md-6">
+                    {{ render_field(add_softphone_form.password) }}
+                  </div>
+                  {# CONFIRM PASSWORD #}
+                  <div class="col-md-6">
+                    {{ render_field(add_softphone_form.confirm_password) }}
+                  </div>
+                </div>
+
+              </fieldset> {# fieldset #}
+              {# SUBMIT #}
+              {{ render_submit(add_softphone_form.submit) }}
+        </form>
+      </div> {# content-section #}
+
+    {% endif %}
+
+  {% endif %}
+
+</div> {# col #}
+
+{% endblock %}
+
+{% block scripts %}
+
+  {{ super() }}
+
+  <script>
+
+    $(document).ready(function() {
+        checkOption("#add-softphone-form");
+    });
+
+    function checkOption(elem) {
+        var softphone_platform = $(elem).find("option:selected").val();
+
+        // disable mobile number if fixed line
+        if (softphone_platform == "Fixed Line") {
+            $(elem).find("input[name=mobile_number]").prop("disabled", true);
+        } else {
+            $(elem).find("input[name=mobile_number]").prop("disabled", false);
+        }
+    };
+
+  </script>
+{% endblock %}

@@ -150,3 +150,25 @@ def add_gst_update_request_to_db(data):
     )
     db.session.add(update_gst)
     db.session.commit()
+
+
+@celery.task
+def add_async_softphone_allotment(data):
+    """Asynchronously add softphone allotment data to database."""
+    softphone = SoftphoneEntry(
+        cust_no=data['customer_no'],
+        cust_name=data['customer_name'],
+        user_name=data['user_name'],
+        cust_mob=data['customer_mobile_no'],
+        password=data['password_hash'],
+        softphone_did='',
+        softphone_no=data['softphone_number'],
+        softphone_os=data['softphone_os'],
+        create_dt=data['create_date'],
+        expiry_dt=data['expiry_date'],
+        softphone_status=data['status'],
+        category_type=data['category'],
+        user_type='Customer'
+    )
+    db.session.add(softphone)
+    db.session.commit()

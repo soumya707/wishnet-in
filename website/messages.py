@@ -159,3 +159,36 @@ SUCCESSFUL_GST_UPDATE_REQUEST = (
     'GST information update request sent successfully! '
     'We will notify you when the procedure is complete.'
 )
+
+# SUCCESSFUL SOFTPHONE NUMBER ALLOCATION
+SUCCESSFUL_SOFTPHONE_ALLOTMENT = 'Your softphone number has been successfully created.'
+
+# UNSUCCESSFUL SOFTPHONE NUMBER ALLOCATION
+UNSUCCESSFUL_SOFTPHONE_ALLOTMENT = 'There was some problem. Please try again.'
+
+# UNSUCCESSFUL SMS FOR SOFTPHONE ALLOCATION
+UNSUCCESSFUL_SOFTPHONE_SMS = (
+    'Your softphone number has been successfully created. '
+    'Please contact us for further support.'
+)
+
+# SUCCESSFUL SMS FOR SOFTPHONE CREATION (ANDROID)
+SUCCESSFUL_SOFTPHONE_SMS_ANDROID = (
+    'Download WishTalk app from Google Play Store. '
+    'Your username is {0} and password is {1}. For instructions, visit '
+    'https://wishnet.in/wishtalk.'
+)
+
+# SUCCESSFUL SMS FOR SOFTPHONE CREATION (iOS)
+SUCCESSFUL_SOFTPHONE_SMS_IOS = (
+    'Download Bria Mobile or any other softphone app from App Store. '
+    'Your username is {0} and password is {1}. For instructions, visit '
+    'https://wishnet.in/wishtalk.'
+)
+
+# SUCCESSFUL SMS FOR SOFTPHONE CREATION (FIXED LINE)
+SUCCESSFUL_SOFTPHONE_SMS_FIXED_LINE = (
+    'Dear customer, please contact us for further configuration. '
+    'Your username is {0} and password is {1}. For instructions, visit '
+    'https://wishnet.in/wishtalk.'
+)

@@ -50,6 +50,10 @@
            href="{{ url_for('change_password') }}">
           <i class="fas fa-key pl-1"></i>
           <span class="pl-1">Change Password</span>
+        <a class="list-group-item list-group-item-action {% if request.path == url_for('wishtalk') %}active{% endif %}"
+           href="{{ url_for('wishtalk') }}">
+          <i class="fas fa-phone-alt pl-1"></i>
+          <span class="pl-1">WishTalk</span>
         </a>
         <a class="list-group-item list-group-item-action {% if request.path == url_for('update_profile') %}active{% endif %}"
            href="{{ url_for('update_profile') }}">
