@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from flask import (
     current_app, flash, redirect, render_template, request, session, url_for)
 from flask_paginate import Pagination, get_page_args
+from flask_sqlalchemy import SignallingSession
 from flask_sqlalchemy_caching import FromCache
 from flask_wtf.csrf import CSRFProtect
 from passlib.exc import MalformedTokenError, TokenError
@@ -26,6 +27,7 @@ from website.mqs_api import *
 from website.paytm_utils import (
     initiate_transaction, verify_final_status, verify_transaction)
 from website.razorpay_utils import get_notes, make_order, verify_signature
+from website.softphone_utils import *
 from website.tasks import *
 from website.utils import *
 
@@ -609,8 +611,14 @@ def terms_and_conditions():
 
 @app.route('/end_user_license_wishtalk')
 def end_user_license_wishtalk():
-    """Route for end user license of Wishtalk."""
+    """Route for end user license of WishTalk."""
     return render_template('end_user_license_wishtalk.html')
+
+
+@app.route('/wishtalk')
+def wishtalk_instructions():
+    """Route for WishTalk instructions."""
+    return render_template('wishtalk_instructions.html')
 
 
 # Self-care routes
@@ -1501,12 +1509,262 @@ def transaction_history():
         )
 
 
+@app.route('/portal/wishtalk', methods=['GET'])
+def wishtalk():
+    """Route for self-care Wishtalk."""
+    # user not logged in
+    if not session.get('user_logged_in'):
+        flash(LOG_IN_FIRST, 'danger')
+        return redirect(url_for('login'))
+    # user logged in
+    elif session.get('user_logged_in'):
+        # keep the session alive
+        session.modified = True
+
+        # Get active plans for the user
+        # [(plan_code, validity_end_date)]
+        active_plans = [
+            (plan_code, validity_period.split(' - ')[1])
+            for (_, plan_code, validity_period) in
+            session['portal_customer_data']['active_plans']
+        ]
+
+        # check if there is active plan
+        if active_plans:
+            # get last active plan
+            last_active_plan = active_plans[-1]
+
+            # get softphone limit
+            softphone_limit = TariffInfo.query.\
+                filter_by(plan_code=last_active_plan[0]).\
+                first().softphone
+
+            # current softphone allotment
+            current_softphone_allotment = SoftphoneEntry.query.\
+                filter(
+                    or_(
+                        and_(
+                            SoftphoneEntry.cust_no == \
+                            session['portal_customer_no'],
+                            SoftphoneEntry.softphone_status == 'ACTIVE'
+                        ),
+                        and_(
+                            SoftphoneEntry.cust_no == \
+                            session['portal_customer_no'],
+                            SoftphoneEntry.softphone_status == 'DEACTIVE'
+                        )
+                    )
+                ).all()
+
+            add_softphone_form = AddSoftphoneForm()
+
+        elif not active_plans:
+            softphone_limit = None
+            current_softphone_allotment = None
+            add_softphone_form = None
+
+
+        return render_template(
+            'wishtalk.html',
+            no_of_softphone_allowed=softphone_limit,
+            no_of_softphone_allotted=\
+            len(current_softphone_allotment) if current_softphone_allotment \
+            else 0,
+            softphone_data=current_softphone_allotment,
+            add_softphone_form=add_softphone_form
         )
 
 
 @app.route('/portal/change_password', methods=['GET', 'POST'])
 def change_password():
     """Route for self-care portal password change."""
+@app.route('/portal/add_softphone', methods=['POST'])
+def wishtalk_add_softphone():
+    """Route for self-care portal softphone addition."""
+    # user not logged in
+    if not session.get('user_logged_in'):
+        flash(LOG_IN_FIRST, 'danger')
+        return redirect(url_for('login'))
+    # user logged in
+    elif session.get('user_logged_in'):
+        # Get active plans for the user
+        # [(plan_code, validity_end_date)]
+        active_plans = [
+            (plan_code, validity_period.split(' - ')[1])
+            for (_, plan_code, validity_period) in
+            session['portal_customer_data']['active_plans']
+        ]
+        # get last active plan and expiry
+        last_active_plan = active_plans[-1]
+        last_active_plan_expiry = datetime.strptime(
+            last_active_plan[1], '%d-%m-%Y'
+        ).date()
+        # get softphone limit
+        softphone_limit = TariffInfo.query.\
+            filter_by(plan_code=last_active_plan[0]).\
+            first().softphone
+
+        # current softphone allotment
+        current_softphone_allotment = SoftphoneEntry.query.\
+            filter(
+                or_(
+                    and_(
+                        SoftphoneEntry.cust_no == \
+                        session['portal_customer_no'],
+                        SoftphoneEntry.softphone_status == 'ACTIVE'
+                    ),
+                    and_(
+                        SoftphoneEntry.cust_no == \
+                        session['portal_customer_no'],
+                        SoftphoneEntry.softphone_status == 'DEACTIVE'
+                    )
+                )
+            ).all()
+
+        add_softphone_form = AddSoftphoneForm()
+
+        if add_softphone_form.validate_on_submit():
+            # create session to perform one-step read and write transaction
+            db_session = SignallingSession(
+                current_app.extensions['sqlalchemy'].db
+            )
+
+            # DATABASE OPERATION
+            # initiate transaction
+            try:
+                # get FREE and NORMAL softphone number
+                free_softphone_number = db_session.query(SoftphoneNumber).\
+                    filter(
+                        and_(
+                            SoftphoneNumber.softphone_status == 'FREE',
+                            SoftphoneNumber.category_type == 'NORMAL'
+                        )
+                    ).order_by(SoftphoneNumber.id.asc()).first()
+                # store the number
+                softphone_number = free_softphone_number.softphone_no
+                # get the category
+                softphone_category = free_softphone_number.category_type
+                # allot the number
+                free_softphone_number.softphone_status = 'ALLOTTED'
+                # commit changes
+                db_session.commit()
+
+            # rollback on failure
+            except:
+                softphone_number = None
+                db_session.rollback()
+
+            # close connection (fallback in case of failure)
+            finally:
+                db_session.close()
+
+            # API CALL
+            # successful allotment of softphone number
+            if softphone_number:
+                # call API for softphone allotment
+                success = add_softphone(
+                    url=app.config['SOFTPHONE_URL'],
+                    softphone_number=softphone_number,
+                    password=add_softphone_form.password.data,
+                    user_name=add_softphone_form.name.data
+                )
+
+                # softphone addition API call successful
+                if success:
+                    # set mobile number in case of fixed line
+                    if not add_softphone_form.mobile_number.data:
+                        mobile_no = CustomerInfo.query.filter_by(
+                            customer_no=session['portal_customer_no']
+                        ).first().mobile_no.strip()
+
+                    else:
+                        mobile_no = add_softphone_form.mobile_number.data
+
+                    # generate hash from the raw password
+                    hashed_pwd = pbkdf2_sha256.hash(
+                        str(add_softphone_form.password.data)
+                    )
+
+                    # create data for db entry
+                    data = {
+                        'customer_no': session['portal_customer_no'],
+                        'customer_name': \
+                        session['portal_customer_data']['name'],
+                        'user_name': add_softphone_form.name.data,
+                        'customer_mobile_no': mobile_no,
+                        'password_hash': hashed_pwd,
+                        'softphone_number': softphone_number,
+                        'softphone_os': \
+                        add_softphone_form.softphone_platform.data,
+                        'create_date': datetime.now().astimezone().date(),
+                        'expiry_date': last_active_plan_expiry,
+                        'status': 'ACTIVE',
+                        'category': softphone_category,
+                    }
+
+                    # add softphone allotment to db async
+                    add_async_softphone_allotment.delay(data)
+
+                    # set SMS message based on platform
+                    if add_softphone_form.softphone_platform.data == 'Android':
+                        sms_msg = SUCCESSFUL_SOFTPHONE_SMS_ANDROID.format(
+                            softphone_number,
+                            add_softphone_form.password.data
+                        )
+                    elif add_softphone_form.softphone_platform.data == 'iOS':
+                        sms_msg = SUCCESSFUL_SOFTPHONE_SMS_IOS.format(
+                            softphone_number,
+                            add_softphone_form.password.data
+                        )
+                    elif add_softphone_form.softphone_platform.data == \
+                         'Fixed Line':
+                        sms_msg = SUCCESSFUL_SOFTPHONE_SMS_FIXED_LINE.format(
+                            softphone_number,
+                            add_softphone_form.password.data
+                        )
+
+                    # send SMS
+                    successful = send_sms(
+                        app.config['SMS_URL'],
+                        {
+                            'username': app.config['SMS_USERNAME'],
+                            'password': app.config['SMS_PASSWORD'],
+                            'from': app.config['SMS_SENDER'],
+                            'to': '91{}'.format(mobile_no),
+                            'text': sms_msg,
+                        }
+                    )
+
+                    # SMS sent
+                    if successful:
+                        text = SUCCESSFUL_SOFTPHONE_ALLOTMENT
+                        status = 'success'
+
+                    # SMS not sent
+                    elif not successful:
+                        text = UNSUCCESSFUL_SOFTPHONE_SMS
+                        status = 'danger'
+
+                    flash(text, status)
+
+                # softphone addition API call unsuccessful
+                elif not success:
+                    flash(UNSUCCESSFUL_SOFTPHONE_ALLOTMENT, 'danger')
+
+            # unsuccessful allotment of softphone number
+            elif not softphone_number:
+                flash(UNSUCCESSFUL_SOFTPHONE_ALLOTMENT, 'danger')
+
+        return render_template(
+            'wishtalk.html',
+            no_of_softphone_allowed=softphone_limit,
+            no_of_softphone_allotted=\
+            len(current_softphone_allotment) if current_softphone_allotment \
+            else 0,
+            softphone_data=current_softphone_allotment,
+            add_softphone_form=add_softphone_form
+        )
+
     # user not logged in
     if not session.get('user_logged_in'):
         flash(LOG_IN_FIRST, 'danger')

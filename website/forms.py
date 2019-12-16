@@ -206,3 +206,48 @@ class UpdateGSTForm(FlaskForm):
         ]
     )
     submit = SubmitField('Submit Request')
+
+
+class AddSoftphoneForm(FlaskForm):
+    """Class for adding softphone number form."""
+    name = StringField(
+        'Name of User',
+        validators=[InputRequired()],
+    )
+    mobile_number = StringField(
+        'Mobile Number of User',
+        validators=[
+            Optional(),
+            Regexp(r'^\d{1,10}$', message='Invalid mobile no.')
+        ]
+    )
+    softphone_platform = SelectField(
+        'Softphone Platform',
+        validators=[InputRequired()],
+        choices=[
+            ('Android', 'Android'),
+            ('iOS', 'iOS'),
+            ('Fixed Line', 'Fixed Line')
+        ]
+    )
+    password = PasswordField(
+        'Password',
+        validators=[
+            InputRequired(),
+            EqualTo('confirm_password', message='Passwords must match.'),
+            Regexp(
+                r'^[a-zA-Z0-9_\-]{1,8}$',
+                message='Alphabets, numbers, - and _ are only used.'
+            ),
+            Length(max=8, message='Exceeding maximum length.')
+        ],
+        render_kw={'placeholder': 'Max. 8 characters'}
+    )
+    confirm_password = PasswordField(
+        'Repeat Password',
+        validators=[
+            InputRequired(),
+        ]
+    )
+    submit = SubmitField('Add Softphone')
+

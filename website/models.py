@@ -440,22 +440,42 @@ class GSTUpdateRequest(db.Model):
         return self.customer_no
 
 
-# Softphone information
-class SoftphoneInfo(db.Model):
-    """Class for representing Softphone information."""
+# Class for representing softphone allocation
+class SoftphoneNumber(db.Model):
 
     __bind_key__ = 'softphone'
+    __tablename__ = 'tbl_series_number_generator'
 
     id = db.Column(db.Integer, primary_key=True)
-    customer_no = db.Column(db.String(100), nullable=True)
-    customer_name = db.Column(db.String(400), nullable=True)
-    customer_mob = db.Column(db.String(10), nullable=True)
-    softphone_number = db.Column(db.String(20), nullable=True)
-    did_number = db.Column(db.String(20), nullable=True)
-    allowable_download_limit = db.Column(db.String(20), nullable=True)
-    alloted_download_counter = db.Column(db.String(20), nullable=True)
-    status = db.Column(db.String(20), nullable=True)
-    series_id = db.Column(db.String(20), nullable=True)
+    series_no = db.Column(db.Integer, nullable=True)
+    softphone_no = db.Column(db.Integer, nullable=True)
+    softphone_status = db.Column(db.String(15), nullable=True)
+    category_type = db.Column(db.String(15), nullable=True)
 
     def __str__(self):
-        return self.customer_no
+        return self.softphone_no
+
+
+# Class for representing softphone allotment entries
+class SoftphoneEntry(db.Model):
+
+    __bind_key__ = 'softphone'
+    __tablename__ = 'tbl_softphone_log'
+
+    id = db.Column(db.Integer, primary_key=True)
+    cust_no = db.Column(db.String(100), nullable=True)
+    cust_name = db.Column(db.String(100), nullable=True)
+    user_name = db.Column(db.String(100), nullable=True)
+    cust_mob = db.Column(db.String(10), nullable=True)
+    password = db.Column(db.String(100), nullable=True)
+    softphone_did = db.Column(db.String(10), nullable=True)
+    softphone_no = db.Column(db.String(10), nullable=True)
+    softphone_os = db.Column(db.String(15), nullable=True)
+    create_dt = db.Column(db.Date, nullable=True)
+    expiry_dt = db.Column(db.Date, nullable=True)
+    softphone_status = db.Column(db.String(15), nullable=True)
+    category_type = db.Column(db.String(15), nullable=True)
+    user_type = db.Column(db.String(15), nullable=True)
+
+    def __str__(self):
+        return self.cust_no
