@@ -32,7 +32,7 @@ def add_softphone(url, softphone_number, password, user_name):
     }
 
     try:
-        res = requests.post(url, params=data, timeout=5)
+        res = requests.post(url, params=data, timeout=10)
         # check if request is successful
         if res.ok:
             success = True

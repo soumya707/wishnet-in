@@ -188,7 +188,7 @@ SUCCESSFUL_SOFTPHONE_SMS_IOS = (
 
 # SUCCESSFUL SMS FOR SOFTPHONE CREATION (FIXED LINE)
 SUCCESSFUL_SOFTPHONE_SMS_FIXED_LINE = (
-    'Dear customer, please contact us for further configuration. '
+    'Please contact us for further configuration of your fixed line device. '
     'Your username is {0} and password is {1}. For instructions, visit '
     'https://wishnet.in/wishtalk.'
 )
