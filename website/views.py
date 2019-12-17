@@ -1521,12 +1521,17 @@ def wishtalk():
         # keep the session alive
         session.modified = True
 
+        plans = {
+            row.plan_code: row
+            for row in TariffInfo.query.options(FromCache(CACHE)).all()
+        }
         # Get active plans for the user
         # [(plan_code, validity_end_date)]
         active_plans = [
             (plan_code, validity_period.split(' - ')[1])
             for (_, plan_code, validity_period) in
             session['portal_customer_data']['active_plans']
+            if plan_code in plans
         ]
 
         # check if there is active plan
