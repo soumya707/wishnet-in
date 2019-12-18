@@ -8,55 +8,51 @@
 
   <h3 class="py-2 text-red">Add Plan</h3>
 
-    <!-- AVAILABLE PLAN TABLE -->
+    {# AVAILABLE PLAN TABLE #}
     {% if not available_plans %}
-    <h5 class="py-4 text-red">You do not have any available plans.</h5>
+      <h5 class="py-4 text-red">You do not have any available plans.</h5>
     {% elif available_plans %}
-    <table class="table table-striped table-bordered table-responsive-xl text-nowrap">
-      <thead>
-        <tr>
-          <th scope="col" class="text-center"></th>
-          <th scope="col" class="text-center">Plan Name</th>
-          <th scope="col" class="text-center">Price</th>
-          <th scope="col" class="text-center">Speed (in Mbps)</th>
-          <th scope="col" class="text-center">Validity (in days)</th>
-          <th scope="col" class="text-center">Plan Type</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for name, (price, code, speed, validity, type) in available_plans.items() %}
-        <tr scope="row">
-          <td class="text-center">
-            <input type="radio" form="payment-form"
-                   name="plan" value="{{ price ~ '-' ~ code }}" id="{{ name }}"
-                   autocomplete="off" onchange="fillForm(this);"
-                   {% if loop.first %}checked{% endif %}>
-          </td>
-          <td>{{ name }}</td>
-          <td class="text-right">&#8377 {{ price }}</td>
-          <td class="text-center">{{ speed }}</td>
-          <td class="text-center">{{ validity }}</td>
-          <td class="text-center">{{ type }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+      <table class="table table-striped table-bordered table-responsive-xl text-nowrap">
+        <thead>
+          <tr>
+            <th scope="col" class="text-center"></th>
+            <th scope="col" class="text-center">Plan Name</th>
+            <th scope="col" class="text-center">Price</th>
+            <th scope="col" class="text-center">Speed (in Mbps)</th>
+            <th scope="col" class="text-center">Validity (in days)</th>
+            <th scope="col" class="text-center">Plan Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for name, (price, code, speed, validity, type) in available_plans.items() %}
+            <tr scope="row">
+              <td class="text-center">
+                <input type="radio" form="payment-form"
+                       name="plan" value="{{ price ~ '-' ~ code }}" id="{{ name }}"
+                       autocomplete="off" onchange="fillForm(this);"
+                       {% if loop.first %}checked{% endif %}>
+              </td>
+              <td>{{ name }}</td>
+              <td class="text-right">&#8377 {{ price }}</td>
+              <td class="text-center">{{ speed }}</td>
+              <td class="text-center">{{ validity }}</td>
+              <td class="text-center">{{ type }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     {% endif %}
 
-  <!-- PAYMENT -->
-  <h3 class="py-2 text-red">Payment</h3>
+    {# PAYMENT #}
+    <h3 class="py-2 text-red">Payment</h3>
 
-  <p>Selected Plan: <span class="text-red" id="chosen-plan-span"><span></p>
-  <p>Total Price (18% GST): <span class="text-red">&#8377 <span id="total-price-span"></span></span></p>
+    <p>Selected Plan: <span class="text-red" id="chosen-plan-span"></span></p>
+    <p>Total Price (18% GST): <span class="text-red">&#8377 <span id="total-price-span"></span></span></p>
 
-  <form method="POST" id="payment-form">
-    <!-- CSRF token -->
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <!-- Selected plan code -->
-    <input type="hidden" name="amount" value="" id="total-price-input">
-    <!-- Transaction amount -->
-    <input type="hidden" name="plan_code" value="" id="selected-plan-code">
-    <!-- PAYMENT GATEWAY -->
+    <form method="POST" id="payment-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="plan_code" value="" id="selected-plan-code">
+      {# PAYMENT GATEWAY #}
       <div class="form-check form-check-inline">
         <input class="form-check-input"
                type="radio"
@@ -64,11 +60,11 @@
                id="paytm-gateway"
                value="paytm"
                form="payment-form" checked>
-        <label class="form-check-label p-2" for="paytm-gateway">
-          <span class="invisible">Paytm</span>
-          <img class="pay-logo float-left"
-               src="{{ url_for('static', filename='img/logo/paytm.svg') }}">
-        </label>
+               <label class="form-check-label p-2" for="paytm-gateway">
+                 <span class="invisible">Paytm</span>
+                 <img class="pay-logo float-left"
+                      src="{{ url_for('static', filename='img/logo/paytm.svg') }}">
+               </label>
       </div>
 
       <div class="form-check form-check-inline">
@@ -78,31 +74,31 @@
                id="razorpay-gateway"
                value="razorpay"
                form="payment-form">
-        <label class="form-check-label p-2" for="razorpay-gateway">
-          <span class="invisible">Razorpay</span>
-          <img class="pay-logo float-left"
-               src="{{ url_for('static', filename='img/logo/razorpay.svg') }}">
-        </label>
+               <label class="form-check-label p-2" for="razorpay-gateway">
+                 <span class="invisible">Razorpay</span>
+                 <img class="pay-logo float-left"
+                      src="{{ url_for('static', filename='img/logo/razorpay.svg') }}">
+               </label>
       </div>
 
-    <!-- TERMS AND CONDITIONS -->
-    <div class="form-check form-check pt-2">
-      <input class="form-check-input" type="checkbox" name="t&c" id="t-and-c"
-             value="paytm" form="payment-form" required>
-      <label class="form-check-label" for="t-and-c">
-        I have read and agree to the <a href="{{ url_for('terms_and_conditions') }}">Terms and Conditions</a>
-      </label>
-    </div>
+      {# TERMS AND CONDITIONS #}
+      <div class="form-check form-check pt-2">
+        <input class="form-check-input" type="checkbox" name="t&c" id="t-and-c"
+               value="paytm" form="payment-form" required>
+               <label class="form-check-label" for="t-and-c">
+                 I have read and agree to the <a href="{{ url_for('terms_and_conditions') }}">Terms and Conditions</a>
+               </label>
+      </div>
 
-    <!-- PAY -->
-    <div class="pt-3">
-      <input type="submit" class="btn btn-red" name="pay" value="Pay"
-             form="payment-form">
-    </div>
+      {# PAY #}
+      <div class="pt-3">
+        <input type="submit" class="btn btn-red" name="pay" value="Pay"
+               form="payment-form">
+      </div>
 
-  </form>
+    </form>
 
-</div> <!-- col -->
+</div> {# col #}
 
 {% endblock %}
 
@@ -117,16 +113,12 @@
   });
 
   function fillForm(elem) {
-      // change selected plan
       $("#chosen-plan-span").text($(elem).attr("id"));
-      // add GST to selected plan and set total price
       var arr = $(elem).val().split("-");
       var price = arr[0];
       var code = arr[1];
       var totalPrice = (parseFloat(price) * 1.18).toFixed(2).toString();
-      // fill hidden fields for selected plan code and price
       $("#selected-plan-code").val(code);
-      $("#total-price-input").val(totalPrice);
       $("#total-price-span").text(totalPrice);
   }
 

@@ -18,125 +18,117 @@
       <h5 class="text-justify">
         Recharge your active plans, for any help call <strong><a href="tel:18004194244" class="text-red">1800-419-4244</a></strong>
       </h5>
-    </div> <!-- col -->
+    </div> {# col #}
 
     <div class="col-sm-8 p-3">
 
-      <!-- CUSTOMER DETAILS -->
+      {# CUSTOMER DETAILS #}
       <div class="border-bottom py-2">
         <h3 class="py-2 text-red">Customer Details</h3>
-
         <div>
-          <!-- Customer No. -->
+          {# Customer No. #}
           <h5 class="text-dark-grey">Customer ID</h5>
           <p>{{ customer_no }}</p>
-          <!-- Customer name -->
+          {# Customer name #}
           <h5 class="text-dark-grey">Customer Name</h5>
           <p>{{ customer_name }}</p>
         </div>
-      </div> <!-- customer-details -->
+      </div> {# customer-details #}
 
-      <!-- ACTIVE PLANS -->
-      <!-- conditional viewing of content here -->
+      {# ACTIVE PLANS #}
+      {# conditional viewing of content here #}
       {% if not active_plans %}
-      <h5 class="py-4 text-red">This facility is not available through Insta-Recharge.</h5>
+        <h5 class="py-4 text-red">This facility is not available through Insta-Recharge.</h5>
       {% elif active_plans %}
-      <div class="border-bottom py-2">
-        <h3 class="py-2 text-red">Active Plans</h3>
+        <div class="border-bottom py-2">
+          <h3 class="py-2 text-red">Active Plans</h3>
 
-        <form method="POST" id="payment-form">
-              <!-- CSRF token -->
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <!-- Customer number -->
-              <input type="hidden" name="customer_no" value="{{ customer_no }}">
-              <!-- Customer name -->
-              <input type="hidden" name="customer_name" value="{{ customer_name }}">
-              <!-- Customer mobile number -->
-              <input type="hidden" name="customer_mobile_no" value="{{ customer_mobile_no }}">
-              <!-- Transaction amount -->
-              <input type="hidden" name="amount" value="" id="total-price-input">
-              <!-- Selected plan code -->
-              <input type="hidden" name="plan_code" value="" id="selected-plan-code">
+          <form method="POST" id="payment-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="customer_no" value="{{ customer_no }}">
+            <input type="hidden" name="customer_name" value="{{ customer_name }}">
+            <input type="hidden" name="customer_mobile_no" value="{{ customer_mobile_no }}">
+            <input type="hidden" name="plan_code" value="" id="selected-plan-code">
 
-              <!-- Active Plans -->
-                <div class="form-group">
-                  <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    {% for name, (price, validity, code) in active_plans.items() %}
-                    <label class="btn payment-plans shadow {% if loop.first %}active{% endif %} m-1 rounded">
-                      <!-- plan details dump -->
-                      <input type="radio"
-                             name="plan" value="{{ price ~ '-' ~ code }}" id="{{ name }}"
-                             autocomplete="off" onchange="fillForm(this);"
-                             {% if loop.first %}checked{% endif %} />
+            {# Active Plans #}
+            <div class="form-group">
+              <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                {% for name, (price, validity, code) in active_plans.items() %}
+                  <label class="btn payment-plans shadow {% if loop.first %}active{% endif %} m-1 rounded">
+                    {# plan details dump #}
+                    <input type="radio"
+                           name="plan" value="{{ price ~ '-' ~ code }}" id="{{ name }}"
+                           autocomplete="off" onchange="fillForm(this);"
+                           {% if loop.first %}checked{% endif %} />
 
-                               <div class="plan-choice">
-                                 <i class="far fa-check-circle fa-2x" style="color: green;"></i>
-                               </div>
-                               {{ name }}</br>
-                               Valid Till: {{ validity }}</br>
-                               &#8377 {{ price }}
-                    </label>
-                    {% endfor %}
-                  </div>
-                </div> <!-- form-group -->
-        </form>
-      </div> <!-- active-plans -->
+                           <div class="plan-choice">
+                             <i class="far fa-check-circle fa-2x" style="color: green;"></i>
+                           </div>
+                           {{ name }}</br>
+                           Valid Till: {{ validity }}</br>
+                           &#8377 {{ price }}
+                  </label>
+                {% endfor %}
+              </div>
+            </div> {# form-group #}
+          </form>
+        </div> {# active-plans #}
 
-      <!-- PAYMENT -->
-      <h3 class="py-2 text-red">Payment</h3>
+        {# PAYMENT #}
+        <h3 class="py-2 text-red">Payment</h3>
 
-      <p>Selected Plan: <span class="text-red" id="chosen-plan-span"><span></p>
-      <p>Total Price (18% GST): <span class="text-red">&#8377 <span id="total-price-span"></span></span></p>
+        <p>Selected Plan: <span class="text-red" id="chosen-plan-span"><span></p>
+        <p>Total Price (18% GST): <span class="text-red">&#8377 <span id="total-price-span"></span></span></p>
 
-      <!-- PAYMENT GATEWAY -->
-      <div class="form-check form-check-inline">
-        <input class="form-check-input"
-               type="radio"
-               name="gateway"
-               id="paytm-gateway"
-               value="paytm"
-               form="payment-form" checked>
-        <label class="form-check-label p-2" for="paytm-gateway">
-          <span class="invisible">Paytm</span>
-          <img class="pay-logo float-left"
-               src="{{ url_for('static', filename='img/logo/paytm.svg') }}">
-        </label>
-      </div>
+        {# PAYMENT GATEWAY #}
+        <div class="form-check form-check-inline">
+          <input class="form-check-input"
+                 type="radio"
+                 name="gateway"
+                 id="paytm-gateway"
+                 value="paytm"
+                 form="payment-form" checked>
+                 <label class="form-check-label p-2" for="paytm-gateway">
+                   <span class="invisible">Paytm</span>
+                   <img class="pay-logo float-left"
+                        src="{{ url_for('static', filename='img/logo/paytm.svg') }}">
+                 </label>
+        </div>
 
-      <div class="form-check form-check-inline">
-        <input class="form-check-input"
-               type="radio"
-               name="gateway"
-               id="razorpay-gateway"
-               value="razorpay"
-               form="payment-form">
-        <label class="form-check-label p-2" for="razorpay-gateway">
-          <span class="invisible">Razorpay</span>
-          <img class="pay-logo float-left"
-               src="{{ url_for('static', filename='img/logo/razorpay.svg') }}">
-        </label>
-      </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input"
+                 type="radio"
+                 name="gateway"
+                 id="razorpay-gateway"
+                 value="razorpay"
+                 form="payment-form">
+                 <label class="form-check-label p-2" for="razorpay-gateway">
+                   <span class="invisible">Razorpay</span>
+                   <img class="pay-logo float-left"
+                        src="{{ url_for('static', filename='img/logo/razorpay.svg') }}">
+                 </label>
+        </div>
 
-      <!-- TERMS AND CONDITIONS -->
-      <div class="form-check form-check pt-2">
-        <input class="form-check-input" type="checkbox" name="t&c" id="t-and-c"
-               value="paytm" form="payment-form" required>
-        <label class="form-check-label" for="t-and-c">
-          I have read and agree to the <a href="{{ url_for('terms_and_conditions') }}">Terms and Conditions</a>
-        </label>
-      </div>
+        {# TERMS AND CONDITIONS #}
+        <div class="form-check form-check pt-2">
+          <input class="form-check-input" type="checkbox" name="t&c" id="t-and-c"
+                 value="paytm" form="payment-form" required>
+                 <label class="form-check-label" for="t-and-c">
+                   I have read and agree to the <a href="{{ url_for('terms_and_conditions') }}">Terms and Conditions</a>
+                 </label>
+        </div>
 
-      <!-- PAY -->
-      <div class="pt-3">
-        <input type="submit" class="btn btn-red" name="pay" value="Pay"
-               form="payment-form">
-      </div>
+        {# PAY #}
+        <div class="pt-3">
+          <input type="submit" class="btn btn-red" name="pay" value="Pay"
+                 form="payment-form">
+        </div>
       {% endif %}
-    </div> <!-- col -->
+    </div> {# col #}
 
-  </div> <!-- row -->
+  </div> {# row #}
 
-</div> <!-- container -->
+</div> {# container #}
 
 {% endblock %}
 
@@ -151,19 +143,15 @@
   });
 
   function fillForm(elem) {
-      // change label view
       $(".plan-choice").hide();
       $(elem).siblings("div").show();
-      // change selected plan
       $("#chosen-plan-span").text($(elem).attr("id"));
-      // add GST and add plan code
       var arr = $(elem).val().split("-");
       var price = arr[0];
       var code = arr[1];
       var totalPrice = (parseFloat(price) * 1.18).toFixed(2).toString();
-      $("#total-price-span").text(totalPrice);
-      $("#total-price-input").val(totalPrice);
       $("#selected-plan-code").val(code);
+      $("#total-price-span").text(totalPrice);
   }
 
 </script>

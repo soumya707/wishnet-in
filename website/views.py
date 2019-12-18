@@ -137,12 +137,15 @@ def insta_recharge(order_id):
         )
 
     elif request.method == 'POST':
+        # retrieve amount for plan code selected
+        amount = TariffInfo.query.options(FromCache(CACHE)).\
+            filter_by(plan_code=request.form['plan_code']).first().price
+        # store amount in session
+        session['insta_amount'] = str(round(amount * 1.18, 2))
         # store customer number in session
         session['insta_customer_no'] = request.form['customer_no']
         # store customer name in session
         session['insta_customer_name'] = request.form['customer_name']
-        # store amount in session
-        session['insta_amount'] = request.form['amount']
         # store selected plan code in session
         session['insta_plan_code'] = request.form['plan_code']
         # store order id in session
@@ -155,7 +158,7 @@ def insta_recharge(order_id):
                 order_id=order_id,
                 customer_no=request.form['customer_no'],
                 customer_mobile_no=request.form['customer_mobile_no'],
-                amount=request.form['amount'],
+                amount=session['insta_amount'],
                 # _ is used as the delimiter; check paytm_utils
                 pay_source='insta_recharge',
             )
@@ -167,7 +170,7 @@ def insta_recharge(order_id):
                 customer_no=request.form['customer_no'],
                 customer_mobile_no=request.form['customer_mobile_no'],
                 customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
-                amount=request.form['amount'],
+                amount=session['insta_amount'],
                 # list is used for passing data; check razorpay_utils
                 pay_source=['insta', 'recharge'],
             )
@@ -1095,8 +1098,11 @@ def recharge():
             )
 
         elif request.method == 'POST':
+            # retrieve amount for plan code selected
+            amount = TariffInfo.query.options(FromCache(CACHE)).\
+                filter_by(plan_code=request.form['plan_code']).first().price
             # store amount in session
-            session['portal_amount'] = request.form['amount']
+            session['portal_amount'] = str(round(amount * 1.18, 2))
             # store selected plan code in session
             session['portal_plan_code'] = request.form['plan_code']
             # generate and store a transaction id
@@ -1110,7 +1116,7 @@ def recharge():
                     customer_no=session['portal_customer_no'],
                     customer_mobile_no=\
                     session['portal_customer_data']['contact_no'],
-                    amount=request.form['amount'],
+                    amount=session['portal_amount'],
                     # _ is used as the delimiter; check Paytm docs
                     pay_source='portal_recharge',
                 )
@@ -1123,7 +1129,7 @@ def recharge():
                     customer_mobile_no=\
                     session['portal_customer_data']['contact_no'],
                     customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
-                    amount=request.form['amount'],
+                    amount=session['portal_amount'],
                     # list is used for passing data; check Razorpay docs
                     pay_source=['portal', 'recharge'],
                 )
@@ -1197,8 +1203,11 @@ def add_plan():
             )
 
         elif request.method == 'POST':
+            # retrieve amount for plan code selected
+            amount = TariffInfo.query.options(FromCache(CACHE)).\
+                filter_by(plan_code=request.form['plan_code']).first().price
             # store amount in session
-            session['portal_amount'] = request.form['amount']
+            session['portal_amount'] = str(round(amount * 1.18, 2))
             # store selected plan code in session
             session['portal_plan_code'] = request.form['plan_code']
             # generate and store a transaction id
@@ -1212,7 +1221,7 @@ def add_plan():
                     customer_no=session['portal_customer_no'],
                     customer_mobile_no=\
                     session['portal_customer_data']['contact_no'],
-                    amount=request.form['amount'],
+                    amount=session['portal_amount'],
                     # _ is used as the delimiter; check Paytm docs
                     pay_source='portal_addplan',
                 )
@@ -1225,7 +1234,7 @@ def add_plan():
                     customer_mobile_no=\
                     session['portal_customer_data']['contact_no'],
                     customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
-                    amount=request.form['amount'],
+                    amount=session['portal_amount'],
                     # list is used for passing data; check Razorpay docs
                     pay_source=['portal', 'addplan'],
                 )
