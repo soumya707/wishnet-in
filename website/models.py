@@ -61,11 +61,15 @@ class UnlimitedPlan(DataPlan):
 
     __bind_key__ = 'assets'
 
+    softphones = db.Column(db.Integer, nullable=True)
+
 
 class FTTHPlan(DataPlan):
     """Class for representing FTTH Plan."""
 
     __bind_key__ = 'assets'
+
+    softphones = db.Column(db.Integer, nullable=True)
 
 
 class BizPlan(DataPlan):
@@ -74,6 +78,7 @@ class BizPlan(DataPlan):
     __bind_key__ = 'assets'
 
     static_ip = db.Column(db.Integer, nullable=False)
+    softphones = db.Column(db.Integer, nullable=True)
 
 
 class LimitedPlan(DataPlan):

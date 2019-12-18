@@ -12,7 +12,7 @@
 
   <div class="row">
 
-    <!-- PLAN TABS -->
+    {# PLAN TABS #}
     <div class="col-auto p-3 mr-auto btn-group btn-group-toggle" data-toggle="buttons">
       {% for plan in plans %}
       <label class="btn btn-red {% if loop.first %}active{% endif %} m-1 rounded plan-labels shadow">
@@ -25,139 +25,57 @@
       {% endfor %}
     </div>
 
-  {# add when filter is ready #}
-  {# <!-- FILTER --> #}
-  {#   <div class="col-auto p-3"> #}
-  {#     <div class="dropright"> #}
-  {#       <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" #}
-  {#          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> #}
-  {#          <!-- data-display="static"> --> #}
-  {#         <i class="fas fa-filter fa-lg"></i> #}
-  {#       </a> #}
-
-  {#       <div class="dropdown-menu dropdown-menu-md-left p-4" aria-labelledby="dropdownMenuLink"> #}
-
-  {#         <form onsubmit="applyFilter()"> #}
-  {#           <!-- Plan type --> #}
-  {#           <fieldset class="form-group"> #}
-  {#             <div class="row"> #}
-  {#               <legend class="col-form-label col">Plan Type</legend> #}
-
-  {#               <div class="col"> #}
-
-  {#                 <div class="form-check"> #}
-  {#                   <input class="form-check-input" type="radio" name="planType" id="unlimitedPlan" #}
-  {#                          value="unlimited" checked> #}
-  {#                   <label class="form-check-label" for="unlimitedPlan"> #}
-  {#                     Unlimited Plan #}
-  {#                   </label> #}
-  {#                 </div> #}
-
-  {#                 <div class="form-check"> #}
-  {#                   <input class="form-check-input" type="radio" name="planType" id="limitedPlan" #}
-  {#                          value="limited"> #}
-  {#                   <label class="form-check-label" for="limitedPlan"> #}
-  {#                     Limited Plan #}
-  {#                   </label> #}
-  {#                 </div> #}
-  {#               </div> #}
-  {#             </div> #}
-  {#           </fieldset> <!-- form-group --> #}
-
-  {#           <!-- Plan validity --> #}
-  {#           <fieldset class="form-group"> #}
-  {#             <div class="row"> #}
-  {#               <legend class="col-form-label col">Plan Validity</legend> #}
-  {#               <div class="col"> #}
-
-  {#                 <div class="form-check"> #}
-  {#                   <input class="form-check-input" type="radio" name="validity" id="30daysValidity" #}
-  {#                          value="30days" checked> #}
-  {#                   <label class="form-check-label" for="30daysValidity"> #}
-  {#                     30 days #}
-  {#                   </label> #}
-  {#                 </div> #}
-
-  {#               </div> #}
-  {#             </div> #}
-  {#           </fieldset> <!-- form-group --> #}
-
-  {#           <!-- Plan price --> #}
-  {#           <div class="form-group"> #}
-  {#             <label for="priceRange">Price</label> #}
-  {#             <input type="range" name="priceInput" class="form-control-range" id="priceRange" #}
-  {#                    min="200" max="3000" oninput="priceOutput.value = priceInput.value"> #}
-  {#             <output name="priceOutput" id="priceRangeOutput">1600</output> #}
-  {#           </div> <!-- form-group --> #}
-
-  {#           <!-- Plan speed --> #}
-  {#           <div class="form-group"> #}
-  {#             <label for="speedRange">Speed</label> #}
-  {#             <input type="range" name="speedInput" class="form-control-range" id="speedRange" #}
-  {#                    min="20" max="100" oninput="speedOutput.value = speedInput.value"> #}
-  {#             <output name="speedOutput" id="speedRangeOutput">60</output> #}
-  {#           </div> <!-- form-group --> #}
-
-  {#           <!-- submit --> #}
-  {#           <input type="submit" class="btn btn-primary" value="Apply"> #}
-  {#         </form> #}
-  {#       </div> <!-- dropdown-menu --> #}
-
-  {#     </div> <!-- dropdown --> #}
-
-  {#   </div> <!-- col --> #}
-
-  </div> <!-- row -->
-</div> <!-- container -->
+  </div> {# row #}
+</div> {# container #}
 
 <div class="container p-3">
 
-  <!-- PLAN CARDS -->
+  {# PLAN CARDS #}
   {% for plan in plans %}
   <div class="masonry justify-content-center">
 
     {% for entry in plan.query.all() %}
     <div class="masonry-brick shadow mt-3 mr-3 {{ plan.__name__ }}-cards">
-      <!-- Plan name -->
+      {# Plan name #}
       <h3 class="card-title heading pt-3">{{ entry.plan_name }}
         <div class="heading-underline-100"></div>
       </h3>
-      <!-- Package speed -->
+      {# Package speed #}
       <h5 class="px-3 py-1 pt-3 heading">
         <i class="fas fa-exchange-alt text-red"></i> {{ entry.bandwidth }} Mbps speed
       </h5>
-      <!-- Package validity -->
+      {# Package validity #}
       <h5 class="px-3 py-1 heading">
         <i class="fas fa-calendar text-red"></i> {{ entry.validity }} days validity
       </h5>
-      <!-- Package data limit -->
+      {# Package data limit / Softphones #}
       {% if entry.data_limit is defined %}
       <h5 class="px-3 py-1 heading">
         <i class="fab fa-cloudscale text-red"></i> {{ entry.data_limit }} GB limit
       </h5>
       {% else %}
       <h5 class="px-3 py-1 heading">
-        <i class="fab fa-cloudscale text-red"></i> No data limit
+        <i class="fas fa-phone-alt text-red"></i> {{ entry.softphones }} softphones
       </h5>
       {% endif %}
-      <!-- Package static IP -->
+      {# Package static IP #}
       {% if entry.static_ip is defined %}
       <h5 class="px-3 py-1 heading">{{ entry.static_ip }} static IP</h5>
       {% endif %}
-      <!-- Package price -->
+      {# Package price #}
       <h5 class="px-3 py-1 heading">
         <span class="text-red">&#8377</span> {{ entry.price }} / month
       </h5>
-      <!-- Package speed after limit -->
+      {# Package speed after limit #}
       {% if plan.speed_after_limit %}
       <h5 class="px-3 py-1 heading">
         <i class="fas fa-exchange-alt text-red"></i> {{ entry.speed_after_limit }} Mbps after limit</h5>
       {% endif %}
-      <!-- Package contention ratio -->
+      {# Package contention ratio #}
       <h5 class="px-3 py-1 heading">{{ entry.contention_ratio }} contention ratio</h5>
-      <!-- Plan type -->
+      {# Plan type #}
       <h4 class="heading px-3 py-3 text-red">{{ entry.plan_type }} Plan</h4>
-    </div> <!-- card -->
+    </div> {# card #}
     {% endfor %}
 
     <div class="masonry-brick bg-light-grey shadow mt-3 mr-3 {{ plan.__name__ }}-cards">
@@ -169,10 +87,10 @@
       <p class="text-justify px-3 py-1">GST and other taxes (if any) are not included in the tariff.</p>
     </div>
 
-  </div> <!-- masonry -->
+  </div> {# masonry #}
   {% endfor %}
 
-</div> <!-- container -->
+</div> {# container #}
 {% endblock %}
 
 {% block scripts %}
@@ -190,10 +108,6 @@
         $("." + $(elem).val() + "-cards").show();
     }
 
-    {# add when filter is ready #}
-    {# // function applyFilter() { #}
-    {# //     if $("input[name='planType']").val() === "unlimited" #}
-    {# // } #}
   </script>
 
 {% endblock %}
