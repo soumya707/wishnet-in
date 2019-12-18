@@ -1,11 +1,24 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
 # macOS specific
 .DS_STORE
 
 # Pipfile
 Pipfile.lock
 
-# instance specific config
+# Instance specific config
 instance/
 
-# tox specific instance files
+# Unit test / coverage reports
 .tox/
+
+# Log files
+*.log
+
+# Local development certificate files
+*.pem
+
+# Celery config
+celeryconfig.py
