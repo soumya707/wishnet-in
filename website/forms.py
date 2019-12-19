@@ -117,29 +117,26 @@ class ChangePasswordForm(FlaskForm):
         InputRequired(),
         EqualTo('confirm', message='New passwords must match')
     ])
-    confirm = PasswordField('Repeat new password', validators=[
+    confirm = PasswordField('Repeat Password', validators=[
         InputRequired(),
     ])
-    submit = SubmitField('Set New Password')
+    submit = SubmitField('Set Password')
 
 
 class UpdateProfileForm(FlaskForm):
     """Class for updating profile form."""
-    phone_no_msg = 'Invalid mobile no.'
-    email_msg = 'Invalid e-mail address'
-
     new_phone_no = StringField(
         'New mobile no.',
         validators=[
             Optional(),
-            Regexp(r'^\d{1,10}$', message=phone_no_msg)
+            Regexp(r'^\d{1,10}$', message='Invalid mobile no.')
         ]
     )
     new_email_address = StringField(
         'New e-mail address',
         validators=[
             Optional(),
-            Email(message=email_msg)
+            Email(message='Invalid e-mail address')
         ]
     )
     submit = SubmitField('Update')

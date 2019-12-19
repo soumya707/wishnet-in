@@ -9,32 +9,87 @@
 
   <h3 class="py-2 text-red">Update Profile</h3>
 
-  <div class="content-section">
-
-    <form method="POST" id="update-profile-form">
-      {{ form.hidden_tag() }}
+  {# UPDATE EMAIL ADDRESS AND MOBILE NUMBER #}
+  <h4 class="py-4">Update Mobile Number and Email Address</h4>
+  <div class="border-bottom">
+    <form action={{ url_for('update_contact') }}
+          method="POST"
+          id="update-profile-form">
+      {{ update_profile_form.hidden_tag() }}
       <fieldset class="form-group">
-
-        <!-- NEW MOBILE NO. -->
         <div class="form-row">
-          {{ render_field(form.new_phone_no) }}
+          {# NEW MOBILE NO. #}
+          <div class="col-md-4">
+          {{ render_field(update_profile_form.new_phone_no) }}
+          </div>
+          {# NEW EMAIL ID #}
+          <div class="col-md-5">
+            {{ render_field(update_profile_form.new_email_address) }}
+          </div>
         </div>
+      </fieldset>
+      {# SUBMIT #}
+      {{ render_submit(update_profile_form.submit, id="update-profile-btn") }}
+</form>
+    </div> {# content-section #}
 
-        <!-- NEW EMAIL ID -->
+
+  {# UPDATE PASSWORD #}
+  <h4 class="py-4">Update Password</h4>
+  <div class="border-bottom">
+    <form action={{ url_for('change_password') }}
+          method="POST"
+          id="change-pwd-form">
+      {{ update_password_form.hidden_tag() }}
+      <fieldset class="form-group">
         <div class="form-row">
-          {{ render_field(form.new_email_address) }}
+          {# OLD PASSWORD #}
+          <div class="col-md-4">
+            {{ render_field(update_password_form.old_password) }}
+          </div>
+          {# NEW PASSWORD #}
+          <div class="col-md-4">
+            {{ render_field(update_password_form.new_password) }}
+          </div>
+          {# PASSWORD CONFIRM #}
+          <div class="col-md-4">
+            {{ render_field(update_password_form.confirm) }}
+          </div>
         </div>
-
-      </fieldset> <!-- fieldset -->
-
-      <!-- SUBMIT -->
-      {{ render_submit(form.submit, id="update-profile-btn") }}
-
+      </fieldset>
+      {# SUBMIT #}
+      {{ render_submit(update_password_form.submit, id="change-pwd-btn") }}
     </form>
+  </div> {# content-section #}
 
-  </div> <!-- content-section -->
 
-</div> <!-- col -->
+  {# UPDATE GST #}
+  <h4 class="py-4">Update GST Information</h4>
+  <div class="content-section">
+    <form action={{ url_for('update_gst') }}
+          method="POST"
+          id="update-gst-form">
+      {{ update_gst_form.hidden_tag() }}
+      <fieldset class="form-group">
+        {# GST NUMBER #}
+        <div class="form-row">
+          {{ render_field(update_gst_form.gst_no) }}
+        </div>
+        {# VERIFY GST LINK #}
+        <div class="form-row">
+          <a target="_blank"
+             rel="noopener noreferrer"
+             href="https://services.gst.gov.in/services/searchtp">
+            Verify your GSTIN
+          </a>
+        </div>
+      </fieldset>
+      {# SUBMIT #}
+      {{ render_submit(update_gst_form.submit, id="update-gst-btn") }}
+    </form>
+  </div> {# content-section #}
+
+</div> {# col #}
 
 {% endblock %}
 
@@ -46,13 +101,20 @@
 
     $(document).ready(function() {
 
-        // loading stage for updating profile request
         $("#update-profile-form").submit(function(event) {
-                $("#update-profile-btn").val("Updating...");
+            $("#update-profile-btn").val("Updating...");
         });
 
-    })
+        $("#change-pwd-form").submit(function(event) {
+            $("#change-pwd-btn").val("Setting New Password...");
+        });
 
-  </script>
+        $("#update-gst-form").submit(function(event) {
+            $("#update-gst-btn").val("Submitting Request...");
+        });
+
+    });
+
+</script>
 
 {% endblock %}

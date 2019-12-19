@@ -1777,61 +1777,7 @@ def wishtalk_add_softphone():
         )
 
 
-@app.route('/portal/change_password', methods=['GET', 'POST'])
-def change_password():
-    """Route for self-care portal password change."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
-    # user logged in
-    elif session.get('user_logged_in'):
-        # keep the session alive
-        session.modified = True
-
-        form = ChangePasswordForm()
-
-        if form.validate_on_submit():
-            customer = CustomerLogin.query.filter_by(
-                customer_no=session['portal_customer_no']
-            ).first()
-
-            # verify old password
-            pwd_verified = pbkdf2_sha256.verify(
-                str(form.old_password.data),
-                customer.password_hash
-            )
-
-            # if old password is verified
-            if pwd_verified:
-                # check if the old and new passwords are same
-                if form.old_password.data == form.new_password.data:
-                    flash(SET_NEW_PWD, 'danger')
-                else:
-                    # generate new hashed password and store
-                    hashed_pwd = pbkdf2_sha256.hash(str(form.new_password.data))
-                    customer.password_hash = hashed_pwd
-
-                    # make synchronous call to save password
-                    db = current_app.extensions['sqlalchemy'].db
-                    db.session.add(customer)
-                    db.session.commit()
-
-                    flash(NEW_PWD_SET, 'success')
-            # old password is incorrect
-            else:
-                flash(INCORRECT_OLD_PWD, 'danger')
-
-            return redirect(url_for('change_password'))
-
-        # GET request
-        return render_template(
-            'change_password.html',
-            form=form,
-        )
-
-
-@app.route('/portal/update_profile', methods=['GET', 'POST'])
+@app.route('/portal/update_profile', methods=['GET'])
 def update_profile():
     """Route for self-care portal profile update."""
     # user not logged in
@@ -1843,46 +1789,142 @@ def update_profile():
         # keep the session alive
         session.modified = True
 
-        form = UpdateProfileForm()
+        update_profile_form = UpdateProfileForm()
+        update_password_form = ChangePasswordForm()
+        update_gst_form = UpdateGSTForm()
 
-        if form.validate_on_submit():
-            # Update profile details in MQS
-            profile = UpdateProfile(app)
-            profile.request(
-                cust_id=session['portal_customer_no'],
-                first_name=session['portal_customer_data']['first_name'],
-                last_name=session['portal_customer_data']['last_name'],
-                email=form.new_email_address.data,
-                mobile_no=form.new_phone_no.data
-            )
-            profile.response()
-
-            # verify MQS ModifyCustomer status
-            db_status, flash_msg, msg_status = verify_mqs_updateprofile(profile)
-
-            form_data = {
-                'customer_no': session['portal_customer_no'],
-                'new_phone_no': form.new_phone_no.data,
-                'new_email': form.new_email_address.data,
-                'status': db_status,
-                'request_date': datetime.now().astimezone().date(),
-                'request_time': datetime.now().astimezone().time(),
-            }
-
-            # add data to db async
-            add_profile_update_request_to_db.delay(form_data)
-
-            flash(flash_msg, msg_status)
-            return redirect(url_for('update_profile'))
-
-        # GET request
         return render_template(
             'update_profile.html',
-            form=form,
+            update_profile_form=update_profile_form,
+            update_password_form=update_password_form,
+            update_gst_form=update_gst_form
         )
 
 
-@app.route('/portal/update_gst', methods=['GET', 'POST'])
+@app.route('/portal/update_contact', methods=['POST'])
+def update_contact():
+    """Route for self-care portal contact update."""
+    # user not logged in
+    if not session.get('user_logged_in'):
+        flash(LOG_IN_FIRST, 'danger')
+        return redirect(url_for('login'))
+    # user logged in
+    elif session.get('user_logged_in'):
+        update_profile_form = UpdateProfileForm()
+        update_password_form = ChangePasswordForm()
+        update_gst_form = UpdateGSTForm()
+
+        if update_profile_form.validate_on_submit():
+            # check for empty inputs
+            if not update_profile_form.new_phone_no.data and \
+               not update_profile_form.new_email_address.data:
+                return redirect(url_for('update_profile'))
+
+            else:
+                # Update profile details in MQS
+                profile = UpdateProfile(app)
+                profile.request(
+                    cust_id=session['portal_customer_no'],
+                    first_name=session['portal_customer_data']['first_name'],
+                    last_name=session['portal_customer_data']['last_name'],
+                    email=update_profile_form.new_email_address.data,
+                    mobile_no=update_profile_form.new_phone_no.data
+                )
+                profile.response()
+
+                # verify MQS ModifyCustomer status
+                db_status, flash_msg, msg_status = \
+                    verify_mqs_updateprofile(profile)
+
+                # data for profile update request in db
+                form_data = {
+                    'customer_no': session['portal_customer_no'],
+                    'new_phone_no': update_profile_form.new_phone_no.data,
+                    'new_email': update_profile_form.new_email_address.data,
+                    'status': db_status,
+                    'request_date': datetime.now().astimezone().date(),
+                    'request_time': datetime.now().astimezone().time(),
+                }
+
+                # add request to db async
+                add_profile_update_request_to_db.delay(form_data)
+
+                # only modify in database if request successful
+                if db_status == 'SUCCESS':
+                    # data for updating profile in db
+                    update_data = {
+                        'customer_no': session['portal_customer_no'],
+                        'email': update_profile_form.new_email_address.data,
+                        'mobile_no': update_profile_form.new_phone_no.data,
+                    }
+                    # update profile in db async
+                    update_profile_in_db.delay(update_data)
+
+                flash(flash_msg, msg_status)
+
+        return render_template(
+            'update_profile.html',
+            update_profile_form=update_profile_form,
+            update_password_form=update_password_form,
+            update_gst_form=update_gst_form
+        )
+
+
+@app.route('/portal/change_password', methods=['POST'])
+def change_password():
+    """Route for self-care portal password change."""
+    # user not logged in
+    if not session.get('user_logged_in'):
+        flash(LOG_IN_FIRST, 'danger')
+        return redirect(url_for('login'))
+    # user logged in
+    elif session.get('user_logged_in'):
+        update_profile_form = UpdateProfileForm()
+        update_password_form = ChangePasswordForm()
+        update_gst_form = UpdateGSTForm()
+
+        if update_password_form.validate_on_submit():
+            customer = CustomerLogin.query.filter_by(
+                customer_no=session['portal_customer_no']
+            ).first()
+
+            # verify old password
+            pwd_verified = pbkdf2_sha256.verify(
+                str(update_password_form.old_password.data),
+                customer.password_hash
+            )
+
+            # if old password is verified
+            if pwd_verified:
+                # check if the old and new passwords are same
+                if update_password_form.old_password.data == \
+                   update_password_form.new_password.data:
+                    flash(SET_NEW_PWD, 'danger')
+                else:
+                    # generate new hashed password and store
+                    hashed_pwd = pbkdf2_sha256.hash(
+                        str(update_password_form.new_password.data)
+                    )
+                    customer.password_hash = hashed_pwd
+
+                    # make synchronous call to save password
+                    db = current_app.extensions['sqlalchemy'].db
+                    db.session.commit()
+
+                    flash(NEW_PWD_SET, 'success')
+            # old password is incorrect
+            else:
+                flash(INCORRECT_OLD_PWD, 'danger')
+
+        return render_template(
+            'update_profile.html',
+            update_profile_form=update_profile_form,
+            update_password_form=update_password_form,
+            update_gst_form=update_gst_form
+        )
+
+
+@app.route('/portal/update_gst', methods=['POST'])
 def update_gst():
     """Route for self-care GST information update."""
     # user not logged in
@@ -1891,15 +1933,14 @@ def update_gst():
         return redirect(url_for('login'))
     # user logged in
     elif session.get('user_logged_in'):
-        # keep the session alive
-        session.modified = True
+        update_profile_form = UpdateProfileForm()
+        update_password_form = ChangePasswordForm()
+        update_gst_form = UpdateGSTForm()
 
-        form = UpdateGSTForm()
-
-        if form.validate_on_submit():
+        if update_gst_form.validate_on_submit():
             form_data = {
                 'customer_no': session['portal_customer_no'],
-                'gst_no': form.gst_no.data,
+                'gst_no': update_gst_form.gst_no.data,
                 'request_date': datetime.now().astimezone().date(),
                 'request_time': datetime.now().astimezone().time(),
             }
@@ -1908,10 +1949,10 @@ def update_gst():
             add_gst_update_request_to_db.delay(form_data)
 
             flash(SUCCESSFUL_GST_UPDATE_REQUEST, 'success')
-            return redirect(url_for('update_gst'))
 
-        # GET request
         return render_template(
-            'update_gst.html',
-            form=form,
+            'update_profile.html',
+            update_profile_form=update_profile_form,
+            update_password_form=update_password_form,
+            update_gst_form=update_gst_form
         )

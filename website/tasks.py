@@ -140,6 +140,27 @@ def add_mobile_number_update_request_to_db(data):
 
 
 @celery.task
+def update_profile_in_db(data):
+    """Asynchronously update email address and/or mobile no. in the database."""
+    customer = CustomerInfo.query.filter_by(
+        customer_no=data['customer_no']
+    ).first()
+
+    # only email
+    if data['email'] and not data['mobile_no']:
+        customer.email_id = data['email']
+    # only mobile no.
+    elif not data['email'] and data['mobile_no']:
+        customer.mobile_no = data['mobile_no']
+    # both email and mobile no.
+    elif data['email'] and data['mobile_no']:
+        customer.email_id = data['email']
+        customer.mobile_no = data['mobile_no']
+
+    db.session.commit()
+
+
+@celery.task
 def add_gst_update_request_to_db(data):
     """Asynchronously add GST number update request to database."""
     update_gst = GSTUpdateRequest(
