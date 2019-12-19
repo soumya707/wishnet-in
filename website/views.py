@@ -1192,6 +1192,7 @@ def add_plan():
                     plan_code,
                     plans[plan_code].speed,
                     plans[plan_code].validity,
+                    plans[plan_code].softphone,
                     plans[plan_code].plan_type,
                 )
                 for plan_code in available_plan_codes

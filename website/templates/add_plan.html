@@ -20,11 +20,12 @@
             <th scope="col" class="text-center">Price</th>
             <th scope="col" class="text-center">Speed (in Mbps)</th>
             <th scope="col" class="text-center">Validity (in days)</th>
+            <th scope="col" class="text-center">Softphones</th>
             <th scope="col" class="text-center">Plan Type</th>
           </tr>
         </thead>
         <tbody>
-          {% for name, (price, code, speed, validity, type) in available_plans.items() %}
+          {% for name, (price, code, speed, validity, softphones, type) in available_plans.items() %}
             <tr scope="row">
               <td class="text-center">
                 <input type="radio" form="payment-form"
@@ -36,6 +37,7 @@
               <td class="text-right">&#8377 {{ price }}</td>
               <td class="text-center">{{ speed }}</td>
               <td class="text-center">{{ validity }}</td>
+              <td class="text-center">{{ softphones }}</td>
               <td class="text-center">{{ type }}</td>
             </tr>
           {% endfor %}
