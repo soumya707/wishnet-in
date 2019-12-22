@@ -15,16 +15,13 @@ class RechargeForm(FlaskForm):
     user_id = StringField(
         'User ID',
         validators=[InputRequired()],
-        render_kw={'placeholder': 'Customer ID'})
+        render_kw={'placeholder': 'Customer ID'}
+    )
     submit = SubmitField('Insta-Recharge')
 
 
 class NewConnectionForm(FlaskForm):
     """Class for new connection form."""
-    pin_code_msg = 'Invalid postal code'
-    phone_no_msg = 'Invalid mobile no.'
-    email_msg = 'Invalid e-mail address'
-
     first_name = StringField('First Name', validators=[InputRequired()])
     middle_name = StringField('Middle Name')
     last_name = StringField('Last Name', validators=[InputRequired()])
@@ -34,21 +31,21 @@ class NewConnectionForm(FlaskForm):
         'Pin code',
         validators=[
             InputRequired(),
-            Regexp(r'^[7]+\d{1,6}$', message=pin_code_msg)
+            Regexp(r'^[7]+\d{5}$', message='Invalid postal code.')
         ]
     )
     phone_no = StringField(
         'Mobile no.',
         validators=[
             InputRequired(),
-            Regexp(r'^\d{1,10}$', message=phone_no_msg)
+            Regexp(r'^\d{10}$', message='Invalid mobile number.')
         ]
     )
     email_address = StringField(
         'E-mail',
         validators=[
             InputRequired(),
-            Email(message=email_msg)
+            Email(message='Invalid e-mail address.')
         ]
     )
     submit = SubmitField('Submit')
@@ -69,8 +66,7 @@ class GetCustomerNumberForm(FlaskForm):
             IPAddress(message='Invalid IP address'),
         ]
     )
-
-    submit = SubmitField('Get')
+    submit = SubmitField('Get Customer ID')
 
 
 class LoginForm(FlaskForm):
@@ -95,31 +91,39 @@ class ForgotPasswordForm(FlaskForm):
 class OTPVerificationForm(FlaskForm):
     """Class for verifying OTP form."""
     otp = StringField('Enter OTP', validators=[InputRequired()])
-    submit = SubmitField('Verify')
+    submit = SubmitField('Verify OTP')
 
 
 class SetPasswordForm(FlaskForm):
     """Class for setting new password form."""
-    password = PasswordField('New Password', validators=[
-        InputRequired(),
-        EqualTo('confirm', message='Passwords must match')
-    ])
+    password = PasswordField(
+        'New Password',
+        validators=[
+            InputRequired(),
+            EqualTo('confirm', message='Passwords must match.')
+        ]
+    )
     confirm = PasswordField('Repeat Password')
     submit = SubmitField('Set New Password')
 
 
 class ChangePasswordForm(FlaskForm):
     """Class for changing password form."""
-    old_password = PasswordField('Old Password', validators=[
-        InputRequired(),
-    ])
-    new_password = PasswordField('New Password', validators=[
-        InputRequired(),
-        EqualTo('confirm', message='New passwords must match')
-    ])
-    confirm = PasswordField('Repeat Password', validators=[
-        InputRequired(),
-    ])
+    old_password = PasswordField(
+        'Old Password',
+        validators=[InputRequired()]
+    )
+    new_password = PasswordField(
+        'New Password',
+        validators=[
+            InputRequired(),
+            EqualTo('confirm', message='New passwords must match.')
+        ]
+    )
+    confirm = PasswordField(
+        'Repeat Password',
+        validators=[InputRequired()]
+    )
     submit = SubmitField('Set Password')
 
 
@@ -129,14 +133,14 @@ class UpdateProfileForm(FlaskForm):
         'New mobile no.',
         validators=[
             Optional(),
-            Regexp(r'^\d{1,10}$', message='Invalid mobile no.')
+            Regexp(r'^\d{10}$', message='Invalid mobile number.')
         ]
     )
     new_email_address = StringField(
         'New e-mail address',
         validators=[
             Optional(),
-            Email(message='Invalid e-mail address')
+            Email(message='Invalid e-mail address.')
         ]
     )
     submit = SubmitField('Update')
@@ -157,49 +161,41 @@ class NewTicketForm(FlaskForm):
 
 class MobileNumberUpdateRequestForm(FlaskForm):
     """Class for requesting mobile number update form (outside portal)."""
-    phone_no_msg = 'Invalid mobile no.'
-    pin_code_msg = 'Invalid postal code'
-
     old_phone_no = StringField(
         'Old mobile no.',
         validators=[
             Optional(),
-            Regexp(r'^\d{1,10}$', message=phone_no_msg)
+            Regexp(r'^\d{10}$', message='Invalid mobile number.')
         ]
     )
-
     new_phone_no = StringField(
         'New mobile no.',
         validators=[
             Optional(),
-            Regexp(r'^\d{1,10}$', message=phone_no_msg)
+            Regexp(r'^\d{10}$', message='Invalid mobile number.')
         ]
     )
-
     username_or_ip_address = StringField(
         'Username / IP Address',
         validators=[InputRequired()]
     )
-
     postal_code = StringField(
         'Pin code',
         validators=[
             InputRequired(),
-            Regexp(r'^[7]+\d{1,6}$', message=pin_code_msg)
+            Regexp(r'^[7]+\d{5}$', message='Invalid postal code.')
         ]
     )
-
     submit = SubmitField('Submit Request')
 
 
 class UpdateGSTForm(FlaskForm):
     """Class for updating GST information form."""
-    gst_msg = 'Invalid GST number'
     gst_no = StringField(
         'GST Number',
         validators=[
             InputRequired(),
-            Regexp(r'^[A-Z0-9]{15}$', message=gst_msg)
+            Regexp(r'^[A-Z0-9]{15}$', message='Invalid GST number.')
         ]
     )
     submit = SubmitField('Submit Request')
@@ -215,7 +211,7 @@ class AddSoftphoneForm(FlaskForm):
         'Mobile Number of User',
         validators=[
             Optional(),
-            Regexp(r'^\d{1,10}$', message='Invalid mobile no.')
+            Regexp(r'^\d{10}$', message='Invalid mobile number.')
         ]
     )
     softphone_platform = SelectField(
@@ -234,7 +230,7 @@ class AddSoftphoneForm(FlaskForm):
             EqualTo('confirm_password', message='Passwords must match.'),
             Regexp(
                 r'^[a-zA-Z0-9_\-]{1,8}$',
-                message='Alphabets, numbers, - and _ are only used.'
+                message='Only alphabets, numbers, - and _ are allowed.'
             ),
             Length(max=8, message='Exceeding maximum length.')
         ],
@@ -242,9 +238,6 @@ class AddSoftphoneForm(FlaskForm):
     )
     confirm_password = PasswordField(
         'Repeat Password',
-        validators=[
-            InputRequired(),
-        ]
+        validators=[InputRequired()]
     )
     submit = SubmitField('Add Softphone')
-
