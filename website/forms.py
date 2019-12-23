@@ -28,24 +28,24 @@ class NewConnectionForm(FlaskForm):
     address = StringField('Address', validators=[InputRequired()])
     location = SelectField('Location', validators=[InputRequired()])
     postal_code = StringField(
-        'Pin code',
+        'Pin Code',
         validators=[
             InputRequired(),
             Regexp(r'^[7]+\d{5}$', message='Invalid postal code.')
         ]
     )
     phone_no = StringField(
-        'Mobile no.',
+        'Mobile Number',
         validators=[
             InputRequired(),
             Regexp(r'^\d{10}$', message='Invalid mobile number.')
         ]
     )
     email_address = StringField(
-        'E-mail',
+        'Email Address',
         validators=[
             InputRequired(),
-            Email(message='Invalid e-mail address.')
+            Email(message='Invalid email address.')
         ]
     )
     submit = SubmitField('Submit')
@@ -130,17 +130,17 @@ class ChangePasswordForm(FlaskForm):
 class UpdateProfileForm(FlaskForm):
     """Class for updating profile form."""
     new_phone_no = StringField(
-        'New mobile no.',
+        'New Mobile Number',
         validators=[
             Optional(),
             Regexp(r'^\d{10}$', message='Invalid mobile number.')
         ]
     )
     new_email_address = StringField(
-        'New e-mail address',
+        'New Email Address',
         validators=[
             Optional(),
-            Email(message='Invalid e-mail address.')
+            Email(message='Invalid email address.')
         ]
     )
     submit = SubmitField('Update')
@@ -162,14 +162,14 @@ class NewTicketForm(FlaskForm):
 class MobileNumberUpdateRequestForm(FlaskForm):
     """Class for requesting mobile number update form (outside portal)."""
     old_phone_no = StringField(
-        'Old mobile no.',
+        'Old Mobile Number',
         validators=[
             Optional(),
             Regexp(r'^\d{10}$', message='Invalid mobile number.')
         ]
     )
     new_phone_no = StringField(
-        'New mobile no.',
+        'New Mobile Number',
         validators=[
             Optional(),
             Regexp(r'^\d{10}$', message='Invalid mobile number.')
@@ -180,7 +180,7 @@ class MobileNumberUpdateRequestForm(FlaskForm):
         validators=[InputRequired()]
     )
     postal_code = StringField(
-        'Pin code',
+        'Pin Code',
         validators=[
             InputRequired(),
             Regexp(r'^[7]+\d{5}$', message='Invalid postal code.')
