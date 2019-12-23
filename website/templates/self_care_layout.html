@@ -9,12 +9,10 @@
   </h2>
 
   <div class="row border-top">
-
     <div class="col-md-4 bg-light-grey p-3">
       <img class="sidebar-img p-1"
            src="{{ url_for('static', filename='img/etc/portal.svg') }}">
-
-      <!-- OPTIONS -->
+      {# OPTIONS #}
       <div class="list-group">
         <a class="list-group-item list-group-item-action {% if request.path == url_for('portal') %}active{% endif %}"
            href="{{ url_for('portal') }}">
@@ -61,14 +59,11 @@
           <i class="fas fa-sign-out-alt pl-1"></i>
             <span class="pl-1">Sign Out</span>
         </a>
-      </div> <!-- list-group -->
-
-    </div> <!-- col -->
+      </div> {# list-group #}
+    </div> {# col #}
 
     {% block portal_content %}{% endblock %}
-
-  </div> <!-- row -->
-
-</div> <!-- container -->
+  </div> {# row #}
+</div> {# container #}
 
 {% endblock %}
