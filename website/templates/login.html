@@ -24,29 +24,16 @@
     <div class="col-md-4 p-3">
       <h3 class="py-2 text-red">Log In</h3>
 
-      <div class="content-section">
-
-        <form method="POST" id="log-in-form">
-          {{ form.hidden_tag() }}
-          <fieldset class="form-group">
-
-            <!-- USERNAME -->
-            <div class="form-row">
-              {{ render_field(form.customer_no) }}
-            </div>
-
-            <!-- PASSWORD -->
-            <div class="form-row">
-              {{ render_field(form.password) }}
-            </div>
-
-        </fieldset> <!-- fieldset -->
-
+      <form method="POST" id="log-in-form">
+        {{ form.hidden_tag() }}
+        <!-- USERNAME -->
+        {{ render_field(form.customer_no) }}
+        <!-- PASSWORD -->
+        {{ render_field(form.password) }}
         <!-- SUBMIT -->
-        {{ render_submit(form.submit, id="log-in-btn") }}
-
+        {{ render_submit(form.submit, class="btn btn-red btn-block", id="log-in-btn") }}
       </form>
-      </div> <!-- content-section -->
+
     </div> <!-- col -->
 
     <div class="col-md-4 bg-light-grey pt-4">

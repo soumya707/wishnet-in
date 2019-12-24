@@ -700,6 +700,8 @@ def logout():
     return redirect(url_for('login'))
 
 
+# Helper utilities for self-care portal
+
 @app.route('/get_customer_number', methods=['GET', 'POST'])
 def get_cust_no():
     """Route for getting customer number."""
@@ -737,7 +739,6 @@ def get_cust_no():
             if successful:
                 text = CUSTOMER_NO_SENT
                 status = 'success'
-
             else:
                 text = CUSTOMER_NO_NOT_SENT
                 status = 'danger'
@@ -812,13 +813,12 @@ def register():
                 if successful:
                     text = OTP_SENT
                     status = 'success'
-
                 # OTP not sent
                 else:
                     text = OTP_NOT_SENT
                     status = 'danger'
 
-                    flash(text, status)
+                flash(text, status)
 
             # mobile no. does not exist in db
             elif customer_info.mobile_no is None:
@@ -831,6 +831,7 @@ def register():
 
         return redirect(url_for(redirect_to))
 
+    # GET request
     return render_template(
         'register.html',
         form=form
@@ -879,7 +880,6 @@ def forgot():
             if successful:
                 text = OTP_SENT
                 status = 'success'
-
             else:
                 text = OTP_NOT_SENT
                 status = 'danger'
@@ -892,12 +892,13 @@ def forgot():
             flash(NON_REGISTERED_USER, 'danger')
 
         # invalid customer
-        else:
+        elif customer is None:
             redirect_to = 'forgot'
             flash(USER_NOT_FOUND_IN_DB, 'danger')
 
         return redirect(url_for(redirect_to))
 
+    # GET request
     return render_template(
         'forgot_password.html',
         form=form
@@ -936,6 +937,7 @@ def verify_otp():
 
         return redirect(url_for(redirect_to))
 
+    # GET request
     return render_template(
         'verify_otp.html',
         form=form
@@ -967,6 +969,7 @@ def set_password():
         flash(SUCCESSFUL_PWD_SAVE, 'success')
         return redirect(url_for('login'))
 
+    # GET request
     return render_template(
         'set_password.html',
         form=form

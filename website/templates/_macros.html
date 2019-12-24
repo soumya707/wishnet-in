@@ -17,21 +17,31 @@
 {% macro render_field(field) -%}
 
   <div class="form-group">
-    {{ field.label(class_='form-control-label', **kwargs) |safe  }}
+    {{ field.label(**kwargs) |safe  }}
 
     {# display error if invalid #}
-    {% if field.errors -%}
+    {%- if field.errors %}
       {{ field(class_='form-control is-invalid') }}
       <div class="invalid-feedback">
-        {% for error in field.errors -%}
+        {%- for error in field.errors %}
           <span>{{ error }}</span>
         {%- endfor %}
       </div>
     {# display field #}
     {%- else %}
       {{ field(class_='form-control') }}
-    {%- endif %}
+    {%- endif -%}
 
+  </div>
+
+{%- endmacro %}
+
+{# render select #}
+{% macro render_select(field) -%}
+
+  <div class="form-group">
+    {{ field.label(**kwargs) |safe  }}
+    {{ field(class_='custom-select') }}
   </div>
 
 {%- endmacro %}
@@ -40,7 +50,7 @@
 {% macro render_submit(field) -%}
 
   <div class="form-group">
-    {{ field(class_='btn btn-red', **kwargs) |safe }}
+    {{ field(**kwargs) |safe }}
   </div>
 
 {%- endmacro %}

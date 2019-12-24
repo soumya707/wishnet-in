@@ -19,45 +19,29 @@
       <h5 class="text-justify">
         Enter User Name / IP or Contact Call Centre at <strong><a href="tel:18004194244" class="text-red">1800-419-4244</a></strong>
       </h5>
-    </div> <!-- col -->
+    </div> {# col #}
 
     <div class="col-md-4 p-3">
-      <div class="content-section">
-
-        <form method="POST" class="px-2">
-          {{ form.hidden_tag() }}
-          <fieldset class="form-group">
-
-            <!-- USERNAME -->
-            <div class="form-row">
-              {{ render_field_inline(form.username) }}
-            </div>
-
-            <div class="pb-2"><strong>Or</strong></div>
-
-            <!-- IP ADDRESS -->
-            <div class="form-row">
-              {{ render_field_inline(form.ip_address) }}
-            </div>
-
-          </fieldset> <!-- fieldset -->
-
-          <!-- SUBMIT -->
-          {{ render_submit_inline(form.submit) }}
-
-        </form>
-
-      </div> <!-- content-section -->
-    </div> <!-- col -->
+      <form method="POST" class="px-2">
+        {{ form.hidden_tag() }}
+        {# USERNAME #}
+        {{ render_field_inline(form.username) }}
+        <div class="text-center pb-2"><strong>Or</strong></div>
+        {# IP ADDRESS #}
+        {{ render_field_inline(form.ip_address) }}
+        {# SUBMIT #}
+        {{ render_submit_inline(form.submit, class="btn btn-red btn-block") }}
+      </form>
+    </div> {# col #}
 
     <div class="col-md-4 bg-light-grey pt-4">
       <p class="description">Please ensure your <span class="text-red">mobile number is registered</span> with us.</p>
       <p class="description"><span class="text-red">Addition / modification</span> of your registered mobile number will be effective <span class="text-red">within 24 hours</span>.</p>
       <p class="description">Customer ID will be sent to your <span class="text-red">registered mobile number</span>.</p>
-    </div> <!-- col -->
+    </div> {# col #}
 
-  </div> <!-- row -->
+  </div> {# row #}
 
-</div> <!-- container -->
+</div> {# container #}
 
 {% endblock %}

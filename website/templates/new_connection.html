@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "_macros.html" import render_field, render_submit %}
+{% from "_macros.html" import render_field, render_select, render_submit %}
 
 {% block title %}New connection{% endblock %}
 
@@ -53,7 +53,7 @@
             <div class="form-row">
               <!-- LOCATION -->
               <div class="col-md-3">
-                {{ render_field(form.location, class="required-field") }}
+                {{ render_select(form.location, class="required-field") }}
               </div> <!-- col -->
               <!-- PIN CODE -->
               <div class="col-md-3">
@@ -75,7 +75,7 @@
           <p><span style="color:red;">*</span> indicates a required field</p>
 
           <!-- SUBMIT -->
-          {{ render_submit(form.submit) }}
+          {{ render_submit(form.submit, class="btn btn-red") }}
 
         </form>
       </div> <!-- content-section -->

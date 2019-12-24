@@ -7,12 +7,12 @@
 <div class="col-md-8 p-3">
 
   <h3 class="py-2 text-red">Recharge</h3>
-
-  <h4 class="py-2">Active Plans</h4>
   {# ACTIVE PLAN TABLE #}
-  {# conditional viewing of content here #}
+  <h4 class="py-2">Active Plans</h4>
+  {# NO ACTIVE PLANS #}
   {% if not active_plans %}
     <h5 class="py-4 text-red">You do not have any active plan.</h5>
+  {# ACTIVE PLANS #}
   {% elif active_plans %}
     <table class="table table-striped table-bordered table-responsive-sm">
       <thead>
@@ -38,17 +38,18 @@
             </td>
             <td>{{ name }}</td>
             <td class="text-center">{{ validity }}</td>
-            <td class="text-right">&#8377 {{ price }}</td>
+            <td class="text-right">&#8377; {{ price }}</td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
   {% endif %}
-
-  <h4 class="py-2">Inactive Plans</h4>
   {# INACTIVE PLAN TABLE #}
+  <h4 class="py-2">Inactive Plans</h4>
+  {# NO INACTIVE PLANS #}
   {% if not inactive_plans %}
     <h5 class="py-4 text-red">You do not have any inactive plans.</h5>
+  {# INACTIVE PLANS #}
   {% elif inactive_plans %}
     <table class="table table-striped table-bordered table-responsive-sm">
       <thead>
@@ -73,13 +74,12 @@
             </td>
             <td>{{ name }}</td>
             <td class="text-center">{{ validity }}</td>
-            <td class="text-right">&#8377 {{ price }}</td>
+            <td class="text-right">&#8377; {{ price }}</td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
   {% endif %}
-
   {# PAYMENT #}
   <h3 class="py-2 text-red">Payment</h3>
 
@@ -90,49 +90,43 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="plan_code" value="" id="selected-plan-code">
     {# PAYMENT GATEWAY #}
-    <div class="form-check form-check-inline">
-      <input class="form-check-input"
+    <div class="custom-control custom-radio custom-control-inline">
+      <input class="custom-control-input"
              type="radio"
              name="gateway"
              id="paytm-gateway"
              value="paytm"
              form="payment-form" checked>
-             <label class="form-check-label p-2" for="paytm-gateway">
-               <span class="invisible">Paytm</span>
+             <label class="custom-control-label" for="paytm-gateway">
                <img class="pay-logo float-left"
                     src="{{ url_for('static', filename='img/logo/paytm.svg') }}">
              </label>
     </div>
-
-    <div class="form-check form-check-inline">
-      <input class="form-check-input"
+    <div class="custom-control custom-radio custom-control-inline">
+      <input class="custom-control-input"
              type="radio"
              name="gateway"
              id="razorpay-gateway"
              value="razorpay"
              form="payment-form">
-             <label class="form-check-label p-2" for="razorpay-gateway">
-               <span class="invisible">Razorpay</span>
+             <label class="custom-control-label" for="razorpay-gateway">
                <img class="pay-logo float-left"
                     src="{{ url_for('static', filename='img/logo/razorpay.svg') }}">
              </label>
     </div>
-
     {# TERMS AND CONDITIONS #}
-    <div class="form-check form-check pt-2">
-      <input class="form-check-input" type="checkbox" name="t&c" id="t-and-c"
+    <div class="custom-control custom-checkbox pt-2">
+      <input class="custom-control-input" type="checkbox" name="t&c" id="t-and-c"
              value="paytm" form="payment-form" required>
-             <label class="form-check-label" for="t-and-c">
+             <label class="custom-control-label" for="t-and-c">
                I have read and agree to the <a href="{{ url_for('terms_and_conditions') }}">Terms and Conditions</a>
              </label>
     </div>
-
     {# PAY #}
     <div class="pt-3">
       <input type="submit" class="btn btn-red" name="pay" value="Pay"
              form="payment-form">
     </div>
-
   </form>
 
 </div> {# col #}
@@ -140,25 +134,22 @@
 {% endblock %}
 
 {% block scripts %}
+  {{ super() }}
+  <script>
 
-{{ super() }}
+    $(document).ready(function() {
+        fillForm('input[name=plan]:checked');
+    });
 
-<script>
-
-  $(document).ready(function() {
-      fillForm('input[name=plan]:checked');
-  });
-
-  function fillForm(elem) {
-      $("#chosen-plan-span").text($(elem).attr("id"));
-      var arr = $(elem).val().split("-");
-      var price = arr[0];
-      var code = arr[1];
-      var totalPrice = (parseFloat(price) * 1.18).toFixed(2).toString();
-      $("#selected-plan-code").val(code);
-      $("#total-price-span").text(totalPrice);
-  }
-
+    function fillForm(elem) {
+        $("#chosen-plan-span").text($(elem).attr("id"));
+        var arr = $(elem).val().split("-");
+        var price = arr[0];
+        var code = arr[1];
+        var totalPrice = (parseFloat(price) * 1.18).toFixed(2).toString();
+        $("#selected-plan-code").val(code);
+        $("#total-price-span").text(totalPrice);
+    }
 </script>
 
 {% endblock %}
