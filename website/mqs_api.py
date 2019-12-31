@@ -150,8 +150,6 @@ class GetCustomerInfo(MQSAPI):
         self.response_msg = None
         self.txn_no = None
         self.txn_msg = None
-        self.first_name = None
-        self.last_name = None
         self.name = None
         self.cust_no = None
         self.address = None
@@ -188,8 +186,6 @@ class GetCustomerInfo(MQSAPI):
 
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
-            self.first_name = res_tree.findtext('.//FIRSTNAME')
-            self.last_name = res_tree.findtext('.//LASTNAME')
             self.name = '{} {} {}'.format(
                 res_tree.findtext('.//FIRSTNAME').capitalize(),
                 res_tree.findtext('.//MIDDLENAME').capitalize(),
@@ -246,8 +242,6 @@ class GetCustomerInfo(MQSAPI):
     def to_dict(self):
         """Define interface to dict."""
         return {
-            'first_name': self.first_name,
-            'last_name': self.last_name,
             'name': self.name,
             'cust_no': self.cust_no,
             'address': self.address,
@@ -427,7 +421,7 @@ class UpdateProfile(MQSAPI):
         self.txn_msg = None
         self.error_no = None
 
-    def request(self, cust_id, first_name, last_name, email, mobile_no):
+    def request(self, cust_id, email, mobile_no):
         """Send request for UpdateProfile."""
 
         # only email needs to be changed
@@ -439,23 +433,11 @@ class UpdateProfile(MQSAPI):
                     <KEY_VALUE>{customer_no}</KEY_VALUE>
                 </KEY_NAMEVALUE>
                 <CUSTOMERINFO>
-                    <CUSTOMERTYPE>NORMAL</CUSTOMERTYPE>
-                    <CATEGORY>ISP</CATEGORY>
-                    <INDIVIDUAL>Y</INDIVIDUAL>
-                    <FIRSTNAME>{first_name}</FIRSTNAME>
-                    <LASTNAME>{last_name}</LASTNAME>
                     <CONTACTINFO>
                         <EMAIL>{email}</EMAIL>
                     </CONTACTINFO>
-                    <ADDRESSINFO>
-                    </ADDRESSINFO>
                 </CUSTOMERINFO>
-            </REQUESTINFO>'''.format(
-                customer_no=cust_id,
-                first_name=first_name,
-                last_name=last_name,
-                email=email
-            )
+            </REQUESTINFO>'''.format(customer_no=cust_id, email=email)
 
         # only mobile no. needs to be changed
         elif not email and mobile_no:
@@ -466,23 +448,11 @@ class UpdateProfile(MQSAPI):
                     <KEY_VALUE>{customer_no}</KEY_VALUE>
                 </KEY_NAMEVALUE>
                 <CUSTOMERINFO>
-                    <CUSTOMERTYPE>NORMAL</CUSTOMERTYPE>
-                    <CATEGORY>ISP</CATEGORY>
-                    <INDIVIDUAL>Y</INDIVIDUAL>
-                    <FIRSTNAME>{first_name}</FIRSTNAME>
-                    <LASTNAME>{last_name}</LASTNAME>
                     <CONTACTINFO>
                         <MOBILEPHONE>{mobile_no}</MOBILEPHONE>
                     </CONTACTINFO>
-                    <ADDRESSINFO>
-                    </ADDRESSINFO>
                 </CUSTOMERINFO>
-            </REQUESTINFO>'''.format(
-                customer_no=cust_id,
-                first_name=first_name,
-                last_name=last_name,
-                mobile_no=mobile_no
-            )
+            </REQUESTINFO>'''.format(customer_no=cust_id, mobile_no=mobile_no)
 
         # both email and mobile no. needs to be changed
         elif email and mobile_no:
@@ -493,22 +463,13 @@ class UpdateProfile(MQSAPI):
                     <KEY_VALUE>{customer_no}</KEY_VALUE>
                 </KEY_NAMEVALUE>
                 <CUSTOMERINFO>
-                    <CUSTOMERTYPE>NORMAL</CUSTOMERTYPE>
-                    <CATEGORY>ISP</CATEGORY>
-                    <INDIVIDUAL>Y</INDIVIDUAL>
-                    <FIRSTNAME>{first_name}</FIRSTNAME>
-                    <LASTNAME>{last_name}</LASTNAME>
                     <CONTACTINFO>
                         <EMAIL>{email}</EMAIL>
                         <MOBILEPHONE>{mobile_no}</MOBILEPHONE>
                     </CONTACTINFO>
-                    <ADDRESSINFO>
-                    </ADDRESSINFO>
                 </CUSTOMERINFO>
             </REQUESTINFO>'''.format(
                 customer_no=cust_id,
-                first_name=first_name,
-                last_name=last_name,
                 email=email,
                 mobile_no=mobile_no
             )

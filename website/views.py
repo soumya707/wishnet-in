@@ -1829,8 +1829,6 @@ def update_contact():
                 profile = UpdateProfile(app)
                 profile.request(
                     cust_id=session['portal_customer_no'],
-                    first_name=session['portal_customer_data']['first_name'],
-                    last_name=session['portal_customer_data']['last_name'],
                     email=update_profile_form.new_email_address.data,
                     mobile_no=update_profile_form.new_phone_no.data
                 )
@@ -1865,6 +1863,7 @@ def update_contact():
                     update_profile_in_db.delay(update_data)
 
                 flash(flash_msg, msg_status)
+                return redirect(url_for('update_profile'))
 
         return render_template(
             'update_profile.html',
@@ -1920,6 +1919,8 @@ def change_password():
             else:
                 flash(INCORRECT_OLD_PWD, 'danger')
 
+            return redirect(url_for('update_profile'))
+
         return render_template(
             'update_profile.html',
             update_profile_form=update_profile_form,
@@ -1953,6 +1954,7 @@ def update_gst():
             add_gst_update_request_to_db.delay(form_data)
 
             flash(SUCCESSFUL_GST_UPDATE_REQUEST, 'success')
+            return redirect(url_for('update_profile'))
 
         return render_template(
             'update_profile.html',
