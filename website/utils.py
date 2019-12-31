@@ -11,7 +11,9 @@ from pathlib import Path
 import requests
 from passlib.totp import generate_secret
 
-from website.messages import *
+from website.messages import (
+    SUCCESSFUL_ADDPLAN, SUCCESSFUL_PROFILE_UPDATE, SUCCESSFUL_RECHARGE,
+    UNSUCCESSFUL_ADDPLAN, UNSUCCESSFUL_PROFILE_UPDATE, UNSUCCESSFUL_RECHARGE)
 
 
 def order_no_gen():
@@ -76,18 +78,12 @@ def verify_mqs_updateprofile(update_profile):
     # success in MQS
     if update_profile.error_no == '0':
         db_entry_status = 'SUCCESS'
-        msg = (
-            'Profile updated successfully! The changes will take effect the '
-            'next time you log in.'
-        )
+        msg = SUCCESSFUL_PROFILE_UPDATE
         msg_stat = 'success'
     # failure in MQS
     else:
         db_entry_status = 'FAILURE'
-        msg = (
-            'There was an error while updating your profile. '
-            'Please open a ticket or contact us.'
-        )
+        msg = UNSUCCESSFUL_PROFILE_UPDATE
         msg_stat = 'danger'
 
     return db_entry_status, msg, msg_stat
