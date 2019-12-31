@@ -309,17 +309,18 @@ class CustomerInfo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_no = db.Column(db.String(100), nullable=False)
     customer_name = db.Column(db.String(400), nullable=False)
-    user_name = db.Column(db.String(20), nullable=False)
     mobile_no = db.Column(db.String(15), nullable=True)
-    ip_addr = db.Column(db.String(20), nullable=True)
     zone_id = db.Column(db.String(50), nullable=True)
+    user_name = db.Column(db.String(100), nullable=False)
+    mobile_number = db.Column(db.String(10), nullable=True)
     email_id = db.Column(db.String(100), nullable=True)
+    ip_addr = db.Column(db.String(100), nullable=False)
     zone_name = db.Column(db.String(100), nullable=True)
-    using_wishtalk = db.Column(db.String(3), nullable=False,
-                               default='NO')
     package = db.Column(db.String(100), nullable=True)
     soft_limit = db.Column(db.Integer, nullable=True)
     ott_limit = db.Column(db.Integer, nullable=True)
+    installation_address = db.Column(db.String(500), nullable=False)
+    billing_address = db.Column(db.String(500), nullable=False)
 
     def __str__(self):
         return self.customer_no
