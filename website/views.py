@@ -1137,6 +1137,10 @@ def recharge():
             session['portal_plan_code'] = request.form['plan_code']
             # generate and store a transaction id
             session['portal_order_id'] = order_no_gen()
+            # get customer mobile number
+            mobile_no = CustomerInfo.query.filter_by(
+                customer_no=session['portal_customer_no']
+            ).first().mobile_number
 
             # Check payment gateway
             if request.form['gateway'] == 'paytm':
@@ -1144,8 +1148,7 @@ def recharge():
                 form_data = initiate_transaction(
                     order_id=session['portal_order_id'],
                     customer_no=session['portal_customer_no'],
-                    customer_mobile_no=\
-                    session['portal_customer_data']['contact_no'],
+                    customer_mobile_no=mobile_no,
                     amount=session['portal_amount'],
                     # _ is used as the delimiter; check Paytm docs
                     pay_source='portal_recharge',
@@ -1156,8 +1159,7 @@ def recharge():
                 form_data = make_order(
                     order_id=session['portal_order_id'],
                     customer_no=session['portal_customer_no'],
-                    customer_mobile_no=\
-                    session['portal_customer_data']['contact_no'],
+                    customer_mobile_no=mobile_no,
                     customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
                     amount=session['portal_amount'],
                     # list is used for passing data; check Razorpay docs
@@ -1243,6 +1245,10 @@ def add_plan():
             session['portal_plan_code'] = request.form['plan_code']
             # generate and store a transaction id
             session['portal_order_id'] = order_no_gen()
+            # get customer mobile number
+            mobile_no = CustomerInfo.query.filter_by(
+                customer_no=session['portal_customer_no']
+            ).first().mobile_number
 
             # Check payment gateway
             if request.form['gateway'] == 'paytm':
@@ -1250,8 +1256,7 @@ def add_plan():
                 form_data = initiate_transaction(
                     order_id=session['portal_order_id'],
                     customer_no=session['portal_customer_no'],
-                    customer_mobile_no=\
-                    session['portal_customer_data']['contact_no'],
+                    customer_mobile_no=mobile_no,
                     amount=session['portal_amount'],
                     # _ is used as the delimiter; check Paytm docs
                     pay_source='portal_addplan',
@@ -1262,8 +1267,7 @@ def add_plan():
                 form_data = make_order(
                     order_id=session['portal_order_id'],
                     customer_no=session['portal_customer_no'],
-                    customer_mobile_no=\
-                    session['portal_customer_data']['contact_no'],
+                    customer_mobile_no=mobile_no,
                     customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
                     amount=session['portal_amount'],
                     # list is used for passing data; check Razorpay docs
