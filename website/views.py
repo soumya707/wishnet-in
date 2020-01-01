@@ -1544,7 +1544,8 @@ def transaction_history():
         # Retrieve data from db
         transactions = RechargeEntry.query.filter_by(
             customer_no=session['portal_customer_no']
-        ).paginate(per_page=10, page=page_num, error_out=False)
+        ).order_by(RechargeEntry.id.desc()).\
+        paginate(per_page=10, page=page_num, error_out=False)
 
         return render_template(
             'transaction_history.html',

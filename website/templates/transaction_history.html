@@ -17,22 +17,22 @@
       <thead>
         <tr>
           <th scope="col" class="text-center">Transaction No.</th>
-          <th scope="col" class="text-center">Date</th>
+          <th scope="col" class="text-center">Date and Time</th>
           <th scope="col" class="text-center">Gateway</th>
-          <th scope="col" class="text-center">Gateway Transaction No.</th>
-          <th scope="col" class="text-center">Amount</th>
           <th scope="col" class="text-center">Status</th>
+          <th scope="col" class="text-center">Amount</th>
+          <th scope="col" class="text-center">Gateway Transaction No.</th>
         </tr>
       </thead>
       <tbody>
         {% for transaction in transactions.items %}
           <tr scope="row">
             <td>{{ transaction.wishnet_payment_order_id }}</td>
-            <td>{{ transaction.payment_datetime }}</td>
+            <td>{{ transaction.payment_datetime.split('.')[0] }}</td>
             <td>{{ transaction.payment_gateway }}</td>
-            <td>{{ transaction.payment_gateway_order_id }}</td>
-            <td class="text-center">{{ transaction.payment_amount }}</td>
             <td>{{ transaction.payment_status }}</td>
+            <td class="text-center">{{ transaction.payment_amount }}</td>
+            <td>{{ transaction.payment_gateway_order_id }}</td>
           </tr>
         {% endfor %}
       </tbody>
