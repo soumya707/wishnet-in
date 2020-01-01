@@ -145,8 +145,6 @@ def insta_recharge(order_id):
         session['insta_amount'] = str(round(amount * 1.18, 2))
         # store customer number in session
         session['insta_customer_no'] = request.form['customer_no']
-        # store customer name in session
-        session['insta_customer_name'] = request.form['customer_name']
         # store selected plan code in session
         session['insta_plan_code'] = request.form['plan_code']
         # store order id in session
@@ -501,11 +499,14 @@ def verify_response(gateway):
 @app.route('/receipt/<order_id>')
 def insta_receipt(order_id):
     """Route to transaction receipt."""
+    customer_name = CustomerInfo.query.options(FromCache(CACHE)).filter_by(
+        customer_no=request.args.get('customer_no')
+    ).first().customer_name
 
     return render_template(
         'receipt.html',
         customer_no=session['insta_customer_no'],
-        customer_name=session['insta_customer_name'],
+        customer_name=customer_name,
         amount=session['insta_amount'],
         date_and_time=request.args.get('txn_datetime'),
         txn_status=request.args.get('status'),
@@ -1286,11 +1287,14 @@ def add_plan():
 @app.route('/portal/receipt/<order_id>')
 def portal_receipt(order_id):
     """Route to transaction receipt."""
+    customer_name = CustomerInfo.query.options(FromCache(CACHE)).filter_by(
+        customer_no=request.args.get('customer_no')
+    ).first().customer_name
 
     return render_template(
         'portal_receipt.html',
         customer_no=session['portal_customer_no'],
-        customer_name=session['portal_customer_data']['name'],
+        customer_name=customer_name,
         amount=session['portal_amount'],
         date_and_time=request.args.get('txn_datetime'),
         txn_status=request.args.get('status'),
@@ -1732,11 +1736,16 @@ def wishtalk_add_softphone():
                         str(add_softphone_form.password.data)
                     )
 
+                    # get customer name
+                    customer_name = CustomerInfo.query.\
+                        options(FromCache(CACHE)).\
+                        filter_by(customer_no=session['portal_customer_no']).\
+                        first().customer_name
+
                     # create data for db entry
                     data = {
                         'customer_no': session['portal_customer_no'],
-                        'customer_name': \
-                        session['portal_customer_data']['name'],
+                        'customer_name': customer_name,
                         'user_name': add_softphone_form.name.data,
                         'customer_mobile_no': mobile_no,
                         'password_hash': hashed_pwd,
