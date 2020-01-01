@@ -63,15 +63,11 @@ UNSUCCESSFUL_ADDPLAN = (
 )
 
 # SUCCESSFUL PROFILE UPDATE
-SUCCESSFUL_PROFILE_UPDATE = (
-    'Profile updated successfully! The changes will take effect the '
-    'next time you log in.'
-)
+SUCCESSFUL_PROFILE_UPDATE = 'Profile updated successfully!'
 
 # UNSUCCESSFUL PROFILE UPDATE
 UNSUCCESSFUL_PROFILE_UPDATE = (
-    'There was an error while updating your profile. '
-    'Please open a ticket or contact us.'
+    'There was an error while updating your profile. Please try again.'
 )
 
 # INCOMPLETE PAYMENT
