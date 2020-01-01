@@ -441,7 +441,8 @@ def verify_response(gateway):
                 f'{session_var_prefix}_receipt',
                 order_id=session[f'{session_var_prefix}_order_id'],
                 status=status,
-                txn_datetime=data['txn_datetime']
+                txn_datetime=data['txn_datetime'],
+                customer_no=session[f'{session_var_prefix}_customer_no']
             )
         )
 
@@ -491,7 +492,8 @@ def verify_response(gateway):
                 f'{session_var_prefix}_receipt',
                 order_id=session[f'{session_var_prefix}_order_id'],
                 status='unsuccessful',
-                txn_datetime=data['txn_datetime']
+                txn_datetime=data['txn_datetime'],
+                customer_no=session[f'{session_var_prefix}_customer_no']
             )
         )
 
@@ -505,7 +507,7 @@ def insta_receipt(order_id):
 
     return render_template(
         'receipt.html',
-        customer_no=session['insta_customer_no'],
+        customer_no=request.args.get('customer_no'),
         customer_name=customer_name,
         amount=session['insta_amount'],
         date_and_time=request.args.get('txn_datetime'),
@@ -1293,7 +1295,7 @@ def portal_receipt(order_id):
 
     return render_template(
         'portal_receipt.html',
-        customer_no=session['portal_customer_no'],
+        customer_no=request.args.get('customer_no'),
         customer_name=customer_name,
         amount=session['portal_amount'],
         date_and_time=request.args.get('txn_datetime'),
