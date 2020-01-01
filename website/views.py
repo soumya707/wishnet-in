@@ -5,6 +5,7 @@
 
 import json
 import random
+import re
 import string
 from datetime import datetime, timedelta
 
@@ -1047,11 +1048,37 @@ def portal():
             )
         ).first()
 
+        # Get customer details
+        cust_data_from_db = CustomerInfo.query.filter_by(
+            customer_no=session['portal_customer_no']
+        ).first()
+
+        installation_address = re.sub(
+            r',{2,3}',
+            r',',
+            cust_data_from_db.installation_address
+        ) if cust_data_from_db.installation_address else 'NOT FOUND'
+
+        billing_address = re.sub(
+            r',{2,3}',
+            r',',
+            cust_data_from_db.billing_address
+        ) if cust_data_from_db.billing_address else 'NOT FOUND'
+
+        customer_data = {
+            'name': cust_data_from_db.customer_name,
+            'installation_address': installation_address,
+            'billing_address': billing_address,
+            'mobile_no': cust_data_from_db.mobile_number,
+            'email': cust_data_from_db.email_id,
+            'partner': cust_data_from_db.zone_name,
+            'gstin': customer_gst if customer_gst else 'NOT REGISTERED',
+        }
+
         return render_template(
             'portal.html',
             cust_no=session['portal_customer_no'],
-            cust_data=session['portal_customer_data'],
-            gstin=customer_gst,
+            cust_data=customer_data,
             active_plans=active_plans
         )
 

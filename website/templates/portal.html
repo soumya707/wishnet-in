@@ -7,7 +7,6 @@
 <div class="col-md-8 p-3">
 
   <h3 class="py-2 text-red">Customer Info</h3>
-
   {# CUSTOMER INFO #}
   <table class="table table-striped table-bordered table-responsive-sm">
     <tbody>
@@ -20,36 +19,37 @@
       {# CUSTOMER NAME #}
       <tr>
         <th scope="row">Customer Name</th>
-        <td>{{ cust_data.name }}</td>
+        <td>{{ cust_data['name'] }}</td>
       </tr>
-      {# CUSTOMER ADDRESS #}
+      {# INSTALLATION ADDRESS #}
       <tr>
-        <th scope="row">Address</th>
-        <td>{{ cust_data.address }}</td>
+        <th scope="row">Installation Address</th>
+        <td>{{ cust_data['installation_address'] }}</td>
+      </tr>
+      {# BILLING ADDRESS #}
+      <tr>
+        <th scope="row">Billing Address</th>
+        <td>{{ cust_data['billing_address'] }}</td>
       </tr>
       {# CUSTOMER CONTACT NUMBER #}
       <tr>
         <th scope="row">Mobile number</th>
-        <td>{{ cust_data.contact_no }}</td>
+        <td>{{ cust_data['mobile_no'] }}</td>
       </tr>
       {# CUSTOMER EMAIL ADDRESS #}
       <tr>
         <th scope="row">E-mail Address</th>
-        <td>{{ cust_data.email }}</td>
+        <td>{{ cust_data['email'] }}</td>
       </tr>
       {# CUSTOMER GST #}
       <tr>
         <th scope="row">GSTIN</th>
-        {% if gstin %}
-          <td>{{ gstin }}</td>
-        {% else %}
-          <td>NOT REGISTERED</td>
-        {% endif %}
+        <td>{{ cust_data['gstin'] }}</td>
       </tr>
       {# CUSTOMER PARTNER #}
       <tr>
         <th scope="row">LCO</th>
-        <td>{{ cust_data.partner }}</td>
+        <td>{{ cust_data['partner'] }}</td>
       </tr>
     </tbody>
   </table>
@@ -72,6 +72,6 @@
     </table>
   {% endif %}
 
-</div> <!-- col -->
+</div> {# col #}
 
 {% endblock %}

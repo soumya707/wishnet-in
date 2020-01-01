@@ -150,13 +150,6 @@ class GetCustomerInfo(MQSAPI):
         self.response_msg = None
         self.txn_no = None
         self.txn_msg = None
-        self.name = None
-        self.cust_no = None
-        self.address = None
-        self.pincode = None
-        self.partner = None
-        self.contact_no = None
-        self.email = None
         self.all_plans = None
         self.inactive_plans = None
         self.active_plans = None
@@ -186,23 +179,6 @@ class GetCustomerInfo(MQSAPI):
 
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
-            self.name = '{} {} {}'.format(
-                res_tree.findtext('.//FIRSTNAME').capitalize(),
-                res_tree.findtext('.//MIDDLENAME').capitalize(),
-                res_tree.findtext('.//LASTNAME').capitalize()
-            )
-            self.cust_no = res_tree.findtext('.//CUSTOMERNO')
-            self.address = '{}, {}, {}, {}, {}'.format(
-                res_tree.findtext('.//ADDRESS1'),
-                res_tree.findtext('.//AREA'),
-                res_tree.findtext('.//CITY'),
-                res_tree.findtext('.//STATE'),
-                res_tree.findtext('.//ZIPCODE')
-            )
-            self.partner = ' '.join(res_tree.findtext('.//OPENTITYNAME')
-                                    .split('_'))
-            self.contact_no = res_tree.findtext('.//MOBILEPHONE')
-            self.email = res_tree.findtext('.//EMAIL')
             # get a list of the contract status
             contract_status = [
                 plan.text for plan in res_tree.iterfind('.//CONTRACTSTATUS')
@@ -242,12 +218,6 @@ class GetCustomerInfo(MQSAPI):
     def to_dict(self):
         """Define interface to dict."""
         return {
-            'name': self.name,
-            'cust_no': self.cust_no,
-            'address': self.address,
-            'partner': self.partner,
-            'contact_no': self.contact_no,
-            'email': self.email,
             'all_plans': self.all_plans,
             'inactive_plans': self.inactive_plans,
             'active_plans': self.active_plans,
