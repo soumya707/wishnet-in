@@ -114,19 +114,18 @@ def insta_recharge(order_id):
     """Route for insta-recharge."""
 
     if request.method == 'GET':
-
         return render_template(
             'insta_recharge.html',
-            customer_no=request.args.get('customer_no'),
-            customer_name=request.args.get('customer_name'),
-            customer_mobile_no=request.args.get('customer_mobile_no'),
-            active_plans=json.loads(request.args.get('active_plans')),
+            customer_no=request.args.get('customer_no', None),
+            customer_name=request.args.get('customer_name', None),
+            customer_mobile_no=request.args.get('customer_mobile_no', None),
+            active_plans=json.loads(request.args.get('active_plans', 'null'))
         )
 
     elif request.method == 'POST':
         # retrieve amount for plan code selected
         amount = TariffInfo.query.options(FromCache(CACHE)).\
-            filter_by(plan_code=request.form['plan_code']).first().price
+            filter_by(plan_code=request.form['plan_code']).first_or_404().price
         # store amount in session
         session['insta_amount'] = str(round(amount * 1.18, 2))
         # store customer number in session
@@ -489,7 +488,7 @@ def insta_receipt(order_id):
     """Route to transaction receipt."""
     customer_name = CustomerInfo.query.options(FromCache(CACHE)).filter_by(
         customer_no=request.args.get('customer_no')
-    ).first().customer_name
+    ).first_or_404().customer_name
 
     return render_template(
         'receipt.html',
@@ -1119,7 +1118,8 @@ def recharge():
         elif request.method == 'POST':
             # retrieve amount for plan code selected
             amount = TariffInfo.query.options(FromCache(CACHE)).\
-                filter_by(plan_code=request.form['plan_code']).first().price
+                filter_by(plan_code=request.form['plan_code']).\
+                first_or_404().price
             # store amount in session
             session['portal_amount'] = str(round(amount * 1.18, 2))
             # store selected plan code in session
@@ -1277,7 +1277,7 @@ def portal_receipt(order_id):
     """Route to transaction receipt."""
     customer_name = CustomerInfo.query.options(FromCache(CACHE)).filter_by(
         customer_no=request.args.get('customer_no')
-    ).first().customer_name
+    ).first_or_404().customer_name
 
     return render_template(
         'portal_receipt.html',
