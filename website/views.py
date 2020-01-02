@@ -425,10 +425,10 @@ def verify_response(gateway):
         return redirect(
             url_for(
                 f'{session_var_prefix}_receipt',
-                order_id=session[f'{session_var_prefix}_order_id'],
+                order_id=data['wishnet_order_id'],
                 status=status,
                 txn_datetime=data['txn_datetime'],
-                customer_no=session[f'{session_var_prefix}_customer_no']
+                customer_no=data['customer_no']
             )
         )
 
@@ -476,10 +476,10 @@ def verify_response(gateway):
         return redirect(
             url_for(
                 f'{session_var_prefix}_receipt',
-                order_id=session[f'{session_var_prefix}_order_id'],
+                order_id=data['wishnet_order_id'],
                 status='unsuccessful',
                 txn_datetime=data['txn_datetime'],
-                customer_no=session[f'{session_var_prefix}_customer_no']
+                customer_no=data['customer_no']
             )
         )
 
