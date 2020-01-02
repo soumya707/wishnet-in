@@ -49,63 +49,49 @@ def init_session_var():
 def index():
     """Route for homepage."""
     form = RechargeForm()
-
+    # POST request for insta-recharge
     if form.validate_on_submit():
         user = form.user_id.data
-
         # Get customer info
         customer = CustomerInfo.query.filter_by(customer_no=user).first()
-
-        # Check if customer data is available in the db
-        # user data available in the db
+        # Customer data available in the db
         if customer is not None:
             # Get active plans (ref no. of this API call is passed forward)
             user_contracts = ContractsByKey(app)
             user_contracts.request(user)
             user_contracts.response()
-
-            # User is valid in MQS
-            if user_contracts.valid_user:
-                plans = {
-                    row.plan_code: row
-                    for row in TariffInfo.query.options(FromCache(CACHE)).all()
-                }
-                # Get active plans for the user
-                # {plan_name: (price, validity, plan_code)}
-                active_plans = {
-                    plans[plan_code].plan_name: (
-                        plans[plan_code].price, validity_period, plan_code
-                    )
-                    for (plan_code, validity_period) in
-                    user_contracts.active_plans if plan_code in plans
-                }
-
-                # No active plans
-                if not active_plans:
-                    flash(NO_ACTIVE_PLANS, 'danger')
-                    return redirect(url_for('index'))
-
-                # Has active plans
-                elif active_plans:
-                    return redirect(
-                        url_for(
-                            'insta_recharge',
-                            order_id=user_contracts.ref_no,
-                            customer_no=customer.customer_no,
-                            customer_name=customer.customer_name,
-                            customer_mobile_no=customer.mobile_no,
-                            active_plans=json.dumps(active_plans),
-                        )
-                    )
-
-            # User is invalid in MQS
-            elif not user_contracts.valid_user:
-                flash(USER_NOT_FOUND_IN_DB, 'danger')
+            # No active plans
+            if not user_contracts.active_plans:
+                flash(NO_ACTIVE_PLANS, 'danger')
                 return redirect(url_for('index'))
+            # Get all plans
+            plans = {
+                row.plan_code: row
+                for row in TariffInfo.query.options(FromCache(CACHE)).all()
+            }
+            # Get eligible active plans for the user
+            # {plan_name: (price, plan_end_date, plan_code)}
+            active_plans = {
+                plans[plan_code].plan_name: (
+                    plans[plan_code].price, plan_end_date, plan_code
+                )
+                for (plan_code, plan_end_date) in
+                user_contracts.active_plans if plan_code in plans
+            }
+            # Active plans sent to insta-recharge
+            return redirect(
+                url_for(
+                    'insta_recharge',
+                    order_id=user_contracts.ref_no,
+                    customer_no=customer.customer_no,
+                    customer_name=customer.customer_name,
+                    customer_mobile_no=customer.mobile_no,
+                    active_plans=json.dumps(active_plans),
+                )
+            )
         # user data not available in the db; might be a new user
-        else:
-            flash(USER_NOT_FOUND_IN_DB, 'danger')
-            return redirect(url_for('index'))
+        flash(USER_NOT_FOUND_IN_DB, 'danger')
+        return redirect(url_for('index'))
 
     # GET request
     carousel_images = CarouselImages.query.options(FromCache(CACHE)).all()

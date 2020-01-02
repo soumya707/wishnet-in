@@ -28,8 +28,12 @@ class MQSAPI():
     def _generate_reference_no(self):
         """Generate Reference number for transactions."""
 
-        return ''.join(random.choices(string.ascii_letters + string.digits,
-                                      k=16))
+        return ''.join(
+            random.choices(
+                string.ascii_letters + string.digits,
+                k=16
+            )
+        )
 
     def _generate_mqs_username_token(self):
         """Generate MQSUserNameToken for SOAP API access."""
@@ -234,7 +238,6 @@ class ContractsByKey(MQSAPI):
         self.txn_no = None
         self.txn_msg = None
         self.error_no = None
-        self.valid_user = None
         self.active_plans = None
 
     def _fix_date_fmt(self, date):
@@ -244,7 +247,6 @@ class ContractsByKey(MQSAPI):
 
     def request(self, cust_id):
         """Send request for GetContractsByKey."""
-
         contracts_info_xml = '''
         <REQUESTINFO>
             <KEY_NAMEVALUE>
@@ -261,17 +263,14 @@ class ContractsByKey(MQSAPI):
 
     def response(self):
         """Parse response for GetContractsByKey."""
-
         if self.response_code == 200:
             res_tree = et.fromstring(self.response_msg)
 
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
             self.error_no = res_tree.findtext('.//ERRORNO')
-
-            # check if user is valid or not
+            # process data only if API call is successful
             if self.error_no == '0':
-                self.valid_user = True
                 plans = [plan.text for plan in res_tree.iterfind('.//PlanCode')]
                 end_dates = list(
                     map(
@@ -280,8 +279,6 @@ class ContractsByKey(MQSAPI):
                     )
                 )
                 self.active_plans = list(zip(plans, end_dates))
-            else:
-                self.valid_user = False
 
 
 class RegisterTicket(MQSAPI):
