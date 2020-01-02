@@ -1590,19 +1590,19 @@ def wishtalk():
                 ).all()
 
             add_softphone_form = AddSoftphoneForm()
+            softphone_allotted = len(current_softphone_allotment)
 
         elif not active_plans:
             softphone_limit = None
             current_softphone_allotment = None
             add_softphone_form = None
+            softphone_allotted = 0
 
 
         return render_template(
             'wishtalk.html',
             no_of_softphone_allowed=softphone_limit,
-            no_of_softphone_allotted=\
-            len(current_softphone_allotment) if current_softphone_allotment \
-            else 0,
+            no_of_softphone_allotted=softphone_allotted,
             softphone_data=current_softphone_allotment,
             add_softphone_form=add_softphone_form
         )
@@ -1784,6 +1784,15 @@ def wishtalk_add_softphone():
 
             # unsuccessful allotment of softphone number
             elif not softphone_number:
+                # remove the softphone number allotment
+                softphone_no = SoftphoneNumber.query.filter_by(
+                    softphone_no=softphone_number
+                ).first()
+                softphone_no.softphone_status = 'FREE'
+                # make synchronous call to change status in db
+                db = current_app.extensions['sqlalchemy'].db
+                db.session.commit()
+
                 flash(UNSUCCESSFUL_SOFTPHONE_ALLOTMENT, 'danger')
 
         return render_template(
