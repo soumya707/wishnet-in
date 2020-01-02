@@ -85,7 +85,7 @@ def index():
                     order_id=user_contracts.ref_no,
                     customer_no=customer.customer_no,
                     customer_name=customer.customer_name,
-                    customer_mobile_no=customer.mobile_no,
+                    customer_mobile_no=customer.mobile_number,
                     active_plans=json.dumps(active_plans),
                 )
             )
@@ -709,23 +709,21 @@ def get_cust_no():
         ).first()
 
         # credentials okay and data available
-        if customer is not None and customer.mobile_no is not None:
+        if customer is not None and customer.mobile_number is not None:
             # send SMS
-            mobile_no = customer.mobile_no.strip()
             sms_msg = SMS_CUSTOMER_NO.format(customer.customer_no)
-
-            successful = send_sms(
+            successful_sms = send_sms(
                 app.config['SMS_URL'],
                 {
                     'username': app.config['SMS_USERNAME'],
                     'password': app.config['SMS_PASSWORD'],
                     'from': app.config['SMS_SENDER'],
-                    'to': '91{}'.format(mobile_no),
+                    'to': '91{}'.format(customer.mobile_number),
                     'text': sms_msg,
                 }
             )
-
-            if successful:
+            # check whether sms sent successfully
+            if successful_sms:
                 text = CUSTOMER_NO_SENT
                 status = 'success'
             else:
@@ -735,7 +733,7 @@ def get_cust_no():
             flash(text, status)
 
         # mobile number not available
-        elif customer is not None and customer.mobile_no is None:
+        elif customer is not None and customer.mobile_number is None:
             flash(NO_MOBILE_NO, 'danger')
         # invalid credentials
         elif customer is None:
@@ -775,31 +773,27 @@ def register():
                 customer_no=form.customer_no.data
             ).first()
 
-            # mobile no. exists in db
-            if customer_info.mobile_no is not None:
+            # mobile number exists in db
+            if customer_info.mobile_number is not None:
                 # generate OTP
                 totp = TOTPFACTORY.new()
                 session['otp_data'] = totp.to_dict()
                 session['customer_no'] = form.customer_no.data
                 redirect_to = 'verify_otp'
-
                 # send SMS
-                mobile_no = customer_info.mobile_no.strip()
                 sms_msg = SMS_REG_OTP.format(totp.generate().token)
-
-                successful = send_sms(
+                successful_sms = send_sms(
                     app.config['SMS_URL'],
                     {
                         'username': app.config['SMS_USERNAME'],
                         'password': app.config['SMS_PASSWORD'],
                         'from': app.config['SMS_SENDER'],
-                        'to': '91{}'.format(mobile_no),
+                        'to': '91{}'.format(customer_info.mobile_number),
                         'text': sms_msg,
                     }
                 )
-
                 # successfully sent OTP
-                if successful:
+                if successful_sms:
                     text = OTP_SENT
                     status = 'success'
                 # OTP not sent
@@ -809,8 +803,8 @@ def register():
 
                 flash(text, status)
 
-            # mobile no. does not exist in db
-            elif customer_info.mobile_no is None:
+            # mobile number does not exist in db
+            elif customer_info.mobile_number is None:
                 flash(NO_MOBILE_NO, 'danger')
 
         # invalid customer
@@ -847,26 +841,23 @@ def forgot():
             session['otp_data'] = totp.to_dict()
             session['customer_no'] = form.customer_no.data
             redirect_to = 'verify_otp'
-
             # send SMS
             customer_info = CustomerInfo.query.filter_by(
                 customer_no=form.customer_no.data
             ).first()
-            mobile_no = customer_info.mobile_no.strip()
             sms_msg = SMS_PWD_RESET_OTP.format(totp.generate().token)
-
-            successful = send_sms(
+            successful_sms = send_sms(
                 app.config['SMS_URL'],
                 {
                     'username': app.config['SMS_USERNAME'],
                     'password': app.config['SMS_PASSWORD'],
                     'from': app.config['SMS_SENDER'],
-                    'to': '91{}'.format(mobile_no),
+                    'to': '91{}'.format(customer_info.mobile_number),
                     'text': sms_msg,
                 }
             )
-
-            if successful:
+            # check whether sms sent successfully
+            if successful_sms:
                 text = OTP_SENT
                 status = 'success'
             else:
@@ -1687,12 +1678,10 @@ def wishtalk_add_softphone():
                 free_softphone_number.softphone_status = 'ALLOTTED'
                 # commit changes
                 db_session.commit()
-
             # rollback on failure
             except:
                 softphone_number = None
                 db_session.rollback()
-
             # close connection (fallback in case of failure)
             finally:
                 db_session.close()
@@ -1701,7 +1690,7 @@ def wishtalk_add_softphone():
             # successful allotment of softphone number
             if softphone_number:
                 # call API for softphone allotment
-                success = add_softphone(
+                softphone_add_success = add_softphone(
                     url=app.config['SOFTPHONE_URL'],
                     softphone_number=softphone_number,
                     password=add_softphone_form.password.data,
@@ -1709,13 +1698,12 @@ def wishtalk_add_softphone():
                 )
 
                 # softphone addition API call successful
-                if success:
+                if softphone_add_success:
                     # set mobile number in case of fixed line
                     if not add_softphone_form.mobile_number.data:
                         mobile_no = CustomerInfo.query.filter_by(
                             customer_no=session['portal_customer_no']
-                        ).first().mobile_no.strip()
-
+                        ).first().mobile_number
                     else:
                         mobile_no = add_softphone_form.mobile_number.data
 
@@ -1768,7 +1756,7 @@ def wishtalk_add_softphone():
                         )
 
                     # send SMS
-                    successful = send_sms(
+                    successful_sms = send_sms(
                         app.config['SMS_URL'],
                         {
                             'username': app.config['SMS_USERNAME'],
@@ -1780,19 +1768,18 @@ def wishtalk_add_softphone():
                     )
 
                     # SMS sent
-                    if successful:
+                    if successful_sms:
                         text = SUCCESSFUL_SOFTPHONE_ALLOTMENT
                         status = 'success'
-
                     # SMS not sent
-                    elif not successful:
+                    elif not successful_sms:
                         text = UNSUCCESSFUL_SOFTPHONE_SMS
                         status = 'danger'
 
                     flash(text, status)
 
                 # softphone addition API call unsuccessful
-                elif not success:
+                elif not softphone_add_success:
                     flash(UNSUCCESSFUL_SOFTPHONE_ALLOTMENT, 'danger')
 
             # unsuccessful allotment of softphone number
