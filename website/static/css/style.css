@@ -89,6 +89,10 @@ a:hover {
     min-width: 4em;;
 }
 
+.btn-update-profile {
+    min-width: 10em;
+}
+
 .btn-red {
     color: #fff;
     background-color: #FF0000;

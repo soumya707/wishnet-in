@@ -124,7 +124,7 @@ class ChangePasswordForm(FlaskForm):
         'Repeat Password',
         validators=[InputRequired()]
     )
-    submit = SubmitField('Set Password')
+    submit = SubmitField('Update Password')
 
 
 class UpdateProfileForm(FlaskForm):
@@ -143,7 +143,7 @@ class UpdateProfileForm(FlaskForm):
             Email(message='Invalid email address.')
         ]
     )
-    submit = SubmitField('Update')
+    submit = SubmitField('Update Profile')
 
 
 class NewTicketForm(FlaskForm):
