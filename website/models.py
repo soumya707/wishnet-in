@@ -263,6 +263,7 @@ class TariffInfo(db.Model):
     plan_type = db.Column(db.String(50), nullable=False)
     softphone = db.Column(db.Integer, nullable=True)
     ott = db.Column(db.Integer, nullable=True)
+    ott_package_codes = db.Column(db.String(500), nullable=True)
 
     def __str__(self):
         return self.plan_name
