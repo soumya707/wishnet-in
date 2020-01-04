@@ -984,286 +984,250 @@ def update_mobile_number():
 # Self-care portal views
 
 @app.route('/portal/', methods=['GET'])
+@login_required
 def portal():
     """Route for self-care portal."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
+    # Check if session variable exists for customer data
+    if not session.get('portal_customer_data'):
+        # Get customer info
+        user_info = GetCustomerInfo(app)
+        user_info.request(session['portal_customer_no'])
+        user_info.response()
+        # add customer data to session for quick access
+        session['portal_customer_data'] = user_info.to_dict()
+    # Get all plans
+    plans = {
+        row.plan_code: row
+        for row in TariffInfo.query.options(FromCache(CACHE)).all()
+    }
+    # Get active plans for the user
+    # {plan_name: validity_period }
+    active_plans = {
+        plans[plan_code].plan_name: validity_period
+        for (_, plan_code, validity_period) in
+        session['portal_customer_data']['active_plans']
+        if plan_code in plans
+    }
+    # Get GSTIN for customer
+    customer_gst = GSTUpdateRequest.query.filter(
+        and_(
+            GSTUpdateRequest.customer_no == \
+            session['portal_customer_no'],
+            GSTUpdateRequest.status == 'REGISTERED'
+        )
+    ).first()
+    # Get customer details
+    cust_data_from_db = CustomerInfo.query.filter_by(
+        customer_no=session['portal_customer_no']
+    ).first()
+    # Format installation address
+    installation_address = re.sub(
+        r',{2,3}',
+        r',',
+        cust_data_from_db.installation_address
+    ) if cust_data_from_db.installation_address else 'NOT FOUND'
+    # Format billing address
+    billing_address = re.sub(
+        r',{2,3}',
+        r',',
+        cust_data_from_db.billing_address
+    ) if cust_data_from_db.billing_address else 'NOT FOUND'
+    # Prepare customer data
+    customer_data = {
+        'name': cust_data_from_db.customer_name,
+        'installation_address': installation_address,
+        'billing_address': billing_address,
+        'mobile_no': cust_data_from_db.mobile_number,
+        'email': cust_data_from_db.email_id,
+        'partner': cust_data_from_db.zone_name,
+        'gstin': customer_gst if customer_gst else 'NOT REGISTERED',
+    }
 
-    # user logged in
-    elif session.get('user_logged_in'):
-        # keep the session alive
-        session.modified = True
+    return render_template(
+        'portal.html',
+        cust_no=session['portal_customer_no'],
+        cust_data=customer_data,
+        active_plans=active_plans
+    )
 
-        # check if session variable exists for customer data
-        if not session.get('portal_customer_data'):
-            # Get customer info
-            user_info = GetCustomerInfo(app)
-            user_info.request(session['portal_customer_no'])
-            user_info.response()
-            # add customer data to session for quick access
-            session['portal_customer_data'] = user_info.to_dict()
 
+@app.route('/portal/recharge', methods=['GET', 'POST'])
+@login_required
+def recharge():
+    """Route for self-care portal recharge."""
+    # GET request
+    if request.method == 'GET':
         plans = {
             row.plan_code: row
             for row in TariffInfo.query.options(FromCache(CACHE)).all()
         }
         # Get active plans for the user
-        # {plan_name: validity_period }
+        # {plan_name: (price, validity, plan_code)}
         active_plans = {
-            plans[plan_code].plan_name: validity_period
+            plans[plan_code].plan_name: (
+                plans[plan_code].price, validity_period, plan_code
+            )
             for (_, plan_code, validity_period) in
             session['portal_customer_data']['active_plans']
             if plan_code in plans
         }
-
-        # Get GSTIN for customer
-        customer_gst = GSTUpdateRequest.query.filter(
-            and_(
-                GSTUpdateRequest.customer_no == \
-                session['portal_customer_no'],
-                GSTUpdateRequest.status == 'REGISTERED'
+        # Get inactive plans for the user
+        # {plan_name: (price, validity, plan_code)}
+        inactive_plans = {
+            plans[plan_code].plan_name: (
+                plans[plan_code].price, validity_period, plan_code
             )
-        ).first()
-
-        # Get customer details
-        cust_data_from_db = CustomerInfo.query.filter_by(
-            customer_no=session['portal_customer_no']
-        ).first()
-
-        installation_address = re.sub(
-            r',{2,3}',
-            r',',
-            cust_data_from_db.installation_address
-        ) if cust_data_from_db.installation_address else 'NOT FOUND'
-
-        billing_address = re.sub(
-            r',{2,3}',
-            r',',
-            cust_data_from_db.billing_address
-        ) if cust_data_from_db.billing_address else 'NOT FOUND'
-
-        customer_data = {
-            'name': cust_data_from_db.customer_name,
-            'installation_address': installation_address,
-            'billing_address': billing_address,
-            'mobile_no': cust_data_from_db.mobile_number,
-            'email': cust_data_from_db.email_id,
-            'partner': cust_data_from_db.zone_name,
-            'gstin': customer_gst if customer_gst else 'NOT REGISTERED',
+            for (_, plan_code, validity_period) in
+            session['portal_customer_data']['inactive_plans']
+            if plan_code in plans
         }
 
         return render_template(
-            'portal.html',
-            cust_no=session['portal_customer_no'],
-            cust_data=customer_data,
-            active_plans=active_plans
+            'recharge.html',
+            active_plans=active_plans,
+            inactive_plans=inactive_plans
+        )
+    # POST request
+    elif request.method == 'POST':
+        # Retrieve amount for plan code selected
+        amount = TariffInfo.query.options(FromCache(CACHE)).\
+            filter_by(plan_code=request.form['plan_code']).\
+            first_or_404().price
+        # Store amount in session
+        session['portal_amount'] = str(round(amount * 1.18, 2))
+        # Store selected plan code in session
+        session['portal_plan_code'] = request.form['plan_code']
+        # Generate and store a transaction id
+        session['portal_order_id'] = order_no_gen()
+        # Get customer mobile number
+        mobile_no = CustomerInfo.query.filter_by(
+            customer_no=session['portal_customer_no']
+        ).first().mobile_number
+        # Check payment gateway
+        if request.form['gateway'] == 'paytm':
+            form_data = initiate_transaction(
+                order_id=session['portal_order_id'],
+                customer_no=session['portal_customer_no'],
+                customer_mobile_no=mobile_no,
+                amount=session['portal_amount'],
+                # _ is used as the delimiter; check Paytm docs
+                pay_source='portal_recharge',
+            )
+        elif request.form['gateway'] == 'razorpay':
+            form_data = make_order(
+                order_id=session['portal_order_id'],
+                customer_no=session['portal_customer_no'],
+                customer_mobile_no=mobile_no,
+                customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
+                amount=session['portal_amount'],
+                # list is used for passing data; check Razorpay docs
+                pay_source=['portal', 'recharge'],
+            )
+            # Store Razorpay order id for verification later
+            session['razorpay_order_id'] = form_data['order_id']
+
+        return render_template(
+            '{}_pay.html'.format(request.form['gateway']),
+            form=form_data
         )
 
 
-@app.route('/portal/recharge', methods=['GET', 'POST'])
-def recharge():
-    """Route for self-care portal recharge."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
-    # user logged in
-    elif session.get('user_logged_in'):
-        # keep the session alive
-        session.modified = True
-
-        if request.method == 'GET':
-            plans = {
-                row.plan_code: row
-                for row in TariffInfo.query.options(FromCache(CACHE)).all()
-            }
-            # Get active plans for the user
-            # {plan_name: (price, validity, plan_code)}
-            active_plans = {
-                plans[plan_code].plan_name: (
-                    plans[plan_code].price, validity_period, plan_code
-                )
-                for (_, plan_code, validity_period) in
-                session['portal_customer_data']['active_plans']
-                if plan_code in plans
-            }
-            # Get inactive plans for the user
-            # {plan_name: (price, validity, plan_code) }
-            inactive_plans = {
-                plans[plan_code].plan_name: (
-                    plans[plan_code].price, validity_period, plan_code
-                )
-                for (_, plan_code, validity_period) in
-                session['portal_customer_data']['inactive_plans']
-                if plan_code in plans
-            }
-
-            return render_template(
-                'recharge.html',
-                active_plans=active_plans,
-                inactive_plans=inactive_plans,
-            )
-
-        elif request.method == 'POST':
-            # retrieve amount for plan code selected
-            amount = TariffInfo.query.options(FromCache(CACHE)).\
-                filter_by(plan_code=request.form['plan_code']).\
-                first_or_404().price
-            # store amount in session
-            session['portal_amount'] = str(round(amount * 1.18, 2))
-            # store selected plan code in session
-            session['portal_plan_code'] = request.form['plan_code']
-            # generate and store a transaction id
-            session['portal_order_id'] = order_no_gen()
-            # get customer mobile number
-            mobile_no = CustomerInfo.query.filter_by(
-                customer_no=session['portal_customer_no']
-            ).first().mobile_number
-
-            # Check payment gateway
-            if request.form['gateway'] == 'paytm':
-                # Get Paytm form data
-                form_data = initiate_transaction(
-                    order_id=session['portal_order_id'],
-                    customer_no=session['portal_customer_no'],
-                    customer_mobile_no=mobile_no,
-                    amount=session['portal_amount'],
-                    # _ is used as the delimiter; check Paytm docs
-                    pay_source='portal_recharge',
-                )
-
-            elif request.form['gateway'] == 'razorpay':
-                # Get Razorpay form data
-                form_data = make_order(
-                    order_id=session['portal_order_id'],
-                    customer_no=session['portal_customer_no'],
-                    customer_mobile_no=mobile_no,
-                    customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
-                    amount=session['portal_amount'],
-                    # list is used for passing data; check Razorpay docs
-                    pay_source=['portal', 'recharge'],
-                )
-
-                # store Razorpay order id for verification later
-                session['razorpay_order_id'] = form_data['order_id']
-
-            return render_template(
-                '{}_pay.html'.format(request.form['gateway']),
-                form=form_data,
-            )
-
-
 @app.route('/portal/add_plan', methods=['GET', 'POST'])
+@login_required
 def add_plan():
     """Route for self-care portal add plan."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
-    # user logged in
-    elif session.get('user_logged_in'):
-        # keep the session alive
-        session.modified = True
-
-        if request.method == 'GET':
-            zone_id = \
-                CustomerInfo.query.\
-                options(FromCache(CACHE)).\
-                filter_by(customer_no=session['portal_customer_no']).\
-                first().zone_id
-
-            # Get eligible plan codes for the user
-            zone_eligible_plan_codes = [
-                zone.plan_code_mqs
-                for zone in ZoneIDWithPlanCode.query.\
-                filter(
-                    and_(
-                        ZoneIDWithPlanCode.zone_id == zone_id,
-                        ZoneIDWithPlanCode.status == 'ACTIVE'
-                    )
-                ).all()
-            ]
-
-            plans = {
-                row.plan_code: row
-                for row in TariffInfo.query.options(FromCache(CACHE)).all()
-            }
-
-            # Get available plans for the user
-            # {plan_name: (price, plan_code) }
-            available_plan_codes = \
-                set(plans.keys()).\
-                difference(session['portal_customer_data']['all_plans']).\
-                intersection(zone_eligible_plan_codes)
-
-            available_plans = {
-                plans[plan_code].plan_name: (
-                    plans[plan_code].price,
-                    plan_code,
-                    plans[plan_code].speed,
-                    plans[plan_code].validity,
-                    plans[plan_code].softphone,
-                    plans[plan_code].plan_type,
+    # GET request
+    if request.method == 'GET':
+        zone_id = \
+            CustomerInfo.query.\
+            options(FromCache(CACHE)).\
+            filter_by(customer_no=session['portal_customer_no']).\
+            first().zone_id
+        # Get eligible plan codes for the user
+        zone_eligible_plan_codes = [
+            zone.plan_code_mqs
+            for zone in ZoneIDWithPlanCode.query.\
+            filter(
+                and_(
+                    ZoneIDWithPlanCode.zone_id == zone_id,
+                    ZoneIDWithPlanCode.status == 'ACTIVE'
                 )
-                for plan_code in available_plan_codes
-            }
-
-            return render_template(
-                'add_plan.html',
-                available_plans=available_plans,
+            ).all()
+        ]
+        # Get all plams
+        plans = {
+            row.plan_code: row
+            for row in TariffInfo.query.options(FromCache(CACHE)).all()
+        }
+        # Get available plan codes for the zone
+        available_plan_codes = \
+            set(plans.keys()).\
+            difference(session['portal_customer_data']['all_plans']).\
+            intersection(zone_eligible_plan_codes)
+        # Get available plans for the user
+        # {plan_name: (price, plan_code)}
+        available_plans = {
+            plans[plan_code].plan_name: (
+                plans[plan_code].price,
+                plan_code,
+                plans[plan_code].speed,
+                plans[plan_code].validity,
+                plans[plan_code].softphone,
+                plans[plan_code].plan_type,
             )
+            for plan_code in available_plan_codes
+        }
 
-        elif request.method == 'POST':
-            # retrieve amount for plan code selected
-            amount = TariffInfo.query.options(FromCache(CACHE)).\
-                filter_by(plan_code=request.form['plan_code']).first().price
-            # store amount in session
-            session['portal_amount'] = str(round(amount * 1.18, 2))
-            # store selected plan code in session
-            session['portal_plan_code'] = request.form['plan_code']
-            # generate and store a transaction id
-            session['portal_order_id'] = order_no_gen()
-            # get customer mobile number
-            mobile_no = CustomerInfo.query.filter_by(
-                customer_no=session['portal_customer_no']
-            ).first().mobile_number
-
-            # Check payment gateway
-            if request.form['gateway'] == 'paytm':
-                # Get Paytm form data
-                form_data = initiate_transaction(
-                    order_id=session['portal_order_id'],
-                    customer_no=session['portal_customer_no'],
-                    customer_mobile_no=mobile_no,
-                    amount=session['portal_amount'],
-                    # _ is used as the delimiter; check Paytm docs
-                    pay_source='portal_addplan',
-                )
-
-            elif request.form['gateway'] == 'razorpay':
-                # Get Razorpay form data
-                form_data = make_order(
-                    order_id=session['portal_order_id'],
-                    customer_no=session['portal_customer_no'],
-                    customer_mobile_no=mobile_no,
-                    customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
-                    amount=session['portal_amount'],
-                    # list is used for passing data; check Razorpay docs
-                    pay_source=['portal', 'addplan'],
-                )
-
-                # store Razorpay order id for verification later
-                session['razorpay_order_id'] = form_data['order_id']
-
-            return render_template(
-                '{}_pay.html'.format(request.form['gateway']),
-                form=form_data,
+        return render_template(
+            'add_plan.html',
+            available_plans=available_plans,
+        )
+    # POST request
+    elif request.method == 'POST':
+        # Retrieve amount for plan code selected
+        amount = TariffInfo.query.options(FromCache(CACHE)).\
+            filter_by(plan_code=request.form['plan_code']).first_or_404().price
+        # Store amount in session
+        session['portal_amount'] = str(round(amount * 1.18, 2))
+        # Store selected plan code in session
+        session['portal_plan_code'] = request.form['plan_code']
+        # Generate and store a transaction id
+        session['portal_order_id'] = order_no_gen()
+        # Get customer mobile number
+        mobile_no = CustomerInfo.query.filter_by(
+            customer_no=session['portal_customer_no']
+        ).first().mobile_number
+        # Check payment gateway
+        if request.form['gateway'] == 'paytm':
+            form_data = initiate_transaction(
+                order_id=session['portal_order_id'],
+                customer_no=session['portal_customer_no'],
+                customer_mobile_no=mobile_no,
+                amount=session['portal_amount'],
+                # _ is used as the delimiter; check Paytm docs
+                pay_source='portal_addplan',
             )
+        elif request.form['gateway'] == 'razorpay':
+            form_data = make_order(
+                order_id=session['portal_order_id'],
+                customer_no=session['portal_customer_no'],
+                customer_mobile_no=mobile_no,
+                customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
+                amount=session['portal_amount'],
+                # list is used for passing data; check Razorpay docs
+                pay_source=['portal', 'addplan'],
+            )
+            # store Razorpay order id for verification later
+            session['razorpay_order_id'] = form_data['order_id']
+
+        return render_template(
+            '{}_pay.html'.format(request.form['gateway']),
+            form=form_data
+        )
 
 
 @app.route('/portal/receipt/<order_id>')
+@login_required
 def portal_receipt(order_id):
     """Route to transaction receipt."""
     customer_name = CustomerInfo.query.options(FromCache(CACHE)).filter_by(
@@ -1282,359 +1246,229 @@ def portal_receipt(order_id):
 
 
 @app.route('/portal/docket')
+@login_required
 def docket():
     """Route for self-care portal docket."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
-    # user logged in
-    elif session.get('user_logged_in'):
-        # keep the session alive
-        session.modified = True
+    # Get tickets for the user
+    tickets = Ticket.query.filter_by(
+        customer_no=session['portal_customer_no']
+    ).all()
+    # Filter open tickets
+    open_tickets = [ticket for ticket in tickets if ticket.status == 'Open']
+    # Filter closed tickets
+    closed_tickets = [
+        ticket for ticket in tickets if ticket.status == 'Closed'
+    ]
+    # Save open ticket number in session
+    if open_tickets:
+        session['portal_open_ticket_no'] = open_tickets[0].ticket_no
 
-        tickets = Ticket.query.filter_by(
-            customer_no=session['portal_customer_no']
-        ).all()
-
-        open_tickets = [ticket for ticket in tickets if ticket.status == 'Open']
-        closed_tickets = [
-            ticket for ticket in tickets if ticket.status == 'Closed'
-        ]
-
-        # save open ticket no in session
-        if open_tickets:
-            session['portal_open_ticket_no'] = open_tickets[0].ticket_no
-
-        # set if open dockets exist
-        return render_template(
-            'docket.html',
-            tickets=tickets,
-            open_tickets=open_tickets,
-            closed_tickets=closed_tickets,
-        )
+    return render_template(
+        'docket.html',
+        tickets=tickets,
+        open_tickets=open_tickets,
+        closed_tickets=closed_tickets
+    )
 
 
 @app.route('/portal/new_docket', methods=['GET', 'POST'])
+@login_required
 def new_docket():
     """Route for self-care new docket."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
-    # user logged in
-    elif session.get('user_logged_in'):
-        # keep the session alive
-        session.modified = True
-
-        # open ticket exists
-        if not session.get('portal_open_ticket_no'):
-            form = NewTicketForm()
-            form.nature.choices = [
-                (row.ticket_nature_code, row.ticket_nature_desc)
-                for row in TicketInfo.query.options(FromCache(CACHE)).all()
-            ]
-
-            if form.validate_on_submit():
-                nature_code = form.nature.data
-                # query category from db
-                entry = TicketInfo.query.options(FromCache(CACHE)).filter_by(
-                    ticket_nature_code=nature_code
-                ).first()
-                category_code = entry.ticket_category_code
-                category_desc = entry.ticket_category_desc
-                nature_desc = entry.ticket_nature_desc
-
-                remarks = form.remarks.data
-
-                # Generate ticket in MQS
-                register_ticket = RegisterTicket(app)
-                register_ticket.request(
-                    cust_id=session['portal_customer_no'],
-                    category=category_code,
-                    description=remarks,
-                    nature=nature_code,
-                )
-                register_ticket.response()
-
-                # check if success
-                if register_ticket.error_no == '0':
-                    ticket_no = register_ticket.ticket_no
-
-                    # send data to db
-                    ticket_data = {
-                        'customer_no': session['portal_customer_no'],
-                        'ticket_no': ticket_no,
-                        'category_desc': category_desc,
-                        'nature_desc': nature_desc,
-                        'remarks': remarks,
-                        'opening_date': datetime.now().astimezone().date(),
-                        'opening_time': datetime.now().astimezone().time()
-                    }
-
-                    # add new ticket to db async
-                    add_new_ticket_to_db(ticket_data)
-
-                    msg = SUCCESSFUL_DOCKET_GEN
-                    status = 'success'
-                else:
-                    msg = UNSUCCESSFUL_DOCKET_GEN
-                    status = 'danger'
-
-                flash(msg, status)
-                return redirect(url_for('docket'))
-
-            # GET request
-            return render_template(
-                'new_docket.html',
-                form=form,
-                allowed=True,
+    # No open ticket exists
+    if not session.get('portal_open_ticket_no'):
+        form = NewTicketForm()
+        form.nature.choices = [
+            (row.ticket_nature_code, row.ticket_nature_desc)
+            for row in TicketInfo.query.options(FromCache(CACHE)).all()
+        ]
+        # POST request
+        if form.validate_on_submit():
+            nature_code = form.nature.data
+            remarks = form.remarks.data
+            # Query category from db
+            entry = TicketInfo.query.options(FromCache(CACHE)).filter_by(
+                ticket_nature_code=nature_code
+            ).first()
+            category_code = entry.ticket_category_code
+            category_desc = entry.ticket_category_desc
+            nature_desc = entry.ticket_nature_desc
+            # Generate ticket in MQS
+            register_ticket = RegisterTicket(app)
+            register_ticket.request(
+                cust_id=session['portal_customer_no'],
+                category=category_code,
+                description=remarks,
+                nature=nature_code,
             )
+            register_ticket.response()
+            # Check if RegisterTicket API is successful
+            if register_ticket.error_no == '0':
+                ticket_no = register_ticket.ticket_no
+                # Send data to db
+                ticket_data = {
+                    'customer_no': session['portal_customer_no'],
+                    'ticket_no': ticket_no,
+                    'category_desc': category_desc,
+                    'nature_desc': nature_desc,
+                    'remarks': remarks,
+                    'opening_date': datetime.now().astimezone().date(),
+                    'opening_time': datetime.now().astimezone().time()
+                }
+                # Add new ticket to db async
+                add_new_ticket_to_db(ticket_data)
 
-        # has open ticket
-        elif session.get('portal_open_ticket_no'):
-            return render_template(
-                'new_docket.html',
-                allowed=False,
-            )
+                msg = SUCCESSFUL_DOCKET_GEN
+                status = 'success'
+            else:
+                msg = UNSUCCESSFUL_DOCKET_GEN
+                status = 'danger'
+
+            flash(msg, status)
+            return redirect(url_for('docket'))
+
+        # GET request
+        return render_template(
+            'new_docket.html',
+            form=form,
+            allowed=True
+        )
+    # Open ticket exists
+    elif session.get('portal_open_ticket_no'):
+        return render_template(
+            'new_docket.html',
+            allowed=False
+        )
 
 
 @app.route('/portal/close_docket')
+@login_required
 def close_docket():
     """Route for self-care close docket."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
-    # user logged in
-    elif session.get('user_logged_in'):
-        # keep the session alive
-        session.modified = True
+    # Open ticket exists
+    if session.get('portal_open_ticket_no'):
+        ticket_no = session.get('portal_open_ticket_no')
+        # Close ticket in MQS
+        close_ticket = CloseTicket(app)
+        close_ticket.request(ticket_no)
+        close_ticket.response()
+        # Check if CloseTicket API is successful or closed internally
+        if close_ticket.error_no == '0' or close_ticket.error_no == '99070':
+            ticket = Ticket.query.filter_by(
+                ticket_no=session['portal_open_ticket_no']
+            ).first()
+            ticket.status = 'Closed'
+            ticket.closing_date = datetime.now().astimezone().date()
+            ticket.closing_time = datetime.now().astimezone().time()
+            # Close ticket in db
+            db = current_app.extensions['sqlalchemy'].db
+            db.session.commit()
 
-        # open ticket exists
-        if session.get('portal_open_ticket_no'):
-            ticket_no = session.get('portal_open_ticket_no')
-
-            # Close ticket in MQS
-            close_ticket = CloseTicket(app)
-            close_ticket.request(ticket_no)
-            close_ticket.response()
-
-            # check if success or closed by non-customer
-            if close_ticket.error_no == '0' or close_ticket.error_no == '99070':
-                ticket = Ticket.query.filter_by(
-                    ticket_no=session['portal_open_ticket_no']
-                ).first()
-                ticket.status = 'Closed'
-                ticket.closing_date = datetime.now().astimezone().date()
-                ticket.closing_time = datetime.now().astimezone().time()
-                # close ticket in db
-                db = current_app.extensions['sqlalchemy'].db
-                db.session.add(ticket)
-                db.session.commit()
-
-                msg = SUCCESSFUL_DOCKET_CLOSE.format(ticket_no)
-                status = 'success'
-
-                # remove data from session variable
-                session.pop('portal_open_ticket_no', None)
-
-            else:
-                msg = UNSUCCESSFUL_DOCKET_CLOSE.format(ticket_no)
-                status = 'danger'
-
-        # no open ticket exists
-        elif not session.get('portal_open_ticket_no'):
-            msg = NO_DOCKETS
+            msg = SUCCESSFUL_DOCKET_CLOSE.format(ticket_no)
+            status = 'success'
+            # remove data from session variable
+            session.pop('portal_open_ticket_no', None)
+        else:
+            msg = UNSUCCESSFUL_DOCKET_CLOSE.format(ticket_no)
             status = 'danger'
+    # No open ticket exists
+    elif not session.get('portal_open_ticket_no'):
+        msg = NO_DOCKETS
+        status = 'danger'
 
-        flash(msg, status)
-        return redirect(url_for('docket'))
+    flash(msg, status)
+    return redirect(url_for('docket'))
 
 
 @app.route('/portal/usage')
+@login_required
 def usage():
     """Route for self-care portal usage."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
-    # user logged in
-    elif session.get('user_logged_in'):
-        # keep the session alive
-        session.modified = True
+    # Get customer username
+    customer_username = CustomerInfo.query.options(FromCache(CACHE)).\
+        filter_by(customer_no=session['portal_customer_no']).\
+        first().user_name
+    # Get start and end dates for usage data
+    today = datetime.now().astimezone().date()
+    past = today - timedelta(days=90)
+    # Get usage data using GetUsageDetails API
+    usage_details = GetUsageDetails()
+    usage_details.request(
+        user_name=customer_username,
+        start_date=past.strftime("%d%m%Y"),
+        end_date=today.strftime("%d%m%Y")
+    )
+    usage_details.response()
+    # Get page, per page and offset parameter names
+    page, per_page, offset = get_page_args(
+        page_parameter='page',
+        per_page_parameter='per_page'
+    )
+    # Get required entries
+    pagination_usage = get_usage(usage_details.usage, offset, per_page)
+    pagination = Pagination(
+        page=page,
+        per_page=per_page,
+        total=len(usage_details.usage),
+        css_framework='bootstrap4',
+        prev_label='&lt',
+        next_label='&gt'
+    )
 
-        # Get customer username
-        customer_username = CustomerInfo.query.options(FromCache(CACHE)).\
-            filter_by(customer_no=session['portal_customer_no']).\
-            first().user_name
-
-        # Get start and end dates for usage data
-        today = datetime.now().astimezone().date()
-        past = today - timedelta(days=90)
-
-        # Get usage data using API call
-        usage_details = GetUsageDetails()
-        usage_details.request(
-            user_name=customer_username,
-            start_date=past.strftime("%d%m%Y"),
-            end_date=today.strftime("%d%m%Y")
-        )
-        usage_details.response()
-
-        # Get page, per page and offset parameter names
-        page, per_page, offset = get_page_args(
-            page_parameter='page',
-            per_page_parameter='per_page'
-        )
-
-        # Get required entries
-        pagination_usage = get_usage(usage_details.usage, offset, per_page)
-
-        pagination = Pagination(
-            page=page,
-            per_page=per_page,
-            total=len(usage_details.usage),
-            css_framework='bootstrap4',
-            prev_label='&lt',
-            next_label='&gt'
-        )
-
-        return render_template(
-            'usage.html',
-            usage_details=pagination_usage,
-            page=page,
-            per_page=per_page,
-            pagination=pagination
-        )
+    return render_template(
+        'usage.html',
+        usage_details=pagination_usage,
+        page=page,
+        per_page=per_page,
+        pagination=pagination
+    )
 
 
 @app.route('/portal/transaction_history')
+@login_required
 def transaction_history():
     """Route for self-care transaction history."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
-    # user logged in
-    elif session.get('user_logged_in'):
-        # keep the session alive
-        session.modified = True
+    # Get page number
+    page_num = request.args.get('page', type=int, default=1)
+    # Retrieve data from db
+    transactions = RechargeEntry.query.filter_by(
+        customer_no=session['portal_customer_no']
+    ).order_by(RechargeEntry.id.desc()).\
+    paginate(per_page=10, page=page_num, error_out=False)
 
-        # Get page number
-        page_num = request.args.get('page', type=int, default=1)
-
-        # Retrieve data from db
-        transactions = RechargeEntry.query.filter_by(
-            customer_no=session['portal_customer_no']
-        ).order_by(RechargeEntry.id.desc()).\
-        paginate(per_page=10, page=page_num, error_out=False)
-
-        return render_template(
-            'transaction_history.html',
-            transactions=transactions,
-            page=page_num
-        )
+    return render_template(
+        'transaction_history.html',
+        transactions=transactions,
+        page=page_num
+    )
 
 
 @app.route('/portal/wishtalk', methods=['GET'])
+@login_required
 def wishtalk():
     """Route for self-care Wishtalk."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
-    # user logged in
-    elif session.get('user_logged_in'):
-        # keep the session alive
-        session.modified = True
-
-        plans = {
-            row.plan_code: row
-            for row in TariffInfo.query.options(FromCache(CACHE)).all()
-        }
-        # Get active plans for the user
-        # [(plan_code, validity_end_date)]
-        active_plans = [
-            (plan_code, validity_period.split(' - ')[1])
-            for (_, plan_code, validity_period) in
-            session['portal_customer_data']['active_plans']
-            if plan_code in plans
-        ]
-
-        # check if there is active plan
-        if active_plans:
-            # get last active plan
-            last_active_plan = active_plans[-1]
-
-            # get softphone limit
-            softphone_limit = TariffInfo.query.\
-                filter_by(plan_code=last_active_plan[0]).\
-                first().softphone
-
-            # current softphone allotment
-            current_softphone_allotment = SoftphoneEntry.query.\
-                filter(
-                    or_(
-                        and_(
-                            SoftphoneEntry.cust_no == \
-                            session['portal_customer_no'],
-                            SoftphoneEntry.softphone_status == 'ACTIVE'
-                        ),
-                        and_(
-                            SoftphoneEntry.cust_no == \
-                            session['portal_customer_no'],
-                            SoftphoneEntry.softphone_status == 'DEACTIVE'
-                        )
-                    )
-                ).all()
-
-            add_softphone_form = AddSoftphoneForm()
-            softphone_allotted = len(current_softphone_allotment)
-
-        elif not active_plans:
-            softphone_limit = None
-            current_softphone_allotment = None
-            add_softphone_form = None
-            softphone_allotted = 0
-
-
-        return render_template(
-            'wishtalk.html',
-            no_of_softphone_allowed=softphone_limit,
-            no_of_softphone_allotted=softphone_allotted,
-            softphone_data=current_softphone_allotment,
-            add_softphone_form=add_softphone_form
-        )
-
-
-@app.route('/portal/add_softphone', methods=['POST'])
-def wishtalk_add_softphone():
-    """Route for self-care portal softphone addition."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
-    # user logged in
-    elif session.get('user_logged_in'):
-        # Get active plans for the user
-        # [(plan_code, validity_end_date)]
-        active_plans = [
-            (plan_code, validity_period.split(' - ')[1])
-            for (_, plan_code, validity_period) in
-            session['portal_customer_data']['active_plans']
-        ]
-        # get last active plan and expiry
+    # Get all plans
+    plans = {
+        row.plan_code: row
+        for row in TariffInfo.query.options(FromCache(CACHE)).all()
+    }
+    # Get active plans for the user
+    # [(plan_code, validity_end_date)]
+    active_plans = [
+        (plan_code, validity_period.split(' - ')[1])
+        for (_, plan_code, validity_period) in
+        session['portal_customer_data']['active_plans']
+        if plan_code in plans
+    ]
+    # Active plans exist
+    if active_plans:
+        # Get last active plan
         last_active_plan = active_plans[-1]
-        last_active_plan_expiry = datetime.strptime(
-            last_active_plan[1], '%d-%m-%Y'
-        ).date()
-        # get softphone limit
+        # Get softphone limit
         softphone_limit = TariffInfo.query.\
             filter_by(plan_code=last_active_plan[0]).\
             first().softphone
-
-        # current softphone allotment
+        # Current softphone allotment
         current_softphone_allotment = SoftphoneEntry.query.\
             filter(
                 or_(
@@ -1652,338 +1486,356 @@ def wishtalk_add_softphone():
             ).all()
 
         add_softphone_form = AddSoftphoneForm()
+        softphone_allotted = len(current_softphone_allotment)
+    # No active plans
+    elif not active_plans:
+        softphone_limit = None
+        current_softphone_allotment = None
+        add_softphone_form = None
+        softphone_allotted = 0
 
-        if add_softphone_form.validate_on_submit():
-            # create session to perform one-step read and write transaction
-            db_session = SignallingSession(
-                current_app.extensions['sqlalchemy'].db
-            )
 
-            # DATABASE OPERATION
-            # initiate transaction
-            try:
-                # get FREE and NORMAL softphone number
-                free_softphone_number = db_session.query(SoftphoneNumber).\
-                    filter(
-                        and_(
-                            SoftphoneNumber.softphone_status == 'FREE',
-                            SoftphoneNumber.category_type == 'NORMAL'
-                        )
-                    ).order_by(SoftphoneNumber.id.asc()).first()
-                # store the number
-                softphone_number = free_softphone_number.softphone_no
-                # get the category
-                softphone_category = free_softphone_number.category_type
-                # allot the number
-                free_softphone_number.softphone_status = 'ALLOTTED'
-                # commit changes
-                db_session.commit()
-            # rollback on failure
-            except:
-                softphone_number = None
-                db_session.rollback()
-            # close connection (fallback in case of failure)
-            finally:
-                db_session.close()
+    return render_template(
+        'wishtalk.html',
+        no_of_softphone_allowed=softphone_limit,
+        no_of_softphone_allotted=softphone_allotted,
+        softphone_data=current_softphone_allotment,
+        add_softphone_form=add_softphone_form,
+    )
 
-            # API CALL
-            # successful allotment of softphone number
-            if softphone_number:
-                # call API for softphone allotment
-                softphone_add_success = add_softphone(
-                    url=app.config['SOFTPHONE_URL'],
-                    softphone_number=softphone_number,
-                    password=add_softphone_form.password.data,
-                    user_name=add_softphone_form.name.data
+
+@app.route('/portal/add_softphone', methods=['POST'])
+@login_required
+def wishtalk_add_softphone():
+    """Route for self-care portal softphone addition."""
+    # Get active plans for the user
+    # [(plan_code, validity_end_date)]
+    active_plans = [
+        (plan_code, validity_period.split(' - ')[1])
+        for (_, plan_code, validity_period) in
+        session['portal_customer_data']['active_plans']
+    ]
+    # Get last active plan and expiry
+    last_active_plan = active_plans[-1]
+    last_active_plan_expiry = datetime.strptime(
+        last_active_plan[1], '%d-%m-%Y'
+    ).date()
+    # Get softphone limit
+    softphone_limit = TariffInfo.query.\
+        filter_by(plan_code=last_active_plan[0]).\
+        first().softphone
+    # current softphone allotment
+    current_softphone_allotment = SoftphoneEntry.query.\
+        filter(
+            or_(
+                and_(
+                    SoftphoneEntry.cust_no == \
+                    session['portal_customer_no'],
+                    SoftphoneEntry.softphone_status == 'ACTIVE'
+                ),
+                and_(
+                    SoftphoneEntry.cust_no == \
+                    session['portal_customer_no'],
+                    SoftphoneEntry.softphone_status == 'DEACTIVE'
                 )
-
-                # softphone addition API call successful
-                if softphone_add_success:
-                    # set mobile number in case of fixed line
-                    if not add_softphone_form.mobile_number.data:
-                        mobile_no = CustomerInfo.query.filter_by(
-                            customer_no=session['portal_customer_no']
-                        ).first().mobile_number
-                    else:
-                        mobile_no = add_softphone_form.mobile_number.data
-
-                    # generate hash from the raw password
-                    hashed_pwd = pbkdf2_sha256.hash(
-                        str(add_softphone_form.password.data)
-                    )
-
-                    # get customer name
-                    customer_name = CustomerInfo.query.\
-                        options(FromCache(CACHE)).\
-                        filter_by(customer_no=session['portal_customer_no']).\
-                        first().customer_name
-
-                    # create data for db entry
-                    data = {
-                        'customer_no': session['portal_customer_no'],
-                        'customer_name': customer_name,
-                        'user_name': add_softphone_form.name.data,
-                        'customer_mobile_no': mobile_no,
-                        'password_hash': hashed_pwd,
-                        'softphone_number': softphone_number,
-                        'softphone_os': \
-                        add_softphone_form.softphone_platform.data,
-                        'create_date': datetime.now().astimezone().date(),
-                        'expiry_date': last_active_plan_expiry,
-                        'status': 'ACTIVE',
-                        'category': softphone_category,
-                    }
-
-                    # add softphone allotment to db async
-                    add_async_softphone_allotment.delay(data)
-
-                    # set SMS message based on platform
-                    if add_softphone_form.softphone_platform.data == 'Android':
-                        sms_msg = SUCCESSFUL_SOFTPHONE_SMS_ANDROID.format(
-                            softphone_number,
-                            add_softphone_form.password.data
-                        )
-                    elif add_softphone_form.softphone_platform.data == 'iOS':
-                        sms_msg = SUCCESSFUL_SOFTPHONE_SMS_IOS.format(
-                            softphone_number,
-                            add_softphone_form.password.data
-                        )
-                    elif add_softphone_form.softphone_platform.data == \
-                         'Fixed Line':
-                        sms_msg = SUCCESSFUL_SOFTPHONE_SMS_FIXED_LINE.format(
-                            softphone_number,
-                            add_softphone_form.password.data
-                        )
-
-                    # send SMS
-                    successful_sms = send_sms(
-                        app.config['SMS_URL'],
-                        {
-                            'username': app.config['SMS_USERNAME'],
-                            'password': app.config['SMS_PASSWORD'],
-                            'from': app.config['SMS_SENDER'],
-                            'to': '91{}'.format(mobile_no),
-                            'text': sms_msg,
-                        }
-                    )
-
-                    # SMS sent
-                    if successful_sms:
-                        text = SUCCESSFUL_SOFTPHONE_ALLOTMENT
-                        status = 'success'
-                    # SMS not sent
-                    elif not successful_sms:
-                        text = UNSUCCESSFUL_SOFTPHONE_SMS
-                        status = 'danger'
-
-                    flash(text, status)
-
-                # softphone addition API call unsuccessful
-                elif not softphone_add_success:
-                    flash(UNSUCCESSFUL_SOFTPHONE_ALLOTMENT, 'danger')
-
-            # unsuccessful allotment of softphone number
-            elif not softphone_number:
-                # remove the softphone number allotment
-                softphone_no = SoftphoneNumber.query.filter_by(
-                    softphone_no=softphone_number
-                ).first()
-                softphone_no.softphone_status = 'FREE'
-                # make synchronous call to change status in db
-                db = current_app.extensions['sqlalchemy'].db
-                db.session.commit()
-
-                flash(UNSUCCESSFUL_SOFTPHONE_ALLOTMENT, 'danger')
-
-        return render_template(
-            'wishtalk.html',
-            no_of_softphone_allowed=softphone_limit,
-            no_of_softphone_allotted=\
-            len(current_softphone_allotment) if current_softphone_allotment \
-            else 0,
-            softphone_data=current_softphone_allotment,
-            add_softphone_form=add_softphone_form
+            )
+        ).all()
+    softphone_allotted = len(current_softphone_allotment) \
+        if current_softphone_allotment else 0
+    # Setup forms
+    add_softphone_form = AddSoftphoneForm()
+    # POST request
+    if add_softphone_form.validate_on_submit():
+        # Create session to perform one-step read and write transaction
+        db_session = SignallingSession(
+            current_app.extensions['sqlalchemy'].db
         )
+        # DATABASE OPERATION
+        # Initiate transaction
+        try:
+            # Get FREE and NORMAL softphone number
+            free_softphone_number = db_session.query(SoftphoneNumber).\
+                filter(
+                    and_(
+                        SoftphoneNumber.softphone_status == 'FREE',
+                        SoftphoneNumber.category_type == 'NORMAL'
+                    )
+                ).order_by(SoftphoneNumber.id.asc()).first()
+            # Store the number
+            softphone_number = free_softphone_number.softphone_no
+            # Get the category
+            softphone_category = free_softphone_number.category_type
+            # Allot the number
+            free_softphone_number.softphone_status = 'ALLOTTED'
+            # Commit changes
+            db_session.commit()
+        # rollback on failure
+        except:
+            softphone_number = None
+            db_session.rollback()
+        # Close connection (fallback in case of failure)
+        finally:
+            db_session.close()
+
+        # API CALL
+        # Successful allotment of softphone number
+        if softphone_number:
+            # Call API for softphone allotment
+            softphone_add_success = add_softphone(
+                url=app.config['SOFTPHONE_URL'],
+                softphone_number=softphone_number,
+                password=add_softphone_form.password.data,
+                user_name=add_softphone_form.name.data
+            )
+            # Softphone addition API call successful
+            if softphone_add_success:
+                # Set mobile number in case of fixed line
+                if not add_softphone_form.mobile_number.data:
+                    mobile_no = CustomerInfo.query.filter_by(
+                        customer_no=session['portal_customer_no']
+                    ).first().mobile_number
+                else:
+                    mobile_no = add_softphone_form.mobile_number.data
+                # Generate hash from the raw password
+                hashed_pwd = pbkdf2_sha256.hash(
+                    str(add_softphone_form.password.data)
+                )
+                # Get customer name
+                customer_name = CustomerInfo.query.\
+                    options(FromCache(CACHE)).\
+                    filter_by(customer_no=session['portal_customer_no']).\
+                    first().customer_name
+                # Create data for db entry
+                data = {
+                    'customer_no': session['portal_customer_no'],
+                    'customer_name': customer_name,
+                    'user_name': add_softphone_form.name.data,
+                    'customer_mobile_no': mobile_no,
+                    'password_hash': hashed_pwd,
+                    'softphone_number': softphone_number,
+                    'softphone_os': \
+                    add_softphone_form.softphone_platform.data,
+                    'create_date': datetime.now().astimezone().date(),
+                    'expiry_date': last_active_plan_expiry,
+                    'status': 'ACTIVE',
+                    'category': softphone_category,
+                }
+                # Add softphone allotment to db async
+                add_async_softphone_allotment.delay(data)
+                # Set SMS message based on platform
+                if add_softphone_form.softphone_platform.data == 'Android':
+                    sms_msg = SUCCESSFUL_SOFTPHONE_SMS_ANDROID.format(
+                        softphone_number,
+                        add_softphone_form.password.data
+                    )
+                elif add_softphone_form.softphone_platform.data == 'iOS':
+                    sms_msg = SUCCESSFUL_SOFTPHONE_SMS_IOS.format(
+                        softphone_number,
+                        add_softphone_form.password.data
+                    )
+                elif add_softphone_form.softphone_platform.data == 'Fixed Line':
+                    sms_msg = SUCCESSFUL_SOFTPHONE_SMS_FIXED_LINE.format(
+                        softphone_number,
+                        add_softphone_form.password.data
+                    )
+                # Send SMS
+                successful_sms = send_sms(
+                    app.config['SMS_URL'],
+                    {
+                        'username': app.config['SMS_USERNAME'],
+                        'password': app.config['SMS_PASSWORD'],
+                        'from': app.config['SMS_SENDER'],
+                        'to': '91{}'.format(mobile_no),
+                        'text': sms_msg,
+                    }
+                )
+                # SMS sent
+                if successful_sms:
+                    text = SUCCESSFUL_SOFTPHONE_ALLOTMENT
+                    status = 'success'
+                # SMS not sent
+                elif not successful_sms:
+                    text = UNSUCCESSFUL_SOFTPHONE_SMS
+                    status = 'danger'
+
+                flash(text, status)
+            # Softphone addition API call unsuccessful
+            elif not softphone_add_success:
+                flash(UNSUCCESSFUL_SOFTPHONE_ALLOTMENT, 'danger')
+        # Unsuccessful allotment of softphone number
+        elif not softphone_number:
+            # Remove the softphone number allotment
+            softphone_no = SoftphoneNumber.query.filter_by(
+                softphone_no=softphone_number
+            ).first()
+            softphone_no.softphone_status = 'FREE'
+            # Make synchronous call to change status in db
+            db = current_app.extensions['sqlalchemy'].db
+            db.session.commit()
+
+            flash(UNSUCCESSFUL_SOFTPHONE_ALLOTMENT, 'danger')
+
+    return render_template(
+        'wishtalk.html',
+        no_of_softphone_allowed=softphone_limit,
+        no_of_softphone_allotted=softphone_allotted,
+        softphone_data=current_softphone_allotment,
+        add_softphone_form=add_softphone_form,
+    )
+
+
 
 
 @app.route('/portal/update_profile', methods=['GET'])
+@login_required
 def update_profile():
     """Route for self-care portal profile update."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
-    # user logged in
-    elif session.get('user_logged_in'):
-        # keep the session alive
-        session.modified = True
+    # Setup forms
+    update_profile_form = UpdateProfileForm()
+    update_password_form = ChangePasswordForm()
+    update_gst_form = UpdateGSTForm()
 
-        update_profile_form = UpdateProfileForm()
-        update_password_form = ChangePasswordForm()
-        update_gst_form = UpdateGSTForm()
-
-        return render_template(
-            'update_profile.html',
-            update_profile_form=update_profile_form,
-            update_password_form=update_password_form,
-            update_gst_form=update_gst_form
-        )
+    return render_template(
+        'update_profile.html',
+        update_profile_form=update_profile_form,
+        update_password_form=update_password_form,
+        update_gst_form=update_gst_form
+    )
 
 
 @app.route('/portal/update_contact', methods=['POST'])
+@login_required
 def update_contact():
     """Route for self-care portal contact update."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
-    # user logged in
-    elif session.get('user_logged_in'):
-        update_profile_form = UpdateProfileForm()
-        update_password_form = ChangePasswordForm()
-        update_gst_form = UpdateGSTForm()
-
-        if update_profile_form.validate_on_submit():
-            # check for empty inputs
-            if not update_profile_form.new_phone_no.data and \
-               not update_profile_form.new_email_address.data:
-                return redirect(url_for('update_profile'))
-
-            else:
-                # Update profile details in MQS
-                profile = UpdateProfile(app)
-                profile.request(
-                    cust_id=session['portal_customer_no'],
-                    email=update_profile_form.new_email_address.data,
-                    mobile_no=update_profile_form.new_phone_no.data
-                )
-                profile.response()
-
-                # verify MQS ModifyCustomer status
-                db_status, flash_msg, msg_status = \
-                    verify_mqs_updateprofile(profile)
-
-                # data for profile update request in db
-                form_data = {
-                    'customer_no': session['portal_customer_no'],
-                    'new_phone_no': update_profile_form.new_phone_no.data,
-                    'new_email': update_profile_form.new_email_address.data,
-                    'status': db_status,
-                    'request_date': datetime.now().astimezone().date(),
-                    'request_time': datetime.now().astimezone().time(),
-                }
-
-                # add request to db async
-                add_profile_update_request_to_db.delay(form_data)
-
-                # only modify in database if request successful
-                if db_status == 'SUCCESS':
-                    # data for updating profile in db
-                    update_data = {
-                        'customer_no': session['portal_customer_no'],
-                        'email': update_profile_form.new_email_address.data,
-                        'mobile_no': update_profile_form.new_phone_no.data,
-                    }
-                    # update profile in db async
-                    update_profile_in_db.delay(update_data)
-
-                flash(flash_msg, msg_status)
-                return redirect(url_for('update_profile'))
-
-        return render_template(
-            'update_profile.html',
-            update_profile_form=update_profile_form,
-            update_password_form=update_password_form,
-            update_gst_form=update_gst_form
-        )
-
-
-@app.route('/portal/change_password', methods=['POST'])
-def change_password():
-    """Route for self-care portal password change."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
-    # user logged in
-    elif session.get('user_logged_in'):
-        update_profile_form = UpdateProfileForm()
-        update_password_form = ChangePasswordForm()
-        update_gst_form = UpdateGSTForm()
-
-        if update_password_form.validate_on_submit():
-            customer = CustomerLogin.query.filter_by(
-                customer_no=session['portal_customer_no']
-            ).first()
-
-            # verify old password
-            pwd_verified = pbkdf2_sha256.verify(
-                str(update_password_form.old_password.data),
-                customer.password_hash
-            )
-
-            # if old password is verified
-            if pwd_verified:
-                # check if the old and new passwords are same
-                if update_password_form.old_password.data == \
-                   update_password_form.new_password.data:
-                    flash(SET_NEW_PWD, 'danger')
-                else:
-                    # generate new hashed password and store
-                    hashed_pwd = pbkdf2_sha256.hash(
-                        str(update_password_form.new_password.data)
-                    )
-                    customer.password_hash = hashed_pwd
-
-                    # make synchronous call to save password
-                    db = current_app.extensions['sqlalchemy'].db
-                    db.session.commit()
-
-                    flash(NEW_PWD_SET, 'success')
-            # old password is incorrect
-            else:
-                flash(INCORRECT_OLD_PWD, 'danger')
-
+    # Setup forms
+    update_profile_form = UpdateProfileForm()
+    update_password_form = ChangePasswordForm()
+    update_gst_form = UpdateGSTForm()
+    # POST request
+    if update_profile_form.validate_on_submit():
+        # Check for empty inputs
+        if not update_profile_form.new_phone_no.data and \
+           not update_profile_form.new_email_address.data:
             return redirect(url_for('update_profile'))
 
-        return render_template(
-            'update_profile.html',
-            update_profile_form=update_profile_form,
-            update_password_form=update_password_form,
-            update_gst_form=update_gst_form
-        )
-
-
-@app.route('/portal/update_gst', methods=['POST'])
-def update_gst():
-    """Route for self-care GST information update."""
-    # user not logged in
-    if not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
-        return redirect(url_for('login'))
-    # user logged in
-    elif session.get('user_logged_in'):
-        update_profile_form = UpdateProfileForm()
-        update_password_form = ChangePasswordForm()
-        update_gst_form = UpdateGSTForm()
-
-        if update_gst_form.validate_on_submit():
+        else:
+            # Update profile details in MQS
+            profile = UpdateProfile(app)
+            profile.request(
+                cust_id=session['portal_customer_no'],
+                email=update_profile_form.new_email_address.data,
+                mobile_no=update_profile_form.new_phone_no.data
+            )
+            profile.response()
+            # Verify MQS ModifyCustomer status
+            db_status, flash_msg, msg_status = verify_mqs_updateprofile(profile)
+            # Data for profile update request in db
             form_data = {
                 'customer_no': session['portal_customer_no'],
-                'gst_no': update_gst_form.gst_no.data,
+                'new_phone_no': update_profile_form.new_phone_no.data,
+                'new_email': update_profile_form.new_email_address.data,
+                'status': db_status,
                 'request_date': datetime.now().astimezone().date(),
                 'request_time': datetime.now().astimezone().time(),
             }
+            # Add request to db async
+            add_profile_update_request_to_db.delay(form_data)
+            # Only modify in database if request successful
+            if db_status == 'SUCCESS':
+                # data for updating profile in db
+                update_data = {
+                    'customer_no': session['portal_customer_no'],
+                    'email': update_profile_form.new_email_address.data,
+                    'mobile_no': update_profile_form.new_phone_no.data,
+                }
+                # Update profile in db async
+                update_profile_in_db.delay(update_data)
 
-            # add data to db async
-            add_gst_update_request_to_db.delay(form_data)
-
-            flash(SUCCESSFUL_GST_UPDATE_REQUEST, 'success')
+            flash(flash_msg, msg_status)
             return redirect(url_for('update_profile'))
+    # Form validation error
+    return render_template(
+        'update_profile.html',
+        update_profile_form=update_profile_form,
+        update_password_form=update_password_form,
+        update_gst_form=update_gst_form
+    )
 
-        return render_template(
-            'update_profile.html',
-            update_profile_form=update_profile_form,
-            update_password_form=update_password_form,
-            update_gst_form=update_gst_form
+
+@app.route('/portal/change_password', methods=['POST'])
+@login_required
+def change_password():
+    """Route for self-care portal password change."""
+    # Setup forms
+    update_profile_form = UpdateProfileForm()
+    update_password_form = ChangePasswordForm()
+    update_gst_form = UpdateGSTForm()
+    # POST request
+    if update_password_form.validate_on_submit():
+        customer = CustomerLogin.query.filter_by(
+            customer_no=session['portal_customer_no']
+        ).first()
+        # Verify old password
+        pwd_verified = pbkdf2_sha256.verify(
+            str(update_password_form.old_password.data),
+            customer.password_hash
         )
+        # If old password is verified
+        if pwd_verified:
+            # Check if the old and new passwords are same
+            if update_password_form.old_password.data == \
+               update_password_form.new_password.data:
+                flash(SET_NEW_PWD, 'danger')
+            else:
+                # Generate new hashed password and store
+                hashed_pwd = pbkdf2_sha256.hash(
+                    str(update_password_form.new_password.data)
+                )
+                customer.password_hash = hashed_pwd
+                # Make synchronous call to save password
+                db = current_app.extensions['sqlalchemy'].db
+                db.session.commit()
+
+                flash(NEW_PWD_SET, 'success')
+        # Old password is incorrect
+        else:
+            flash(INCORRECT_OLD_PWD, 'danger')
+
+        return redirect(url_for('update_profile'))
+    # Form validation error
+    return render_template(
+        'update_profile.html',
+        update_profile_form=update_profile_form,
+        update_password_form=update_password_form,
+        update_gst_form=update_gst_form
+    )
+
+
+@app.route('/portal/update_gst', methods=['POST'])
+@login_required
+def update_gst():
+    """Route for self-care GST information update."""
+    # Setup forms
+    update_profile_form = UpdateProfileForm()
+    update_password_form = ChangePasswordForm()
+    update_gst_form = UpdateGSTForm()
+    # POST request
+    if update_gst_form.validate_on_submit():
+        form_data = {
+            'customer_no': session['portal_customer_no'],
+            'gst_no': update_gst_form.gst_no.data,
+            'request_date': datetime.now().astimezone().date(),
+            'request_time': datetime.now().astimezone().time(),
+        }
+        # Add data to db async
+        add_gst_update_request_to_db.delay(form_data)
+
+        flash(SUCCESSFUL_GST_UPDATE_REQUEST, 'success')
+        return redirect(url_for('update_profile'))
+    # Form validation error
+    return render_template(
+        'update_profile.html',
+        update_profile_form=update_profile_form,
+        update_password_form=update_password_form,
+        update_gst_form=update_gst_form
+    )

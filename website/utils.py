@@ -6,14 +6,17 @@ import csv
 import random
 import string
 from datetime import datetime
+from functools import wraps
 from pathlib import Path
 
 import requests
+from flask import flash, redirect, session, url_for
 from passlib.totp import generate_secret
 
 from website.messages import (
-    SUCCESSFUL_ADDPLAN, SUCCESSFUL_PROFILE_UPDATE, SUCCESSFUL_RECHARGE,
-    UNSUCCESSFUL_ADDPLAN, UNSUCCESSFUL_PROFILE_UPDATE, UNSUCCESSFUL_RECHARGE)
+    LOG_IN_FIRST, SUCCESSFUL_ADDPLAN, SUCCESSFUL_PROFILE_UPDATE,
+    SUCCESSFUL_RECHARGE, UNSUCCESSFUL_ADDPLAN, UNSUCCESSFUL_PROFILE_UPDATE,
+    UNSUCCESSFUL_RECHARGE)
 
 
 def order_no_gen():
@@ -124,3 +127,16 @@ def retrieve_otp_secret(filepath):
 def get_usage(usage, offset=0, per_page=10):
     """Helper function for retrieving paginated usage information."""
     return usage[offset: offset + per_page]
+
+
+def login_required(f: Callable) -> Callable:
+    """Decorator function to check user login status of self-care portal."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('user_logged_in'):
+            flash(LOG_IN_FIRST, 'danger')
+            return redirect(url_for('login'))
+        # Keep the session alive
+        session.modified = True
+        return f(*args, **kwargs)
+    return decorated_function
