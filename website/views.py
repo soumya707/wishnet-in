@@ -127,7 +127,7 @@ def insta_recharge(order_id):
         amount = TariffInfo.query.options(FromCache(CACHE)).\
             filter_by(plan_code=request.form['plan_code']).first_or_404().price
         # store amount in session
-        session['insta_amount'] = str(round(amount * 1.18, 2))
+        session['insta_amount'] = format(amount * 1.18, '.2f')
         # store customer number in session
         session['insta_customer_no'] = request.form['customer_no']
         # store selected plan code in session
@@ -1094,7 +1094,7 @@ def recharge():
             filter_by(plan_code=request.form['plan_code']).\
             first_or_404().price
         # Store amount in session
-        session['portal_amount'] = str(round(amount * 1.18, 2))
+        session['portal_amount'] = format(amount * 1.18, '.2f')
         # Store selected plan code in session
         session['portal_plan_code'] = request.form['plan_code']
         # Generate and store a transaction id
@@ -1188,7 +1188,7 @@ def add_plan():
         amount = TariffInfo.query.options(FromCache(CACHE)).\
             filter_by(plan_code=request.form['plan_code']).first_or_404().price
         # Store amount in session
-        session['portal_amount'] = str(round(amount * 1.18, 2))
+        session['portal_amount'] = format(amount * 1.18, '.2f')
         # Store selected plan code in session
         session['portal_plan_code'] = request.form['plan_code']
         # Generate and store a transaction id
