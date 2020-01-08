@@ -2,20 +2,22 @@
 
 """Define functions for Razorpay transactions."""
 
+
+from typing import Dict, Tuple
+
 import razorpay
 
 from website import app
 
 
 def make_order(
-        order_id,
-        customer_no,
-        customer_mobile_no,
-        customer_email,
-        amount,
-        pay_source):
+        order_id: str,
+        customer_no: str,
+        customer_mobile_no: str,
+        customer_email: str,
+        amount: str,
+        pay_source: str) -> Dict[str, str]:
     """Generate an order from Razorpay."""
-
     post_data = {
         'amount': amount.replace('.', ''),
         'currency': 'INR',
@@ -27,11 +29,11 @@ def make_order(
             'txn_type': pay_source[1],
         }
     }
-
+    # Setup the client for Razorpay
     client = razorpay.Client(auth=(app.config['RAZORPAY_KEY'],
                                    app.config['RAZORPAY_SECRET']))
     order_resp = client.order.create(data=post_data)
-
+    # Get the Razorpay order id
     razorpay_order_id = order_resp['id']
 
     razorpay_params = {
@@ -50,17 +52,15 @@ def make_order(
     return razorpay_params
 
 
-def verify_signature(response):
+def verify_signature(response: Dict[str, str]) -> None:
     """Verify payment signature obtained from Razorpay."""
-
     client = razorpay.Client(auth=(app.config['RAZORPAY_KEY'],
                                    app.config['RAZORPAY_SECRET']))
     client.utility.verify_payment_signature(response)
 
 
-def get_notes(razorpay_order_id):
+def get_notes(razorpay_order_id: str) -> Tuple[str, str, str]:
     """Receive metadata sent as payload to Razopay."""
-
     client = razorpay.Client(auth=(app.config['RAZORPAY_KEY'],
                                    app.config['RAZORPAY_SECRET']))
     resp = client.order.fetch(razorpay_order_id)
