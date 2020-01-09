@@ -459,6 +459,7 @@ def verify_response(gateway):
             'txn_time': datetime.now().astimezone().time(),
             'txn_amount': '',
             'txn_status': 'INCOMPLETE',
+            'plan_code': session[f'{session_var_prefix}_plan_code'],
             'topup_ref_id': '',
             'topup_datetime': '',
             'topup_status': '',
