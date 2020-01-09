@@ -84,6 +84,7 @@ def add_txn_data_to_db(data):
         payment_date=data['txn_date'],
         payment_time=data['txn_time'],
         payment_status=data['txn_status'],
+        plan_code=data['plan_code'],
         mq_topup_reference_id=data['topup_ref_id'],
         mq_topup_datetime=data['topup_datetime'],
         mq_topup_status=data['topup_status'],

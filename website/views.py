@@ -195,6 +195,7 @@ def verify_response(gateway):
                 'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 'txn_date': datetime.now().astimezone().date(),
                 'txn_time': datetime.now().astimezone().time(),
+                'plan_code': session[f'{session_var_prefix}_plan_code'],
             }
 
             # initial checksum verification
@@ -338,6 +339,7 @@ def verify_response(gateway):
                 'txn_datetime': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 'txn_date': datetime.now().astimezone().date(),
                 'txn_time': datetime.now().astimezone().time(),
+                'plan_code': session[f'{session_var_prefix}_plan_code'],
             }
 
             # remove Razorpay order id from session storage
