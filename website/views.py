@@ -1461,7 +1461,7 @@ def wishtalk_add_softphone():
     # Get last active plan and expiry
     last_active_plan = active_plans[-1]
     last_active_plan_expiry = datetime.strptime(
-        last_active_plan[1], '%d-%m-%Y'
+        last_active_plan[1], '%d-%b-%y'
     ).date()
     # Get softphone limit
     softphone_limit = TariffInfo.query.\

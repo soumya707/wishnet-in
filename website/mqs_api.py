@@ -180,26 +180,26 @@ class GetAllContracts(MQSAPI):
     def response(self):
         """Parse response for GetRecordsBySearch."""
         if self.response_code == 200:
-            months = {
-                'JAN': '01',
-                'FEB': '02',
-                'MAR': '03',
-                'APR': '04',
-                'MAY': '05',
-                'JUN': '06',
-                'JUL': '07',
-                'AUG': '08',
-                'SEP': '09',
-                'OCT': '10',
-                'NOV': '11',
-                'DEC': '12',
-            }
-            def modify_date(date):
-                """Modify the date to proper format."""
-                splitted_date = date.split('-')
-                splitted_date[1] = months.get(splitted_date[1])
-                splitted_date[2] = '20' + splitted_date[2]
-                return '-'.join(splitted_date)
+            # months = {
+            #     'JAN': '01',
+            #     'FEB': '02',
+            #     'MAR': '03',
+            #     'APR': '04',
+            #     'MAY': '05',
+            #     'JUN': '06',
+            #     'JUL': '07',
+            #     'AUG': '08',
+            #     'SEP': '09',
+            #     'OCT': '10',
+            #     'NOV': '11',
+            #     'DEC': '12',
+            # }
+            # def modify_date(date):
+            #     """Modify the date to proper format."""
+            #     splitted_date = date.split('-')
+            #     splitted_date[1] = months.get(splitted_date[1])
+            #     splitted_date[2] = '20' + splitted_date[2]
+            #     return '-'.join(splitted_date)
 
             res_tree = et.fromstring(self.response_msg)
 
@@ -216,12 +216,14 @@ class GetAllContracts(MQSAPI):
             ]
             # Get a list of start dates
             start_dates = [
-                modify_date(plan_start.text)
+                plan_start.text
+                # modify_date(plan_start.text)
                 for plan_start in res_tree.iterfind('.//STARTDATE')
             ]
             # Get a list of end dates
             end_dates = [
-                modify_date(plan_end.text)
+                plan_end.text
+                # modify_date(plan_end.text)
                 for plan_end in res_tree.iterfind('.//ENDDATE')
             ]
             # Get a list of plan validity
