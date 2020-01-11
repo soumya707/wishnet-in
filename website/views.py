@@ -930,12 +930,12 @@ def portal():
     """Route for self-care portal."""
     # Check if session variable exists for customer data
     if not session.get('portal_customer_data'):
-        # Get customer info
-        user_info = GetCustomerInfo(app)
-        user_info.request(session['portal_customer_no'])
-        user_info.response()
-        # add customer data to session for quick access
-        session['portal_customer_data'] = user_info.to_dict()
+        # Get customer contracts
+        user_contracts = GetAllContracts(app)
+        user_contracts.request(session['portal_customer_no'])
+        user_contracts.response()
+        # Add customer data to session for quick access
+        session['portal_customer_data'] = user_contracts.to_dict()
     # Get all plans
     plans = {
         row.plan_code: row
@@ -1171,6 +1171,12 @@ def portal_receipt(order_id):
     customer_name = CustomerInfo.query.options(FromCache(CACHE)).filter_by(
         customer_no=request.args.get('customer_no')
     ).first_or_404().customer_name
+    # Get customer contracts
+    user_contracts = GetAllContracts(app)
+    user_contracts.request(session['portal_customer_no'])
+    user_contracts.response()
+    # Add customer data to session for quick access
+    session['portal_customer_data'] = user_contracts.to_dict()
 
     return render_template(
         'portal_receipt.html',

@@ -145,11 +145,11 @@ class AddPlan(MQSAPI):
             self.error_no = res_tree.findtext('.//ERRORNO')
 
 
-class GetCustomerInfo(MQSAPI):
-    """Define GetCustomerInfo API."""
+class GetAllContracts(MQSAPI):
+    """Define GetAllContracts API."""
 
     def __init__(self, app, **kwargs):
-        super(GetCustomerInfo, self).__init__(app, **kwargs)
+        super(GetAllContracts, self).__init__(app, **kwargs)
         self.response_code = None
         self.response_msg = None
         self.txn_no = None
@@ -159,54 +159,76 @@ class GetCustomerInfo(MQSAPI):
         self.active_plans = None
 
     def request(self, cust_id):
-        """Send request for GetCustomerInfo."""
-
-        customer_info_xml = '''
+        """Send request for GetRecordsBySearch."""
+        get_records_by_search_xml = '''
         <REQUESTINFO>
             <KEY_NAMEVALUE>
-                <KEY_NAME>CUSTOMERNO</KEY_NAME>
-                <KEY_VALUE>{}</KEY_VALUE>
+                <KEY_NAME>PROCESS</KEY_NAME>
+                <KEY_VALUE>GETCUSTOMERCONTRACTDETAILS</KEY_VALUE>
             </KEY_NAMEVALUE>
+            <ADDITIONAL_INFO>
+                <CUSTOMERNO>{}</CUSTOMERNO>
+            </ADDITIONAL_INFO>
         </REQUESTINFO>'''.format(cust_id)
 
-        res = self.client.service.GetCustomerInfo(
-            customer_info_xml, self.ref_no
+        res = self.client.service.GetRecordsBySearch(
+            get_records_by_search_xml, self.ref_no
         )
 
         self.response_code, self.response_msg = res[0], res[1]
 
     def response(self):
-        """Parse response for GetCustomerInfo."""
-
+        """Parse response for GetRecordsBySearch."""
         if self.response_code == 200:
+            months = {
+                'JAN': '01',
+                'FEB': '02',
+                'MAR': '03',
+                'APR': '04',
+                'MAY': '05',
+                'JUN': '06',
+                'JUL': '07',
+                'AUG': '08',
+                'SEP': '09',
+                'OCT': '10',
+                'NOV': '11',
+                'DEC': '12',
+            }
+            def modify_date(date):
+                """Modify the date to proper format."""
+                splitted_date = date.split('-')
+                splitted_date[1] = months.get(splitted_date[1])
+                splitted_date[2] = '20' + splitted_date[2]
+                return '-'.join(splitted_date)
+
             res_tree = et.fromstring(self.response_msg)
 
             self.txn_no = res_tree.findtext('.//TRANSACTIONNO')
             self.txn_msg = res_tree.findtext('.//MESSAGE')
-            # get a list of the contract status
+            # Get a list of the contract status
             contract_status = [
-                plan.text for plan in res_tree.iterfind('.//CONTRACTSTATUS')
+                status.text for status in res_tree.iterfind('.//STATUS')
+                if status.text
             ]
-            # get a list of plan codes
+            # Get a list of plan codes
             self.all_plans = [
-                plan_code.text.strip()
-                for plan_code in res_tree.iterfind('.//PLANCODE')
+                plan_code.text for plan_code in res_tree.iterfind('.//PLANCODE')
             ]
-            # get a list of start dates
+            # Get a list of start dates
             start_dates = [
-                plan_start.text
+                modify_date(plan_start.text)
                 for plan_start in res_tree.iterfind('.//STARTDATE')
             ]
-            # get a list of end dates
+            # Get a list of end dates
             end_dates = [
-                plan_end.text
+                modify_date(plan_end.text)
                 for plan_end in res_tree.iterfind('.//ENDDATE')
             ]
-            # get a list of plan validity
+            # Get a list of plan validity
             validities = [
                 ' - '.join(period) for period in zip(start_dates, end_dates)
             ]
-            # get a consolidated plan list
+            # Get a consolidated plan list
             # [(contract_status, plan_code, validity)]
             plans_with_validity = \
                 list(zip(contract_status, self.all_plans, validities))
@@ -216,7 +238,7 @@ class GetCustomerInfo(MQSAPI):
             ]
             # filter inactive plans
             self.inactive_plans = [
-                plan for plan in plans_with_validity if plan[0] == 'Inactive'
+                plan for plan in plans_with_validity if plan[0] == 'Expired'
             ]
 
     def to_dict(self):
