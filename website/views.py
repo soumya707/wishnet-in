@@ -23,14 +23,22 @@ from sqlalchemy import and_, or_
 from website import CACHE, TOTPFACTORY, app
 from website.forms import *
 from website.messages import *
-from website.models import *
 from website.mqs_api import *
+from website.models import (
+    FAQ, AvailableLocations, BestPlans, CarouselImages, CustomerInfo,
+    CustomerLogin, Downloads, GSTUpdateRequest, JobVacancy, RechargeEntry,
+    RegionalOffices, Services, SoftphoneEntry, SoftphoneNumber, TariffInfo,
+    Ticket, TicketInfo, Ventures, ZoneIDWithPlanCode)
 from website.paytm_utils import (
     initiate_transaction, verify_final_status, verify_transaction)
 from website.razorpay_utils import get_notes, make_order, verify_signature
 from website.softphone_utils import *
-from website.tasks import *
 from website.utils import *
+from website.tasks import (
+    add_async_softphone_allotment, add_gst_update_request_to_db,
+    add_mobile_number_update_request_to_db, add_new_connection_data_to_db,
+    add_new_ticket_to_db, add_profile_update_request_to_db, add_txn_data_to_db,
+    send_async_new_connection_mail, update_profile_in_db)
 
 
 CSRF = CSRFProtect(app)
@@ -112,17 +120,7 @@ def index():
 @app.route('/insta_recharge/<order_id>', methods=['GET', 'POST'])
 def insta_recharge(order_id):
     """Route for insta-recharge."""
-
-    if request.method == 'GET':
-        return render_template(
-            'insta_recharge.html',
-            customer_no=request.args.get('customer_no', None),
-            customer_name=request.args.get('customer_name', None),
-            customer_mobile_no=request.args.get('customer_mobile_no', None),
-            active_plans=json.loads(request.args.get('active_plans', 'null'))
-        )
-
-    elif request.method == 'POST':
+    if request.method == 'POST':
         # retrieve amount for plan code selected
         amount = TariffInfo.query.options(FromCache(CACHE)).\
             filter_by(plan_code=request.form['plan_code']).first_or_404().price
@@ -137,7 +135,6 @@ def insta_recharge(order_id):
 
         # Check payment gateway
         if request.form['gateway'] == 'paytm':
-            # Get Paytm form data
             form_data = initiate_transaction(
                 order_id=order_id,
                 customer_no=request.form['customer_no'],
@@ -146,20 +143,17 @@ def insta_recharge(order_id):
                 # _ is used as the delimiter; check paytm_utils
                 pay_source='insta_recharge',
             )
-
         elif request.form['gateway'] == 'razorpay':
-            # Get Razorpay form data
             form_data = make_order(
                 order_id=order_id,
                 customer_no=request.form['customer_no'],
                 customer_mobile_no=request.form['customer_mobile_no'],
                 customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
                 amount=session['insta_amount'],
-                # list is used for passing data; check razorpay_utils
+                # List is used for passing data; check razorpay_utils
                 pay_source=['insta', 'recharge'],
             )
-
-            # store Razorpay order id for verification later
+            # Store Razorpay order id for verification later
             session['razorpay_order_id'] = form_data['order_id']
 
         return render_template(
@@ -167,26 +161,31 @@ def insta_recharge(order_id):
             form=form_data,
         )
 
+    return render_template(
+        'insta_recharge.html',
+        customer_no=request.args.get('customer_no', None),
+        customer_name=request.args.get('customer_name', None),
+        customer_mobile_no=request.args.get('customer_mobile_no', None),
+        active_plans=json.loads(request.args.get('active_plans', 'null'))
+    )
+
 
 @app.route('/verify/<gateway>', methods=['GET', 'POST'])
 @CSRF.exempt
 def verify_response(gateway):
     """Route for verifying response for payment."""
     if request.method == 'POST':
-        # check payment gateway
-        # PAYTM
+        # Check payment gateway
         if gateway == 'paytm':
             session_var_prefix, txn_type = \
                 request.form['MERC_UNQ_REF'].split('_')
-
-            # get zone id for table entry
+            # Get zone id for table entry
             zone_id = CustomerInfo.query.\
                 options(FromCache(CACHE)).\
                 filter_by(
                     customer_no=session[f'{session_var_prefix}_customer_no']
                 ).first().zone_id
-
-            # store response data
+            # Store response data
             data = {
                 'customer_no': session[f'{session_var_prefix}_customer_no'],
                 'customer_zone_id': zone_id,
@@ -197,19 +196,16 @@ def verify_response(gateway):
                 'txn_time': datetime.now().astimezone().time(),
                 'plan_code': session[f'{session_var_prefix}_plan_code'],
             }
-
-            # initial checksum verification
+            # Initial checksum verification
             verified = verify_transaction(request.form)
-
-            # check verification success
+            # Check verification success
             if verified:
                 data.update(txn_order_id=request.form['TXNID'])
-                # final status verification
+                # Final status verification
                 final_status_code = verify_final_status(
                     session[f'{session_var_prefix}_order_id']
                 )
-
-                # check if transaction successful
+                # Check if transaction successful
                 if final_status_code == '01':
                     data.update(
                         txn_amount=request.form['TXNAMOUNT'],
@@ -284,9 +280,7 @@ def verify_response(gateway):
                     )
                     status = 'unsuccessful'
                     flash(INCOMPLETE_PAYMENT, 'danger')
-
-            # checksumhash verification failure
-            # data tampered during transaction
+            # Checksum hash verification failure; data tampered
             elif not verified:
                 data.update(
                     txn_order_id='',
@@ -302,34 +296,29 @@ def verify_response(gateway):
                 status = 'unsuccessful'
                 flash(UNSUCCESSFUL_PAYMENT, 'danger')
 
-        # RAZORPAY
         elif gateway == 'razorpay':
-            # verify signature
+            # Verify signature
             verify_params = {
                 'razorpay_order_id': session['razorpay_order_id'],
                 'razorpay_payment_id': request.form.get('razorpay_payment_id'),
                 'razorpay_signature': request.form.get('razorpay_signature')
             }
-
             try:
                 verify_signature(verify_params)
                 verified = True
             except (SignatureVerificationError, BadRequestError) as _:
                 verified = False
-
-            # get metadata of order (skipping customer no.)
+            # Get metadata of order (skipping customer no.)
             _, session_var_prefix, txn_type = get_notes(
                 session['razorpay_order_id']
             )
-
-            # get zone id for table entry
+            # Get zone id for table entry
             zone_id = CustomerInfo.query.\
                 options(FromCache(CACHE)).\
                 filter_by(
                     customer_no=session[f'{session_var_prefix}_customer_no']
                 ).first().zone_id
-
-            # store response data
+            # Store response data
             data = {
                 'customer_no': session[f'{session_var_prefix}_customer_no'],
                 'customer_zone_id': zone_id,
@@ -341,11 +330,9 @@ def verify_response(gateway):
                 'txn_time': datetime.now().astimezone().time(),
                 'plan_code': session[f'{session_var_prefix}_plan_code'],
             }
-
-            # remove Razorpay order id from session storage
+            # Remove Razorpay order id from session storage
             session.pop('razorpay_order_id', None)
-
-            # signature verification success
+            # Signature verification success
             if verified:
                 data.update(
                     txn_amount=session[f'{session_var_prefix}_amount'],
@@ -404,9 +391,8 @@ def verify_response(gateway):
 
                 flash(flash_msg, msg_stat)
 
-            # signature verification failure
-            # data tampered during transaction
-            else:
+            # Signature verification failure; data tampered
+            elif not verified:
                 data.update(
                     txn_amount='',
                     txn_status='VERIFICATION FAILURE',
@@ -420,7 +406,7 @@ def verify_response(gateway):
                 status = 'unsuccessful'
                 flash(UNSUCCESSFUL_PAYMENT, 'danger')
 
-        # add transaction data to db async
+        # Add transaction data to db asynchronously
         add_txn_data_to_db.delay(data)
 
         return redirect(
@@ -435,19 +421,17 @@ def verify_response(gateway):
 
     # handle Razorpay transaction cancel
     elif request.method == 'GET':
-        # get metadata of order (skipping customer no. and txn type)
+        # Get metadata of order (skipping customer no. and txn type)
         _, session_var_prefix, _ = get_notes(
             session['razorpay_order_id']
         )
-
-        # get zone id for table entry
+        # Get zone id for table entry
         zone_id = CustomerInfo.query.\
             options(FromCache(CACHE)).\
             filter_by(
                 customer_no=session[f'{session_var_prefix}_customer_no']
             ).first().zone_id
-
-        # prepare data to be sent to db
+        # Prepare data to be sent to db
         data = {
             'customer_no': session[f'{session_var_prefix}_customer_no'],
             'customer_zone_id': zone_id,
@@ -467,12 +451,12 @@ def verify_response(gateway):
             'addplan_datetime': '',
             'addplan_status': '',
         }
-        # remove Razorpay order id from session storage
+        # Remove Razorpay order id from session storage
         session.pop('razorpay_order_id', None)
 
         flash(INCOMPLETE_PAYMENT, 'danger')
 
-        # add transaction data to db async
+        # Add transaction data to db asynchronously
         add_txn_data_to_db.delay(data)
 
         return redirect(
@@ -507,10 +491,10 @@ def insta_receipt(order_id):
 @app.route('/tariff')
 def tariff():
     """Route for tariff."""
-    db = current_app.extensions['sqlalchemy'].db
+    database = current_app.extensions['sqlalchemy'].db
 
-    classes = [cls for cls in db.Model._decl_class_registry.values()
-               if isinstance(cls, type) and issubclass(cls, db.Model)]
+    classes = [cls for cls in database.Model._decl_class_registry.values()
+               if isinstance(cls, type) and issubclass(cls, database.Model)]
 
     plan_classes = [cls for cls in classes if cls.__name__.endswith('Plan')]
 
@@ -526,14 +510,13 @@ def new_conn():
         AvailableLocations.query.options(FromCache(CACHE)).\
         order_by(AvailableLocations.location).all()
     ]
-
+    # POST request for new connection
     if form.validate_on_submit():
         query_no = ''.join(
             random.choices(
                 string.ascii_letters + string.digits, k=8
             )
         )
-
         form_data = {
             'query_no': query_no,
             'name': '{} {} {}'.format(
@@ -549,16 +532,14 @@ def new_conn():
             'date': datetime.now().astimezone().date(),
             'time': datetime.now().astimezone().time(),
         }
-
-        # add data to db async
+        # Add data to db asynchronously
         add_new_connection_data_to_db.delay(form_data)
-
-        # send mail async
+        # Send mail asynchronously
         send_async_new_connection_mail.delay(form.email_address.data, query_no)
 
         flash(SUCCESSFUL_NEW_CONN_REQUEST, 'success')
         return redirect(url_for('new_conn'))
-
+    # GET request
     return render_template('new_connection.html', form=form)
 
 
@@ -622,73 +603,60 @@ def wishtalk_instructions():
 def login():
     """Route for self-care login."""
     form = LoginForm()
-
+    # POST request for login
     if form.validate_on_submit():
-        # get customer login credentials
+        redirect_to = None
+        # Get customer login credentials
         customer = CustomerLogin.query.filter_by(
             customer_no=form.customer_no.data
         ).first()
-
-        redirect_to = None
-
-        # valid customer and valid password
+        # Valid customer and valid password
         if customer is not None and customer.password_hash is not None:
-            # verify password
+            # Verify password
             pwd_verified = pbkdf2_sha256.verify(
                 str(form.password.data),
                 customer.password_hash
             )
-            # condition based on password sanity
             if pwd_verified:
-                session['user_logged_in'] = True
                 redirect_to = 'portal'
-                # store customer number in session
+                session['user_logged_in'] = True
                 session['portal_customer_no'] = customer.customer_no
             else:
                 redirect_to = 'login'
                 flash(INCORRECT_PWD, 'danger')
-
-        # non-registered customer
+        # Non-registered customer
         elif customer is not None and customer.password_hash is None:
             redirect_to = 'register'
             flash(NON_REGISTERED_USER, 'danger')
-
-        # invalid customer
+        # Invalid customer
         else:
             redirect_to = 'login'
             flash(USER_NOT_FOUND_IN_DB, 'danger')
 
         return redirect(url_for(redirect_to))
 
-    # user logged in
+    # GET request
+    # User logged in
     if session.get('user_logged_in'):
         return redirect(url_for('portal'))
-    # user not logged in
-    else:
-        return render_template(
-            'login.html',
-            form=form
-        )
+    # User logged out
+    return render_template('login.html', form=form)
 
 
 @app.route('/logout')
+@login_required
 def logout():
     """Route for self-care logout."""
-    # user logged in already
-    if session.get('user_logged_in'):
-        flash(SUCCESSFUL_LOGOUT, 'success')
-        # revoke session entry
-        session['user_logged_in'] = False
-        # remove portal customer data storage
-        session.pop('portal_customer_no', None)
-        session.pop('portal_customer_data', None)
-        session.pop('portal_order_id', None)
-        session.pop('portal_plan_code', None)
-        session.pop('portal_open_ticket_no', None)
-    # user not logged in (invalid access to route)
-    elif not session.get('user_logged_in'):
-        flash(LOG_IN_FIRST, 'danger')
+    # Revoke session entry
+    session['user_logged_in'] = False
+    # Remove portal customer data storage
+    session.pop('portal_customer_no', None)
+    session.pop('portal_customer_data', None)
+    session.pop('portal_order_id', None)
+    session.pop('portal_plan_code', None)
+    session.pop('portal_open_ticket_no', None)
 
+    flash(SUCCESSFUL_LOGOUT, 'success')
     return redirect(url_for('login'))
 
 
@@ -698,22 +666,17 @@ def logout():
 def get_cust_no():
     """Route for getting customer number."""
     form = GetCustomerNumberForm()
-
+    # POST request for getting customer number
     if form.validate_on_submit():
-        user = form.username.data
-        ip_addr = form.ip_address.data
-
-        # query with `or` condition
         customer = CustomerInfo.query.filter(
             or_(
-                CustomerInfo.user_name == user,
-                CustomerInfo.ip_addr == ip_addr
+                CustomerInfo.user_name == form.username.data,
+                CustomerInfo.ip_addr == form.ip_address.data
             )
         ).first()
-
-        # credentials okay and data available
+        # Credentials okay and data available
         if customer is not None and customer.mobile_number is not None:
-            # send SMS
+            # Send SMS
             sms_msg = SMS_CUSTOMER_NO.format(customer.customer_no)
             successful_sms = send_sms(
                 app.config['SMS_URL'],
@@ -725,7 +688,7 @@ def get_cust_no():
                     'text': sms_msg,
                 }
             )
-            # check whether sms sent successfully
+            # Check whether sms sent successfully
             if successful_sms:
                 text = CUSTOMER_NO_SENT
                 status = 'success'
@@ -734,56 +697,47 @@ def get_cust_no():
                 status = 'danger'
 
             flash(text, status)
-
-        # mobile number not available
+        # Mobile number not available
         elif customer is not None and customer.mobile_number is None:
             flash(NO_MOBILE_NO, 'danger')
-        # invalid credentials
+        # Invalid credentials
         elif customer is None:
             flash(INVALID_CUSTOMER, 'danger')
 
         return redirect(url_for('get_cust_no'))
 
     # GET request
-    return render_template(
-        'customer_no.html',
-        form=form
-    )
+    return render_template('customer_no.html', form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """Route for self-care registration."""
     form = RegistrationForm()
-
+    # POST request for registration
     if form.validate_on_submit():
-        # get customer from login db
+        redirect_to = None
+        # Get customer from login db
         customer = CustomerLogin.query.filter_by(
             customer_no=form.customer_no.data
         ).first()
-
-        redirect_to = None
-
-        # valid customer and valid password
+        # Valid customer and valid password
         if customer is not None and customer.password_hash is not None:
             redirect_to = 'login'
             flash(ALREADY_REGISTERED, 'info')
-
-        # non-registered customer
+        # Non-registered customer
         elif customer is not None and customer.password_hash is None:
-            # get customer info
+            # Get customer info
             customer_info = CustomerInfo.query.filter_by(
                 customer_no=form.customer_no.data
             ).first()
-
-            # mobile number exists in db
+            # Mobile number exists in db
             if customer_info.mobile_number is not None:
-                # generate OTP
+                # Generate OTP
                 totp = TOTPFACTORY.new()
                 session['otp_data'] = totp.to_dict()
                 session['customer_no'] = form.customer_no.data
-                redirect_to = 'verify_otp'
-                # send SMS
+                # Send SMS
                 sms_msg = SMS_REG_OTP.format(totp.generate().token)
                 successful_sms = send_sms(
                     app.config['SMS_URL'],
@@ -795,22 +749,26 @@ def register():
                         'text': sms_msg,
                     }
                 )
-                # successfully sent OTP
+                # OTP sent
                 if successful_sms:
+                    redirect_to = 'verify_otp'
                     text = OTP_SENT
                     status = 'success'
                 # OTP not sent
                 else:
+                    redirect_to = 'register'
                     text = OTP_NOT_SENT
                     status = 'danger'
+                    # Remove OTP and customer data from session
+                    session.pop('otp_data', None)
+                    session.pop('customer_no', None)
 
                 flash(text, status)
-
-            # mobile number does not exist in db
+            # Mobile number does not exist in db
             elif customer_info.mobile_number is None:
+                redirect_to = 'register'
                 flash(NO_MOBILE_NO, 'danger')
-
-        # invalid customer
+        # Invalid customer
         elif customer is None:
             redirect_to = 'register'
             flash(USER_NOT_FOUND_IN_DB, 'danger')
@@ -818,36 +776,31 @@ def register():
         return redirect(url_for(redirect_to))
 
     # GET request
-    return render_template(
-        'register.html',
-        form=form
-    )
+    return render_template('register.html', form=form)
 
 
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot():
     """Route for generating new password for self-care."""
     form = ForgotPasswordForm()
-
+    # POST request for resetting password
     if form.validate_on_submit():
-        # get customer login credentials
+        redirect_to = None
+        # Get customer login credentials
         customer = CustomerLogin.query.filter_by(
             customer_no=form.customer_no.data
         ).first()
-
-        redirect_to = None
-
-        # valid customer and valid password
+        # Valid customer and valid password
         if customer is not None and customer.password_hash is not None:
-            # generate OTP
+            # Generate OTP
             totp = TOTPFACTORY.new()
             session['otp_data'] = totp.to_dict()
             session['customer_no'] = form.customer_no.data
-            redirect_to = 'verify_otp'
-            # send SMS
-            customer_info = CustomerInfo.query.filter_by(
+            # Get customer mobile number
+            mobile_number = CustomerInfo.query.filter_by(
                 customer_no=form.customer_no.data
-            ).first()
+            ).first().mobile_number
+            # Send SMS
             sms_msg = SMS_PWD_RESET_OTP.format(totp.generate().token)
             successful_sms = send_sms(
                 app.config['SMS_URL'],
@@ -855,26 +808,30 @@ def forgot():
                     'username': app.config['SMS_USERNAME'],
                     'password': app.config['SMS_PASSWORD'],
                     'from': app.config['SMS_SENDER'],
-                    'to': '91{}'.format(customer_info.mobile_number),
+                    'to': '91{}'.format(mobile_number),
                     'text': sms_msg,
                 }
             )
-            # check whether sms sent successfully
+            # OTP sent
             if successful_sms:
+                redirect_to = 'verify_otp'
                 text = OTP_SENT
                 status = 'success'
+            # OTP not sent
             else:
+                redirect_to = 'forgot'
                 text = OTP_NOT_SENT
                 status = 'danger'
+                # Remove OTP and customer data from session
+                session.pop('otp_data', None)
+                session.pop('customer_no', None)
 
             flash(text, status)
-
-        # non-registered customer
+        # Non-registered customer
         elif customer is not None and customer.password_hash is None:
             redirect_to = 'register'
             flash(NON_REGISTERED_USER, 'danger')
-
-        # invalid customer
+        # Invalid customer
         elif customer is None:
             redirect_to = 'forgot'
             flash(USER_NOT_FOUND_IN_DB, 'danger')
@@ -882,22 +839,17 @@ def forgot():
         return redirect(url_for(redirect_to))
 
     # GET request
-    return render_template(
-        'forgot_password.html',
-        form=form
-    )
+    return render_template('forgot_password.html', form=form)
 
 
 @app.route('/verify_otp', methods=['GET', 'POST'])
 def verify_otp():
     """Route for verifying OTP."""
     form = OTPVerificationForm()
-
+    # POST request for verifying OTP
     if form.validate_on_submit():
-        otp = form.otp.data
-
         redirect_to = None
-
+        otp = form.otp.data
         # Verify OTP
         totp = TOTPFACTORY.from_dict(session['otp_data'])
 
@@ -907,12 +859,12 @@ def verify_otp():
             otp_verified = False
         else:
             otp_verified = True
-
-        # destroy OTP data
+        # Destroy OTP data
         session.pop('otp_data', None)
-
+        # OTP is correct
         if otp_verified:
             redirect_to = 'set_password'
+        # OTP is incorrect
         elif not otp_verified:
             session.pop('customer_no', None)
             redirect_to = 'login'
@@ -921,49 +873,38 @@ def verify_otp():
         return redirect(url_for(redirect_to))
 
     # GET request
-    return render_template(
-        'verify_otp.html',
-        form=form
-    )
+    return render_template('verify_otp.html', form=form)
 
 
 @app.route('/set_password', methods=['GET', 'POST'])
 def set_password():
     """Route for setting new password for self-care."""
     form = SetPasswordForm()
-
+    # POST request for setting password
     if form.validate_on_submit():
         customer = CustomerLogin.query.filter_by(
             customer_no=session['customer_no']
         ).first()
-
-        # generate hashed password and store
-        hashed_pwd = pbkdf2_sha256.hash(str(form.password.data))
-        customer.password_hash = hashed_pwd
-
-        # make synchronous call to save password
-        db = current_app.extensions['sqlalchemy'].db
-        db.session.add(customer)
-        db.session.commit()
-
-        # remove customer number from session storage
+        # Generate hashed password and store
+        customer.password_hash = pbkdf2_sha256.hash(str(form.password.data))
+        # Save password in db
+        database = current_app.extensions['sqlalchemy'].db
+        database.session.commit()
+        # Remove customer number from session storage
         session.pop('customer_no', None)
 
         flash(SUCCESSFUL_PWD_SAVE, 'success')
         return redirect(url_for('login'))
 
     # GET request
-    return render_template(
-        'set_password.html',
-        form=form
-    )
+    return render_template('set_password.html', form=form)
 
 
 @app.route('/update_mobile_number', methods=['GET', 'POST'])
 def update_mobile_number():
     """Route for requesting mobile number update."""
     form = MobileNumberUpdateRequestForm()
-
+    # POST request for updating mobile number
     if form.validate_on_submit():
         form_data = {
             'old_phone_no': form.old_phone_no.data,
@@ -971,22 +912,19 @@ def update_mobile_number():
             'username_or_ip_address': form.username_or_ip_address.data,
             'postal_code': form.postal_code.data,
         }
-
-        # add data to db async
+        # Add data to db asynchronously
         add_mobile_number_update_request_to_db(form_data)
 
         flash(SUCCESSFUL_MOBILE_NO_UPDATE_REQUEST, 'success')
         return redirect(url_for('update_mobile_number'))
 
-    return render_template(
-        'update_mobile_number.html',
-        form=form
-    )
+    # GET request
+    return render_template('update_mobile_number.html', form=form)
 
 
 # Self-care portal views
 
-@app.route('/portal/', methods=['GET'])
+@app.route('/portal/')
 @login_required
 def portal():
     """Route for self-care portal."""
@@ -1058,40 +996,8 @@ def portal():
 @login_required
 def recharge():
     """Route for self-care portal recharge."""
-    # GET request
-    if request.method == 'GET':
-        plans = {
-            row.plan_code: row
-            for row in TariffInfo.query.options(FromCache(CACHE)).all()
-        }
-        # Get active plans for the user
-        # {plan_name: (price, validity, plan_code)}
-        active_plans = {
-            plans[plan_code].plan_name: (
-                plans[plan_code].price, validity_period, plan_code
-            )
-            for (_, plan_code, validity_period) in
-            session['portal_customer_data']['active_plans']
-            if plan_code in plans
-        }
-        # Get inactive plans for the user
-        # {plan_name: (price, validity, plan_code)}
-        inactive_plans = {
-            plans[plan_code].plan_name: (
-                plans[plan_code].price, validity_period, plan_code
-            )
-            for (_, plan_code, validity_period) in
-            session['portal_customer_data']['inactive_plans']
-            if plan_code in plans
-        }
-
-        return render_template(
-            'recharge.html',
-            active_plans=active_plans,
-            inactive_plans=inactive_plans
-        )
     # POST request
-    elif request.method == 'POST':
+    if request.method == 'POST':
         # Retrieve amount for plan code selected
         amount = TariffInfo.query.options(FromCache(CACHE)).\
             filter_by(plan_code=request.form['plan_code']).\
@@ -1134,59 +1040,45 @@ def recharge():
             form=form_data
         )
 
+    # GET request
+    plans = {
+        row.plan_code: row
+        for row in TariffInfo.query.options(FromCache(CACHE)).all()
+    }
+    # Get active plans for the user
+    # {plan_name: (price, validity, plan_code)}
+    active_plans = {
+        plans[plan_code].plan_name: (
+            plans[plan_code].price, validity_period, plan_code
+        )
+        for (_, plan_code, validity_period) in
+        session['portal_customer_data']['active_plans']
+        if plan_code in plans
+    }
+    # Get inactive plans for the user
+    # {plan_name: (price, validity, plan_code)}
+    inactive_plans = {
+        plans[plan_code].plan_name: (
+            plans[plan_code].price, validity_period, plan_code
+        )
+        for (_, plan_code, validity_period) in
+        session['portal_customer_data']['inactive_plans']
+        if plan_code in plans
+    }
+
+    return render_template(
+        'recharge.html',
+        active_plans=active_plans,
+        inactive_plans=inactive_plans
+    )
+
 
 @app.route('/portal/add_plan', methods=['GET', 'POST'])
 @login_required
 def add_plan():
     """Route for self-care portal add plan."""
-    # GET request
-    if request.method == 'GET':
-        zone_id = \
-            CustomerInfo.query.\
-            options(FromCache(CACHE)).\
-            filter_by(customer_no=session['portal_customer_no']).\
-            first().zone_id
-        # Get eligible plan codes for the user
-        zone_eligible_plan_codes = [
-            zone.plan_code_mqs
-            for zone in ZoneIDWithPlanCode.query.\
-            filter(
-                and_(
-                    ZoneIDWithPlanCode.zone_id == zone_id,
-                    ZoneIDWithPlanCode.status == 'ACTIVE'
-                )
-            ).all()
-        ]
-        # Get all plams
-        plans = {
-            row.plan_code: row
-            for row in TariffInfo.query.options(FromCache(CACHE)).all()
-        }
-        # Get available plan codes for the zone
-        available_plan_codes = \
-            set(plans.keys()).\
-            difference(session['portal_customer_data']['all_plans']).\
-            intersection(zone_eligible_plan_codes)
-        # Get available plans for the user
-        # {plan_name: (price, plan_code)}
-        available_plans = {
-            plans[plan_code].plan_name: (
-                plans[plan_code].price,
-                plan_code,
-                plans[plan_code].speed,
-                plans[plan_code].validity,
-                plans[plan_code].softphone,
-                plans[plan_code].plan_type,
-            )
-            for plan_code in available_plan_codes
-        }
-
-        return render_template(
-            'add_plan.html',
-            available_plans=available_plans,
-        )
     # POST request
-    elif request.method == 'POST':
+    if request.method == 'POST':
         # Retrieve amount for plan code selected
         amount = TariffInfo.query.options(FromCache(CACHE)).\
             filter_by(plan_code=request.form['plan_code']).first_or_404().price
@@ -1217,16 +1109,59 @@ def add_plan():
                 customer_mobile_no=mobile_no,
                 customer_email=app.config['RAZORPAY_DEFAULT_MAIL'],
                 amount=session['portal_amount'],
-                # list is used for passing data; check Razorpay docs
+                # List is used for passing data; check Razorpay docs
                 pay_source=['portal', 'addplan'],
             )
-            # store Razorpay order id for verification later
+            # Store Razorpay order id for verification later
             session['razorpay_order_id'] = form_data['order_id']
 
         return render_template(
             '{}_pay.html'.format(request.form['gateway']),
             form=form_data
         )
+
+    # GET request
+    zone_id = CustomerInfo.query.options(FromCache(CACHE)).\
+        filter_by(customer_no=session['portal_customer_no']).\
+        first().zone_id
+    # Get eligible plan codes for the user
+    zone_eligible_plan_codes = [
+        zone.plan_code_mqs
+        for zone in ZoneIDWithPlanCode.query.\
+        filter(
+            and_(
+                ZoneIDWithPlanCode.zone_id == zone_id,
+                ZoneIDWithPlanCode.status == 'ACTIVE'
+            )
+        ).all()
+    ]
+    # Get all plans
+    plans = {
+        row.plan_code: row
+        for row in TariffInfo.query.options(FromCache(CACHE)).all()
+    }
+    # Get available plan codes for the zone
+    available_plan_codes = set(plans.keys()).\
+        difference(session['portal_customer_data']['all_plans']).\
+        intersection(zone_eligible_plan_codes)
+    # Get available plans for the user
+    # {plan_name: (price, plan_code)}
+    available_plans = {
+        plans[plan_code].plan_name: (
+            plans[plan_code].price,
+            plan_code,
+            plans[plan_code].speed,
+            plans[plan_code].validity,
+            plans[plan_code].softphone,
+            plans[plan_code].plan_type,
+        )
+        for plan_code in available_plan_codes
+    }
+
+    return render_template(
+        'add_plan.html',
+        available_plans=available_plans,
+    )
 
 
 @app.route('/portal/receipt/<order_id>')
@@ -1274,7 +1209,7 @@ def docket():
     )
 
 
-@app.route('/portal/new_docket', methods=['GET', 'POST'])
+@app.route('/portal/docket/new', methods=['GET', 'POST'])
 @login_required
 def new_docket():
     """Route for self-care new docket."""
@@ -1285,7 +1220,7 @@ def new_docket():
             (row.ticket_nature_code, row.ticket_nature_desc)
             for row in TicketInfo.query.options(FromCache(CACHE)).all()
         ]
-        # POST request
+        # POST request for opening ticket
         if form.validate_on_submit():
             nature_code = form.nature.data
             remarks = form.remarks.data
@@ -1318,7 +1253,7 @@ def new_docket():
                     'opening_date': datetime.now().astimezone().date(),
                     'opening_time': datetime.now().astimezone().time()
                 }
-                # Add new ticket to db async
+                # Add new ticket to db asynchronously
                 add_new_ticket_to_db(ticket_data)
 
                 msg = SUCCESSFUL_DOCKET_GEN
@@ -1337,14 +1272,13 @@ def new_docket():
             allowed=True
         )
     # Open ticket exists
-    elif session.get('portal_open_ticket_no'):
-        return render_template(
-            'new_docket.html',
-            allowed=False
-        )
+    return render_template(
+        'new_docket.html',
+        allowed=False
+    )
 
 
-@app.route('/portal/close_docket')
+@app.route('/portal/docket/close', methods=['POST'])
 @login_required
 def close_docket():
     """Route for self-care close docket."""
@@ -1364,12 +1298,12 @@ def close_docket():
             ticket.closing_date = datetime.now().astimezone().date()
             ticket.closing_time = datetime.now().astimezone().time()
             # Close ticket in db
-            db = current_app.extensions['sqlalchemy'].db
-            db.session.commit()
+            database = current_app.extensions['sqlalchemy'].db
+            database.session.commit()
 
             msg = SUCCESSFUL_DOCKET_CLOSE.format(ticket_no)
             status = 'success'
-            # remove data from session variable
+            # Remove data from session variable
             session.pop('portal_open_ticket_no', None)
         else:
             msg = UNSUCCESSFUL_DOCKET_CLOSE.format(ticket_no)
@@ -1507,7 +1441,7 @@ def wishtalk():
     )
 
 
-@app.route('/portal/add_softphone', methods=['POST'])
+@app.route('/portal/wishtalk/add_softphone', methods=['POST'])
 @login_required
 def wishtalk_add_softphone():
     """Route for self-care portal softphone addition."""
@@ -1547,7 +1481,7 @@ def wishtalk_add_softphone():
         if current_softphone_allotment else 0
     # Setup forms
     add_softphone_form = AddSoftphoneForm()
-    # POST request
+    # POST request for adding softphone
     if add_softphone_form.validate_on_submit():
         # Create session to perform one-step read and write transaction
         db_session = SignallingSession(
@@ -1623,7 +1557,7 @@ def wishtalk_add_softphone():
                     'status': 'ACTIVE',
                     'category': softphone_category,
                 }
-                # Add softphone allotment to db async
+                # Add softphone allotment to db asynchronously
                 add_async_softphone_allotment.delay(data)
                 # Set SMS message based on platform
                 if add_softphone_form.softphone_platform.data == 'Android':
@@ -1673,8 +1607,8 @@ def wishtalk_add_softphone():
             ).first()
             softphone_no.softphone_status = 'FREE'
             # Make synchronous call to change status in db
-            db = current_app.extensions['sqlalchemy'].db
-            db.session.commit()
+            database = current_app.extensions['sqlalchemy'].db
+            database.session.commit()
 
             flash(UNSUCCESSFUL_SOFTPHONE_ALLOTMENT, 'danger')
 
@@ -1689,7 +1623,7 @@ def wishtalk_add_softphone():
 
 
 
-@app.route('/portal/update_profile', methods=['GET'])
+@app.route('/portal/update_profile')
 @login_required
 def update_profile():
     """Route for self-care portal profile update."""
@@ -1714,48 +1648,47 @@ def update_contact():
     update_profile_form = UpdateProfileForm()
     update_password_form = ChangePasswordForm()
     update_gst_form = UpdateGSTForm()
-    # POST request
+    # POST request for updating contact information
     if update_profile_form.validate_on_submit():
         # Check for empty inputs
         if not update_profile_form.new_phone_no.data and \
            not update_profile_form.new_email_address.data:
             return redirect(url_for('update_profile'))
 
-        else:
-            # Update profile details in MQS
-            profile = UpdateProfile(app)
-            profile.request(
-                cust_id=session['portal_customer_no'],
-                email=update_profile_form.new_email_address.data,
-                mobile_no=update_profile_form.new_phone_no.data
-            )
-            profile.response()
-            # Verify MQS ModifyCustomer status
-            db_status, flash_msg, msg_status = verify_mqs_updateprofile(profile)
-            # Data for profile update request in db
-            form_data = {
+        # Update profile details in MQS
+        profile = UpdateProfile(app)
+        profile.request(
+            cust_id=session['portal_customer_no'],
+            email=update_profile_form.new_email_address.data,
+            mobile_no=update_profile_form.new_phone_no.data
+        )
+        profile.response()
+        # Verify MQS ModifyCustomer status
+        db_status, flash_msg, msg_status = verify_mqs_updateprofile(profile)
+        # Data for profile update request in db
+        form_data = {
+            'customer_no': session['portal_customer_no'],
+            'new_phone_no': update_profile_form.new_phone_no.data,
+            'new_email': update_profile_form.new_email_address.data,
+            'status': db_status,
+            'request_date': datetime.now().astimezone().date(),
+            'request_time': datetime.now().astimezone().time(),
+        }
+        # Add request to db asynchronously
+        add_profile_update_request_to_db.delay(form_data)
+        # Only modify in database if request successful
+        if db_status == 'SUCCESS':
+            # Data for updating profile in db
+            update_data = {
                 'customer_no': session['portal_customer_no'],
-                'new_phone_no': update_profile_form.new_phone_no.data,
-                'new_email': update_profile_form.new_email_address.data,
-                'status': db_status,
-                'request_date': datetime.now().astimezone().date(),
-                'request_time': datetime.now().astimezone().time(),
+                'email': update_profile_form.new_email_address.data,
+                'mobile_no': update_profile_form.new_phone_no.data,
             }
-            # Add request to db async
-            add_profile_update_request_to_db.delay(form_data)
-            # Only modify in database if request successful
-            if db_status == 'SUCCESS':
-                # data for updating profile in db
-                update_data = {
-                    'customer_no': session['portal_customer_no'],
-                    'email': update_profile_form.new_email_address.data,
-                    'mobile_no': update_profile_form.new_phone_no.data,
-                }
-                # Update profile in db async
-                update_profile_in_db.delay(update_data)
+            # Update profile in db asynchronously
+            update_profile_in_db.delay(update_data)
 
-            flash(flash_msg, msg_status)
-            return redirect(url_for('update_profile'))
+        flash(flash_msg, msg_status)
+        return redirect(url_for('update_profile'))
     # Form validation error
     return render_template(
         'update_profile.html',
@@ -1773,7 +1706,7 @@ def change_password():
     update_profile_form = UpdateProfileForm()
     update_password_form = ChangePasswordForm()
     update_gst_form = UpdateGSTForm()
-    # POST request
+    # POST request for changing password
     if update_password_form.validate_on_submit():
         customer = CustomerLogin.query.filter_by(
             customer_no=session['portal_customer_no']
@@ -1795,9 +1728,9 @@ def change_password():
                     str(update_password_form.new_password.data)
                 )
                 customer.password_hash = hashed_pwd
-                # Make synchronous call to save password
-                db = current_app.extensions['sqlalchemy'].db
-                db.session.commit()
+                # Save password in db
+                database = current_app.extensions['sqlalchemy'].db
+                database.session.commit()
 
                 flash(NEW_PWD_SET, 'success')
         # Old password is incorrect
@@ -1822,7 +1755,7 @@ def update_gst():
     update_profile_form = UpdateProfileForm()
     update_password_form = ChangePasswordForm()
     update_gst_form = UpdateGSTForm()
-    # POST request
+    # POST request for updating GST
     if update_gst_form.validate_on_submit():
         form_data = {
             'customer_no': session['portal_customer_no'],
@@ -1830,7 +1763,7 @@ def update_gst():
             'request_date': datetime.now().astimezone().date(),
             'request_time': datetime.now().astimezone().time(),
         }
-        # Add data to db async
+        # Add data to db asynchronously
         add_gst_update_request_to_db.delay(form_data)
 
         flash(SUCCESSFUL_GST_UPDATE_REQUEST, 'success')
