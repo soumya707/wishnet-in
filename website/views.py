@@ -1618,6 +1618,8 @@ def wishtalk_add_softphone():
 
             flash(UNSUCCESSFUL_SOFTPHONE_ALLOTMENT, 'danger')
 
+        return redirect(url_for('wishtalk'))
+
     return render_template(
         'wishtalk.html',
         no_of_softphone_allowed=softphone_limit,
