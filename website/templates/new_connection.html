@@ -19,70 +19,74 @@
       <h5 class="text-justify">
         To avail a new connection, please fill in the form or you can also contact us at <strong><a href="tel:18004194244" class="text-red">1800-419-4244</a></strong>
       </h5>
-    </div> <!-- col -->
+    </div> {# col #}
 
     <div class="col-md-8 p-3">
-      <div class="content-section">
+      <form method="POST" id="new-connection-form">
+        {{ form.hidden_tag() }}
+        <div class="form-row">
+          {# FIRST NAME #}
+          <div class="col-md-4">
+            {{ render_field(form.first_name, class="required-field") }}
+          </div> {# col #}
+          {# MIDDLE NAME #}
+          <div class="col-md-4">
+            {{ render_field(form.middle_name) }}
+          </div> {# col #}
+          {# LAST NAME #}
+          <div class="col-md-4">
+            {{ render_field(form.last_name, class="required-field") }}
+          </div> {# col #}
+        </div> {# form row #}
 
-        <form method="POST">
-          {{ form.hidden_tag() }}
-          <fieldset class="form-group">
+        <div class="form-row">
+          {# ADDRESS #}
+          <div class="col">
+            {{ render_field(form.address, class="required-field") }}
+          </div> {# col #}
+        </div> {# row #}
 
-            <div class="form-row">
-              <!-- FIRST NAME -->
-              <div class="col-md-4">
-                {{ render_field(form.first_name, class="required-field") }}
-              </div> <!-- col -->
-              <!-- MIDDLE NAME -->
-              <div class="col-md-4">
-                {{ render_field(form.middle_name) }}
-              </div> <!-- col -->
-              <!-- LAST NAME -->
-              <div class="col-md-4">
-                {{ render_field(form.last_name, class="required-field") }}
-              </div> <!-- col -->
-            </div> <!-- form row -->
+        <div class="form-row">
+          {# LOCATION #}
+          <div class="col-md-3">
+            {{ render_select(form.location, class="required-field") }}
+          </div> {# col #}
+          {# PIN CODE #}
+          <div class="col-md-3">
+            {{ render_field(form.postal_code, class="required-field" )}}
+          </div> {# col #}
+          {# MOBILE NO. #}
+          <div class="col-md-3">
+            {{ render_field(form.phone_no, class="required-field") }}
+          </div> {# col #}
+          {# E-MAIL ADDRESS #}
+          <div class="col-md-3">
+            {{ render_field(form.email_address, class="required-field") }}
+          </div> {# col #}
+        </div> {# form-row #}
 
-            <div class="form-row">
-              <!-- ADDRESS -->
-              <div class="col">
-                {{ render_field(form.address, class="required-field") }}
-              </div> <!-- col -->
-            </div> <!-- row -->
+        {# REQUIRED FIELDS INFORMATION #}
+        <p><span style="color:red;">*</span> indicates a required field</p>
 
-            <div class="form-row">
-              <!-- LOCATION -->
-              <div class="col-md-3">
-                {{ render_select(form.location, class="required-field") }}
-              </div> <!-- col -->
-              <!-- PIN CODE -->
-              <div class="col-md-3">
-                {{ render_field(form.postal_code, class="required-field" )}}
-              </div> <!-- col -->
-              <!-- MOBILE NO. -->
-              <div class="col-md-3">
-                {{ render_field(form.phone_no, class="required-field") }}
-              </div> <!-- col -->
-              <!-- E-MAIL ADDRESS -->
-              <div class="col-md-3">
-                {{ render_field(form.email_address, class="required-field") }}
-              </div> <!-- col -->
-            </div> <!-- form-row -->
+        {# SUBMIT #}
+        {{ render_submit(form.submit, class="btn btn-red", id="new-connection-btn") }}
+      </form>
+    </div> {# col #}
 
-          </fieldset>
+  </div> {# row #}
 
-          <!-- REQUIRED FIELDS INFORMATION -->
-          <p><span style="color:red;">*</span> indicates a required field</p>
+</div> {# container #}
 
-          <!-- SUBMIT -->
-          {{ render_submit(form.submit, class="btn btn-red") }}
+{% endblock %}
 
-        </form>
-      </div> <!-- content-section -->
-    </div> <!-- col -->
-
-  </div> <!-- row -->
-
-</div> <!-- container -->
-
+{% block scripts %}
+  {{ super() }}
+  <script>
+    $(document).ready(function() {
+        $("#new-connection-form").submit(function(event) {
+            $("#new-connection-btn").prop("disabled", true);
+            $("#new-connection-btn").val("Submitting...");
+        });
+    })
+  </script>
 {% endblock %}

@@ -89,14 +89,17 @@
   <script>
     $(document).ready(function() {
         $("#update-profile-form").submit(function(event) {
+            $("#update-profile-btn").prop("disabled", true);
             $("#update-profile-btn").val("Updating...");
         });
         $("#change-pwd-form").submit(function(event) {
+            $("#change-pwd-btn").prop("disabled", true);
             $("#change-pwd-btn").val("Setting New Password...");
         });
         $("#update-gst-form").submit(function(event) {
+            $("#update-gst-btn").prop("disabled", true);
             $("#update-gst-btn").val("Submitting Request...");
         });
     });
-</script>
+  </script>
 {% endblock %}

@@ -59,7 +59,8 @@
   <script>
     $(document).ready(function() {
         $("#mobile-no-change-form").submit(function(event) {
-                $("#mobile-no-change-btn").val("Submitting request...");
+            $("#mobile-no-change-btn").prop("disabled", true);
+            $("#mobile-no-change-btn").val("Submitting request...");
         });
     })
   </script>

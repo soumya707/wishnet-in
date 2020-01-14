@@ -12,7 +12,7 @@
   {% if not allowed %}
     <h5 class="py-4 text-red">You already have an open docket. Please close that before proceeding.</h5>
   {% elif allowed %}
-    <form method="POST">
+    <form method="POST" id="new-docket-form">
       {{ form.hidden_tag() }}
       {# NATURE #}
       <div class="form-row">
@@ -28,10 +28,21 @@
         </div>
       </div>
       {# SUBMIT #}
-      {{ render_submit(form.submit, class="btn btn-red") }}
+      {{ render_submit(form.submit, id="new-docket-btn" class="btn btn-red") }}
     </form>
   {% endif %}
 
 </div> {# col #}
 
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script>
+    $(document).ready(function() {
+        $("#new-docket-form").submit(function(event) {
+            $("#new-docket-btn").prop("disabled", true);
+            $("#new-docket-btn").val("Submitting...");
+    });
+  </script>
 {% endblock %}

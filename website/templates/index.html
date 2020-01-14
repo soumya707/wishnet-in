@@ -4,11 +4,9 @@
 {% block title %}Wishnet{% endblock %}
 
 {% block content %}
-
-<!-- CAROUSEL -->
+{# CAROUSEL #}
 <div id="carouselDiv" class="carousel slide" data-ride="carousel">
-
-  <!-- Indicators -->
+  {# Indicators #}
   <ol class="carousel-indicators">
     {% for _ in carousel_images %}
     <li data-target="#carouselDiv"
@@ -16,8 +14,7 @@
         {% if loop.first %}class="active"{% endif %}></li>
     {% endfor %}
   </ol>
-
-  <!-- Images -->
+  {# Images #}
   <div class="carousel-inner" role="listbox">
     {% for img in carousel_images %}
     <div class="carousel-item {% if loop.first %}active{% endif %}">
@@ -26,14 +23,10 @@
     </div>
     {% endfor %}
   </div>
-
-</div> <!-- carousel -->
-
-<!-- RECHARGE FACILITY -->
+</div> {# carousel #}
+{# RECHARGE FACILITY #}
 <div class="container-fluid bg-dark-grey p-2">
-
   <div class="d-flex justify-content-center" style="flex-wrap: wrap;">
-
     <div>
       <form class="form-inline justify-content-center px-5 pt-2" method="POST" id="recharge-form">
         {{ form.hidden_tag() }}
@@ -41,138 +34,109 @@
         {{ render_submit_inline(form.submit, id="recharge-submit-btn")}}
       </form>
     </div>
-
     <div class="align-self-center">
       <a href="{{ url_for('get_cust_no') }}" class="text-white" data-toggle="tooltip"
          title="Know your customer ID">
         <i class="fas fa-info-circle fa-2x"></i>
       </a>
     </div>
-
-</div>
-    </div> <!-- container -->
-
-    <!-- SERVICES -->
-    <div class="container-fluid border-bottom">
-    <div class="row text-center">
+  </div>
+</div> {# container #}
+{# SERVICES #}
+<div class="container-fluid border-bottom">
+  <div class="row text-center">
     {% for service in services %}
-    <div class="col-sm-6 {{ loop.cycle('bg-white', 'bg-light-grey')}}">
-      <img src="{{ url_for('static', filename='img/services/{}.svg'.format(service.logo_id)) }}"
-           class="service-img py-3">
-      <h1 class="service-name text-red">{{ service.name }}</h1>
-      <h5>
-        <p class="description">{{ service.features |safe }}</p>
-      </h5>
-    </div> <!-- col -->
+      <div class="col-sm-6 {{ loop.cycle('bg-white', 'bg-light-grey')}}">
+        <img src="{{ url_for('static', filename='img/services/{}.svg'.format(service.logo_id)) }}"
+             class="service-img py-3">
+             <h1 class="service-name text-red">{{ service.name }}</h1>
+             <h5><p class="description">{{ service.features |safe }}</p></h5>
+      </div> {# col #}
     {% endfor %}
-  </div> <!-- row -->
-</div> <!-- container -->
-
-<!-- BEST PLANS -->
+  </div> {# row #}
+</div> {# container #}
+{# BEST PLANS #}
 <div class="container-fluid">
   <h3 class="py-4 heading">Featured Plans
     <div class="heading-underline-center"></div>
   </h3>
-
   <div class="card-deck p-1">
-
     {% for plan in plans %}
     <div class="card shadow plan-card">
-      <!-- Color bar at top -->
+      {# Color bar at top #}
       <div class="d-flex w-100 bg-red color-bar"></div>
-      <!-- Plan name -->
+      {# Plan name #}
       <div class="d-flex pt-3 pb-1 w-100 justify-content-center bg-light-grey">
         <h3>{{ plan.name }}</h3>
       </div>
-      <!-- Plan img -->
+      {# Plan img #}
       <img src="{{ url_for('static', filename='img/best_plans/{}.svg'.format(plan.logo_id)) }}">
-      <!-- Package speed -->
+      {# Package speed #}
       <div class="d-flex p-2 justify-content-center">
         <h5>{{ plan.speed }} Mbps speed</h5>
       </div>
-      <!-- Package validity -->
+      {# Package validity #}
       <div class="d-flex p-2 justify-content-center">
         <h5>{{ plan.validity }} days validity</h5>
       </div>
-      <!-- Package price -->
+      {# Package price #}
       <div class="d-flex p-2 justify-content-center">
         <h5>&#8377 {{ plan.price }} / month</h5>
       </div>
-
     </div>
     {% endfor %}
-
-  </div> <!-- card-deck -->
-
-  <!-- View all plans -->
+  </div> {# card-deck #}
+  {# View all plans #}
   <div class="d-flex py-4 justify-content-center">
     <a href="{{ url_for('tariff') }}" class="btn btn-red">
       <i class="far fa-list-alt"></i> Browse Plans
     </a>
-  </div> <!-- flex -->
-
-</div> <!-- container -->
-
-<!-- BROCHURES -->
+  </div> {# flex #}
+</div> {# container #}
+{# BROCHURES #}
 <div class="container-fluid bg-light-grey">
   <h3 class="py-4 heading">Downloads
     <div class="heading-underline-center"></div>
   </h3>
-
-    <div class="card-deck justify-content-center p-3 pb-5 text-center">
-
-      {% for download in downloads %}
+  <div class="card-deck justify-content-center p-3 pb-5 text-center">
+    {% for download in downloads %}
       <div class="card shadow-lg download-cards m-1">
         <div class="row no-gutters">
-
           <div class="col-sm-4">
             <img src="{{ url_for('static', filename='img/downloads/{}.svg'.format(download.img_id)) }}"
                  class="card-img download-img pt-2">
-          </div> <!-- col -->
-
+          </div> {# col #}
           <div class="col-sm-8">
             <div class="card-body">
               <h4 class="text-red text-left">{{ download.name }}</h4>
               <p class="card-text text-justify">{{ download.text }}</p>
-            </div> <!-- card-body -->
-
+            </div> {# card-body #}
             <div class="card-footer bg-white border-0 text-left pt-0">
               <a href="{{ url_for('static', filename='assets/{}'.format(download.link)) }}"
                  class="text-red"
                  download="{{ download.link }}">
                 <i class="fas fa-download"></i> Download
               </a>
-            </div> <!-- card-footer -->
-          </div> <!-- col -->
-
-        </div> <!-- row -->
-      </div> <!-- card -->
-      {% endfor %}
-
-    </div>
-
-</div> <!-- container -->
-
+            </div> {# card-footer #}
+          </div> {# col #}
+        </div> {# row #}
+      </div> {# card #}
+    {% endfor %}
+  </div> {# card-deck #}
+</div> {# container #}
 {% endblock %}
 
 {% block scripts %}
-
   {{ super() }}
-
   <script>
-
     $(document).ready(function() {
-
-       // enable tooltip
-       $('[data-toggle="tooltip"]').tooltip();
-
+        // enable tooltip
+        $('[data-toggle="tooltip"]').tooltip();
         // loading stage for recharge request
         $("#recharge-form").submit(function(event) {
-                $("#recharge-submit-btn").val("Loading...");
+            $("#recharge-submit-btn").prop("disabled", true);
+            $("#recharge-submit-btn").val("Loading...");
         });
-
     })
-
   </script>
-
 {% endblock %}
