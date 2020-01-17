@@ -6,7 +6,10 @@ from celery import Celery
 from flask_mail import Mail, Message
 
 from website import app, db
-from website.models import *
+from website.models import (
+    CustomerInfo, EmailAddressUpdateRequest, GSTUpdateRequest,
+    MobileNumberUpdateRequest, NewConnection, RechargeEntry, SoftphoneEntry,
+    Ticket, UpdateProfileRequest)
 
 
 # setup Flask-Mail
@@ -14,6 +17,7 @@ mail = Mail(app)
 
 
 def make_celery(flask_app):
+    """Make a Celery instance with Flask context."""
     celery = Celery(__name__)
 
     class ContextTask(celery.Task):
@@ -137,6 +141,18 @@ def add_mobile_number_update_request_to_db(data):
         postal_code=data['postal_code']
     )
     db.session.add(update_mobile_no)
+    db.session.commit()
+
+
+@celery.task
+def add_email_address_update_request_to_db(data):
+    """Asynchronously add email address update request to database."""
+    update_email_address = EmailAddressUpdateRequest(
+        email_address=data['email_address'],
+        username_or_ip_address=data['username_or_ip_address'],
+        postal_code=data['postal_code']
+    )
+    db.session.add(update_email_address)
     db.session.commit()
 
 

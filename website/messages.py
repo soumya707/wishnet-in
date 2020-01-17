@@ -124,6 +124,12 @@ SUCCESSFUL_MOBILE_NO_UPDATE_REQUEST = (
     'the procedure is complete.'
 )
 
+# SUCCESSFUL EMAIL ADDRESS REQUEST
+SUCCESSFUL_EMAIL_ADDRESS_UPDATE_REQUEST = (
+    'Update request sent successfully! We will confirm you once '
+    'the procedure is complete.'
+)
+
 # SUCCESSFUL DOCKET GENERATE
 SUCCESSFUL_DOCKET_GEN = 'Docket generated successfully.'
 

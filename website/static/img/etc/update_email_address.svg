@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2540 2540" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd">
+  <defs>
+    <style>
+      .str1{stroke:red;stroke-width:16.93}.fil0{fill:none}
+    </style>
+  </defs>
+  <g id="Layer_x0020_1">
+    <circle class="fil0" cx="1270" cy="1270" r="1194" stroke="#2b2a29" stroke-width="67.73"/>
+    <path class="fil0 str1" d="M1454 405c147-28 283 37 344 156 9 18 15 43 24 55l-109 21c17 38 232 225 247 257 22-11 70-146 79-169l55-129c19-43 21-37-87-16-8-39-50-99-72-124-143-157-355-184-542-64-14 9-20 11-31 23-10 12-15 24 7 22 9 0 54-26 85-32zM450 2032l92-18c23 32 28 68 75 120 60 66 138 115 226 134 92 19 196 4 278-42l69-44c17-16 10-14 7-18-6-10 10-21-41 5-91 46-211 28-290-18-95-57-127-164-133-173l108-21c-9-20-43-51-59-67-21-21-41-39-63-61s-39-41-62-62c-15-14-54-50-63-67-17 8-17 19-23 36-7 16-11 26-17 41-15 36-103 235-104 255z"/>
+    <g id="_254099672">
+      <rect class="fil0" x="717" y="881" width="1105" height="780" rx="84" ry="84" stroke="red" stroke-width="48.59"/>
+      <path class="fil0" stroke="red" stroke-width="48.59" d="M742 905l528 366 526-368"/>
+    </g>
+  </g>
+</svg>

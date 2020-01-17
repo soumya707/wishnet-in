@@ -189,6 +189,29 @@ class MobileNumberUpdateRequestForm(FlaskForm):
     submit = SubmitField('Submit Request')
 
 
+class EmailAddressUpdateRequestForm(FlaskForm):
+    """Class for requesting email address update form (outside portal)."""
+    email_address = StringField(
+        'Email Address',
+        validators=[
+            InputRequired(),
+            Email(message='Invalid email address.')
+        ]
+    )
+    username_or_ip_address = StringField(
+        'Username / IP Address',
+        validators=[InputRequired()]
+    )
+    postal_code = StringField(
+        'Pin Code',
+        validators=[
+            InputRequired(),
+            Regexp(r'^[7]+\d{5}$', message='Invalid postal code.')
+        ]
+    )
+    submit = SubmitField('Submit Request')
+
+
 class UpdateGSTForm(FlaskForm):
     """Class for updating GST information form."""
     gst_no = StringField(

@@ -431,6 +431,22 @@ class MobileNumberUpdateRequest(db.Model):
         return self.username_or_ip_address
 
 
+# Email address update requests
+class EmailAddressUpdateRequest(db.Model):
+    """Class for representing email address update requests."""
+
+    __bind_key__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    email_address = db.Column(db.String(100), nullable=False)
+    username_or_ip_address = db.Column(db.String(50), nullable=False)
+    postal_code = db.Column(db.String(6), nullable=False)
+    status = db.Column(db.String(10), nullable=False, default='PENDING')
+
+    def __str__(self):
+        return self.username_or_ip_address
+
+
 # GST number update requests
 class GSTUpdateRequest(db.Model):
     """Class for representing GST update requests."""

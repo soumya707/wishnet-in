@@ -106,6 +106,8 @@ admin.add_view(
 )
 admin.add_view(NOCModelView(
     MobileNumberUpdateRequest, db.session, category='Customer Info'))
+admin.add_view(NOCModelView(
+    EmailAddressUpdateRequest, db.session, category='Customer Info'))
 admin.add_view(
     GSTUpdateRequestModelView(
         GSTUpdateRequest, db.session, category='Customer Info'

@@ -35,9 +35,10 @@ from website.razorpay_utils import get_notes, make_order, verify_signature
 from website.softphone_utils import *
 from website.utils import *
 from website.tasks import (
-    add_async_softphone_allotment, add_gst_update_request_to_db,
-    add_mobile_number_update_request_to_db, add_new_connection_data_to_db,
-    add_new_ticket_to_db, add_profile_update_request_to_db, add_txn_data_to_db,
+    add_async_softphone_allotment, add_email_address_update_request_to_db,
+    add_gst_update_request_to_db, add_mobile_number_update_request_to_db,
+    add_new_connection_data_to_db, add_new_ticket_to_db,
+    add_profile_update_request_to_db, add_txn_data_to_db,
     send_async_new_connection_mail, update_profile_in_db)
 
 
@@ -920,6 +921,27 @@ def update_mobile_number():
 
     # GET request
     return render_template('update_mobile_number.html', form=form)
+
+
+@app.route('/update_email_address', methods=['GET', 'POST'])
+def update_email_address():
+    """Route for requesting email address update."""
+    form = EmailAddressUpdateRequestForm()
+    # POST request for updating email address
+    if form.validate_on_submit():
+        form_data = {
+            'email_address': form.email_address.data,
+            'username_or_ip_address': form.username_or_ip_address.data,
+            'postal_code': form.postal_code.data,
+        }
+        # Add data to db asynchronously
+        add_email_address_update_request_to_db(form_data)
+
+        flash(SUCCESSFUL_EMAIL_ADDRESS_UPDATE_REQUEST, 'success')
+        return redirect(url_for('update_email_address'))
+
+    # GET request
+    return render_template('update_email_address.html', form=form)
 
 
 # Self-care portal views
