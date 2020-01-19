@@ -1408,7 +1408,7 @@ def transaction_history():
     )
 
 
-@app.route('/portal/wishtalk', methods=['GET'])
+@app.route('/portal/wishtalk')
 @login_required
 def wishtalk():
     """Route for self-care Wishtalk."""

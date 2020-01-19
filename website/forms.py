@@ -218,10 +218,10 @@ class UpdateGSTForm(FlaskForm):
         'GST Number',
         validators=[
             InputRequired(),
-            Regexp(r'^[A-Z0-9]{15}$', message='Invalid GST number.')
+            Regexp(r'^[A-Z0-9]{15}$', message='Invalid GSTIN.')
         ]
     )
-    submit = SubmitField('Submit Request')
+    submit = SubmitField('Update GSTIN')
 
 
 class UpdateAadhaarForm(FlaskForm):
