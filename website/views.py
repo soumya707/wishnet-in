@@ -1003,6 +1003,8 @@ def portal():
         'mobile_no': cust_data_from_db.mobile_number,
         'email': cust_data_from_db.email_id,
         'partner': cust_data_from_db.zone_name,
+        'aadhaar': cust_data_from_db.aadhaar if cust_data_from_db.aadhaar \
+        else 'NOT FOUND',
         'gstin': customer_gst if customer_gst else 'NOT REGISTERED',
     }
 
