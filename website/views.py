@@ -1661,12 +1661,14 @@ def update_profile():
     update_profile_form = UpdateProfileForm()
     update_password_form = ChangePasswordForm()
     update_gst_form = UpdateGSTForm()
+    update_aadhaar_form = UpdateAadhaarForm()
 
     return render_template(
         'update_profile.html',
         update_profile_form=update_profile_form,
         update_password_form=update_password_form,
-        update_gst_form=update_gst_form
+        update_gst_form=update_gst_form,
+        update_aadhaar_form=update_aadhaar_form
     )
 
 
@@ -1678,6 +1680,7 @@ def update_contact():
     update_profile_form = UpdateProfileForm()
     update_password_form = ChangePasswordForm()
     update_gst_form = UpdateGSTForm()
+    update_aadhaar_form = UpdateAadhaarForm()
     # POST request for updating contact information
     if update_profile_form.validate_on_submit():
         # Check for empty inputs
@@ -1724,7 +1727,8 @@ def update_contact():
         'update_profile.html',
         update_profile_form=update_profile_form,
         update_password_form=update_password_form,
-        update_gst_form=update_gst_form
+        update_gst_form=update_gst_form,
+        update_aadhaar_form=update_aadhaar_form
     )
 
 
@@ -1736,6 +1740,7 @@ def change_password():
     update_profile_form = UpdateProfileForm()
     update_password_form = ChangePasswordForm()
     update_gst_form = UpdateGSTForm()
+    update_aadhaar_form = UpdateAadhaarForm()
     # POST request for changing password
     if update_password_form.validate_on_submit():
         customer = CustomerLogin.query.filter_by(
@@ -1773,7 +1778,8 @@ def change_password():
         'update_profile.html',
         update_profile_form=update_profile_form,
         update_password_form=update_password_form,
-        update_gst_form=update_gst_form
+        update_gst_form=update_gst_form,
+        update_aadhaar_form=update_aadhaar_form
     )
 
 
@@ -1785,6 +1791,7 @@ def update_gst():
     update_profile_form = UpdateProfileForm()
     update_password_form = ChangePasswordForm()
     update_gst_form = UpdateGSTForm()
+    update_aadhaar_form = UpdateAadhaarForm()
     # POST request for updating GST
     if update_gst_form.validate_on_submit():
         form_data = {
@@ -1803,5 +1810,38 @@ def update_gst():
         'update_profile.html',
         update_profile_form=update_profile_form,
         update_password_form=update_password_form,
-        update_gst_form=update_gst_form
+        update_gst_form=update_gst_form,
+        update_aadhaar_form=update_aadhaar_form
+    )
+
+
+@app.route('/portal/update_aadhaar', methods=['POST'])
+@login_required
+def update_aadhaar():
+    """Route for self-care Aadhaar information update."""
+    # Setup forms
+    update_profile_form = UpdateProfileForm()
+    update_password_form = ChangePasswordForm()
+    update_gst_form = UpdateGSTForm()
+    update_aadhaar_form = UpdateAadhaarForm()
+    # POST request for updating Aadhaar
+    if update_aadhaar_form.validate_on_submit():
+        # Get customer information from database
+        customer = CustomerInfo.query.filter_by(
+            customer_no=session['portal_customer_no']
+        ).first()
+        # Modify Aadhaar data
+        customer.aadhaar = update_aadhaar_form.aadhaar.data
+        database = current_app.extensions['sqlalchemy'].db
+        database.session.commit()
+
+        flash(SUCCESSFUL_AADHAAR_UPDATE, 'success')
+        return redirect(url_for('update_profile'))
+    # Form validation error
+    return render_template(
+        'update_profile.html',
+        update_profile_form=update_profile_form,
+        update_password_form=update_password_form,
+        update_gst_form=update_gst_form,
+        update_aadhaar_form=update_aadhaar_form
     )

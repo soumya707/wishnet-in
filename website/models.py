@@ -316,6 +316,7 @@ class CustomerInfo(db.Model):
     user_name = db.Column(db.String(100), nullable=False)
     mobile_number = db.Column(db.String(10), nullable=True)
     email_id = db.Column(db.String(100), nullable=True)
+    aadhaar = db.Column(db.String(12), nullable=True)
     ip_addr = db.Column(db.String(100), nullable=False)
     zone_name = db.Column(db.String(100), nullable=True)
     package = db.Column(db.String(100), nullable=True)

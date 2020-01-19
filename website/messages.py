@@ -162,6 +162,9 @@ SUCCESSFUL_GST_UPDATE_REQUEST = (
     'We will notify you when the procedure is complete.'
 )
 
+# AADHAAR DATA UPDATED SUCCESSFULLY
+SUCCESSFUL_AADHAAR_UPDATE = 'Aadhaar updated successfully!'
+
 # SUCCESSFUL SOFTPHONE NUMBER ALLOCATION
 SUCCESSFUL_SOFTPHONE_ALLOTMENT = 'Your softphone number has been successfully created.'
 

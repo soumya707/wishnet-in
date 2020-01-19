@@ -56,7 +56,7 @@
   </div>
   {# UPDATE GST #}
   <h4 class="py-4">Update GST Information</h4>
-  <div>
+  <div class="border-bottom">
     <form action={{ url_for('update_gst') }}
           method="POST"
           id="update-gst-form">
@@ -79,6 +79,23 @@
           {{ render_submit(update_gst_form.submit, id="update-gst-btn", class="btn btn-red btn-update-profile") }}
     </form>
   </div>
+  {# UPDATE AADHAAR #}
+  <h4 class="py-4">Update Aadhaar Information</h4>
+  <div>
+    <form action={{ url_for('update_aadhaar') }}
+          method="POST"
+          id="update-aadhaar-form">
+          {{ update_aadhaar_form.hidden_tag() }}
+          {# AADHAAR NUMBER #}
+          <div class="form-row">
+            <div class="col-md-4">
+              {{ render_field(update_aadhaar_form.aadhaar) }}
+            </div>
+          </div>
+          {# SUBMIT #}
+          {{ render_submit(update_aadhaar_form.submit, id="update-aadhaar-btn", class="btn btn-red btn-update-profile") }}
+    </form>
+  </div>
 
 </div> {# col #}
 
@@ -99,6 +116,10 @@
         $("#update-gst-form").submit(function(event) {
             $("#update-gst-btn").prop("disabled", true);
             $("#update-gst-btn").val("Submitting Request...");
+        });
+        $("#update-aadhaar-form").submit(function(event) {
+            $("#update-aadhaar-btn").prop("disabled", true);
+            $("#update-aadhaar-btn").val("Updating Aadhaar...");
         });
     });
   </script>

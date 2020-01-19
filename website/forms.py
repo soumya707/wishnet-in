@@ -224,6 +224,18 @@ class UpdateGSTForm(FlaskForm):
     submit = SubmitField('Submit Request')
 
 
+class UpdateAadhaarForm(FlaskForm):
+    """Class for updating Aadhaar information form."""
+    aadhaar = StringField(
+        'Aadhaar',
+        validators=[
+            InputRequired(),
+            Regexp(r'^[0-9]{12}$', message='Invalid Aadhaar.')
+        ]
+    )
+    submit = SubmitField('Update Aadhaar')
+
+
 class AddSoftphoneForm(FlaskForm):
     """Class for adding softphone number form."""
     name = StringField(
