@@ -322,8 +322,8 @@ class CustomerInfo(db.Model):
     package = db.Column(db.String(100), nullable=True)
     soft_limit = db.Column(db.Integer, nullable=True)
     ott_limit = db.Column(db.Integer, nullable=True)
-    installation_address = db.Column(db.String(500), nullable=False)
-    billing_address = db.Column(db.String(500), nullable=False)
+    installation_address = db.Column(db.String(500), nullable=True)
+    billing_address = db.Column(db.String(500), nullable=True)
 
     def __str__(self):
         return self.customer_no
@@ -504,3 +504,35 @@ class SoftphoneEntry(db.Model):
 
     def __str__(self):
         return self.cust_no
+
+
+# LCO self-care information
+class LCOInfo(db.Model):
+    """Class for representing LCO basic info."""
+
+    __bind_key__ = 'lco'
+
+    id = db.Column(db.Integer, primary_key=True)
+    lco_code = db.Column(db.String(10), nullable=False)
+    name = db.Column(db.String(100), nullable=True)
+    address = db.Column(db.String(500), nullable=True)
+    email_id = db.Column(db.String(50), nullable=True)
+    mobile_number = db.Column(db.String(10), nullable=True)
+    status = db.Column(db.Integer, nullable=False)
+
+    def __str__(self):
+        return self.code
+
+
+# LCO self-care login details
+class LCOLogin(db.Model):
+    """Class for representing LCO login authentication."""
+
+    __bind_key__ = 'lco'
+
+    id = db.Column(db.Integer, primary_key=True)
+    lco_code = db.Column(db.String(10), nullable=False)
+    password_hash = db.Column(db.String(100), nullable=True)
+
+    def __str__(self):
+        return self.lco_code

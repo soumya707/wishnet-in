@@ -140,6 +140,8 @@ admin.add_view(TicketModelView(Ticket, db.session, category='Ticket'))
 admin.add_view(NOCModelView(SoftphoneNumber, db.session, category='Softphone'))
 admin.add_view(NOCModelView(SoftphoneEntry, db.session, category='Softphone'))
 
+admin.add_view(NOCModelView(LCOLogin, db.session, category='LCO Info'))
+admin.add_view(NOCModelView(LCOInfo, db.session, category='LCO Info'))
 
 # define a context processor for merging flask-admin's template context into the
 # flask-security views.
