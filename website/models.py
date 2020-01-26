@@ -506,6 +506,85 @@ class SoftphoneEntry(db.Model):
         return self.cust_no
 
 
+# Class for representing OTT voucher
+class Voucher(db.Model):
+
+    __bind_key__ = 'voucher'
+    __tablename__ = 'tbl_voucher'
+
+    id = db.Column(db.Integer, primary_key=True)
+    ott_provider_code = db.Column(db.String(8), nullable=False)
+    ott_pkg_code = db.Column(db.String(8), nullable=False)
+    ott_voucher_code = db.Column(db.String(50), nullable=False)
+    ott_voucher_start_dt = db.Column(db.Date, nullable=False)
+    ott_voucher_end_dt = db.Column(db.Date, nullable=False)
+    ott_voucher_status = db.Column(db.String(15), nullable=False)
+
+    def __str__(self):
+        return self.ott_voucher_code
+
+
+# Class for representing OTT allotment entry
+class VoucherEntry(db.Model):
+
+    __bind_key__ = 'voucher'
+    __tablename__ = 'tbl_ott_voucher_log'
+
+    id = db.Column(db.Integer, primary_key=True)
+    ott_provider_code = db.Column(db.String(8), nullable=False)
+    ott_provider_name = db.Column(db.String(50), nullable=False)
+    ott_pkg_code = db.Column(db.String(8), nullable=False)
+    ott_pkg_name = db.Column(db.String(50), nullable=False)
+    ott_voucher_code = db.Column(db.String(50), nullable=False)
+    customer_no = db.Column(db.String(100), nullable=False)
+    plan_code = db.Column(db.String(50), nullable=False)
+    voucher_send_dt = db.Column(db.Date, nullable=False)
+    voucher_end_dt = db.Column(db.Date, nullable=False)
+
+    def __str__(self):
+        return self.ott_voucher_code
+
+
+# Class for representing OTT provider
+class VoucherProvider(db.Model):
+
+    __bind_key__ = 'voucher'
+    __tablename__ = 'tbl_ott_provider'
+
+    id = db.Column(db.Integer, primary_key=True)
+    ott_provider_code = db.Column(db.String(8), nullable=False)
+    ott_provider_name = db.Column(db.String(100), nullable=False)
+    ott_provider_app_name = db.Column(db.String(50), nullable=False)
+    ott_provider_reg_date = db.Column(db.Date, nullable=True)
+    ott_provider_user_limit = db.Column(db.Integer, nullable=True)
+    ott_provider_status = db.Column(db.String(15), nullable=False)
+
+    def __str__(self):
+        return self.ott_provider_name
+
+
+# Class for representing OTT package
+class VoucherPackage(db.Model):
+
+    __bind_key__ = 'voucher'
+    __tablename__ = 'tbl_ott_pkg'
+
+    id = db.Column(db.Integer, primary_key=True)
+    ott_provider_code = db.Column(db.String(8), index=True)
+    ott_provider_name = db.Column(db.String(100), nullable=False)
+    ott_pkg_code = db.Column(db.String(8), unique=True, nullable=False)
+    ott_pkg_name = db.Column(db.String(100), nullable=False)
+    ott_pkg_rate = db.Column(db.Float(10), nullable=False)
+    ott_pkg_validity = db.Column(db.Integer, nullable=True)
+    ott_pkg_start_dt = db.Column(db.Date, nullable=True)
+    ott_pkg_end_dt = db.Column(db.Date, nullable=True)
+    ott_pkg_priority = db.Column(db.Integer, unique=True, nullable=False)
+    ott_pkg_status = db.Column(db.String(15), nullable=False)
+
+    def __str__(self):
+        return self.ott_provider_code
+
+
 # LCO self-care information
 class LCOInfo(db.Model):
     """Class for representing LCO basic info."""

@@ -140,6 +140,11 @@ admin.add_view(TicketModelView(Ticket, db.session, category='Ticket'))
 admin.add_view(NOCModelView(SoftphoneNumber, db.session, category='Softphone'))
 admin.add_view(NOCModelView(SoftphoneEntry, db.session, category='Softphone'))
 
+admin.add_view(NOCModelView(VoucherProvider, db.session, category='Vouchers'))
+admin.add_view(NOCModelView(VoucherPackage, db.session, category='Vouchers'))
+admin.add_view(NOCModelView(Voucher, db.session, category='Vouchers'))
+admin.add_view(NOCModelView(VoucherEntry, db.session, category='Vouchers'))
+
 admin.add_view(NOCModelView(LCOLogin, db.session, category='LCO Info'))
 admin.add_view(NOCModelView(LCOInfo, db.session, category='LCO Info'))
 
