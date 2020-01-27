@@ -972,13 +972,13 @@ def portal():
         if plan_code in plans
     }
     # Get GSTIN for customer
-    customer_gst = GSTUpdateRequest.query.filter(
-        and_(
-            GSTUpdateRequest.customer_no == \
-            session['portal_customer_no'],
-            GSTUpdateRequest.status == 'REGISTERED'
-        )
-    ).first()
+    customer_gst = GSTUpdateRequest.query.\
+        filter(
+            and_(
+                GSTUpdateRequest.customer_no == session['portal_customer_no'],
+                GSTUpdateRequest.status == 'REGISTERED'
+            )
+        ).order_by(GSTUpdateRequest.id.desc()).first()
     # Get customer details
     cust_data_from_db = CustomerInfo.query.filter_by(
         customer_no=session['portal_customer_no']
@@ -1005,7 +1005,7 @@ def portal():
         'partner': cust_data_from_db.zone_name,
         'aadhaar': cust_data_from_db.aadhaar if cust_data_from_db.aadhaar \
         else 'NOT FOUND',
-        'gstin': customer_gst if customer_gst else 'NOT REGISTERED',
+        'gstin': customer_gst.gst_no if customer_gst else 'NOT REGISTERED',
     }
 
     return render_template(
