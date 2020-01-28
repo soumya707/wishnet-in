@@ -1784,8 +1784,12 @@ def wishott():
         allowed_packages = plan_tariff.ott_package_codes.split(',')
         # Get latest online transaction
         last_transaction = RechargeEntry.query.\
-            filter_by(customer_no=session['portal_customer_no']).\
-            order_by(RechargeEntry.payment_date.desc()).first()
+            filter(
+                and_(
+                    RechargeEntry.customer_no == session['portal_customer_no'],
+                    RechargeEntry.payment_status == 'SUCCESS'
+                )
+            ).order_by(RechargeEntry.payment_date.desc()).first()
         # Check if latest plan active via online transaction
         if last_transaction:
             # Current OTT allotment
@@ -1794,7 +1798,8 @@ def wishott():
                     and_(
                         VoucherEntry.voucher_send_dt >= \
                         last_transaction.payment_date,
-                        VoucherEntry.customer_no == session['portal_customer_no']
+                        VoucherEntry.customer_no == \
+                        session['portal_customer_no']
                     )
                 ).all()
             ott_allotted = len(current_ott_allotment) \
