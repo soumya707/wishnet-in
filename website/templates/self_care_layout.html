@@ -49,6 +49,11 @@
           <i class="fas fa-phone-alt pl-1"></i>
           <span class="pl-1">WishTalk</span>
         </a>
+        <a class="list-group-item list-group-item-action {% if request.path == url_for('wishott') %}active{% endif %}"
+           href="{{ url_for('wishott') }}">
+          <i class="fas fa-film pl-1"></i>
+          <span class="pl-1">Wish OTT</span>
+        </a>
         <a class="list-group-item list-group-item-action {% if request.path == url_for('update_profile') %}active{% endif %}"
            href="{{ url_for('update_profile') }}">
           <i class="fas fa-user-edit pl-1"></i>

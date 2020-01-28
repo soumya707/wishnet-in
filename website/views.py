@@ -1653,6 +1653,184 @@ def wishtalk_add_softphone():
     )
 
 
+@app.route('/portal/wish_ott', methods=['GET', 'POST'])
+@login_required
+def wishott():
+    """Route for self-care Wish OTT."""
+    # Get all plans
+    plans = {
+        row.plan_code: row
+        for row in TariffInfo.query.options(FromCache(CACHE)).all()
+    }
+    # Get active plans for the user
+    # [(plan_code, validity_end_date)]
+    active_plans = [
+        (plan_code, validity_period.split(' - ')[0])
+        for (_, plan_code, validity_period) in
+        session['portal_customer_data']['active_plans']
+        if plan_code in plans
+    ]
+
+    # POST request for getting voucher
+    if request.method == 'POST':
+        # Get OTT package code from form
+        voucher_package_code = request.form['ott-package']
+        # Create session to perform one-step read and write transaction
+        db_session = SignallingSession(
+            current_app.extensions['sqlalchemy'].db
+        )
+        # DATABASE OPERATION
+        # Initiate transaction
+        try:
+            # Get ACTIVE voucher from the specific provider
+            ott_voucher = db_session.query(Voucher).filter(
+                and_(
+                    Voucher.ott_pkg_code == voucher_package_code,
+                    Voucher.ott_voucher_status == 'ACTIVE',
+                    Voucher.ott_voucher_start_dt <= datetime.now().date(),
+                    Voucher.ott_voucher_end_dt > datetime.now().date()
+                )
+            ).order_by(Voucher.id.asc()).first()
+            # Store required data
+            voucher_provider_code = ott_voucher.ott_provider_code
+            voucher_code = ott_voucher.ott_voucher_code
+            voucher_end_date = ott_voucher.ott_voucher_end_dt
+            # Change status to ALLOTTED
+            ott_voucher.ott_voucher_status = 'ALLOTTED'
+            # Commit changes
+            db_session.commit()
+        # Rollback on failure
+        except:
+            ott_voucher = None
+            db_session.rollback()
+        # Close connection (fallback in case of failure)
+        finally:
+            db_session.close()
+
+        # Successful voucher retrieval from database
+        if ott_voucher:
+            # Get OTT provider info
+            provider = VoucherProvider.query.\
+                filter_by(ott_provider_code=voucher_provider_code).first()
+            # Get OTT package info
+            package = VoucherPackage.query.\
+                filter_by(ott_pkg_code=voucher_package_code).first()
+            # Create data for db entry
+            data = {
+                'ott_provider_code': voucher_provider_code,
+                'ott_provider_name': provider.ott_provider_name,
+                'ott_package_code': voucher_package_code,
+                'ott_package_name': package.ott_pkg_name,
+                'ott_voucher_code': voucher_code,
+                'customer_no': session['portal_customer_no'],
+                'plan_code': active_plans[-1][0],
+                'send_date': datetime.now().astimezone().date(),
+                'expiry_date': voucher_end_date,
+            }
+
+            # Add voucher allotment data to database asynchronously
+            add_async_voucher_allotment.delay(data)
+            # Get customer mobile number
+            customer_mobile_number = CustomerInfo.query.\
+                filter_by(customer_no=session['portal_customer_no']).\
+                first().mobile_number
+            # Send voucher to mobile number via SMS
+            sms_msg = SUCCESSFUL_VOUCHER_SMS.format(
+                provider.ott_provider_app_name,
+                voucher_code,
+                package.ott_pkg_name,
+                voucher_end_date
+            )
+            # Send SMS
+            successful_sms = send_sms(
+                app.config['SMS_URL'],
+                {
+                    'username': app.config['SMS_USERNAME'],
+                    'password': app.config['SMS_PASSWORD'],
+                    'from': app.config['SMS_SENDER'],
+                    'to': '91{}'.format(customer_mobile_number),
+                    'text': sms_msg,
+                }
+            )
+            # SMS sent
+            if successful_sms:
+                text = SUCCESSFUL_VOUCHER_ALLOTMENT
+                status = 'success'
+            # SMS not sent
+            elif not successful_sms:
+                text = UNSUCCESSFUL_VOUCHER_SMS
+                status = 'danger'
+
+            flash(text, status)
+
+        # Unsuccessful voucher retrieval from database
+        elif not ott_voucher:
+            flash(UNSUCCESSFUL_VOUCHER_ALLOTMENT, 'danger')
+
+        return redirect(url_for('wishott'))
+
+    # GET request
+    # Active plans exist
+    if active_plans:
+        # Get last active plan
+        last_active_plan = active_plans[-1]
+        # Get tariff for active plan
+        plan_tariff = TariffInfo.query.\
+            filter_by(plan_code=last_active_plan[0]).first()
+        # Get OTT limit
+        ott_limit = plan_tariff.ott
+        # Get allowed OTT packages
+        allowed_packages = plan_tariff.ott_package_codes.split(',')
+        # Get latest online transaction
+        last_transaction = RechargeEntry.query.\
+            filter_by(customer_no=session['portal_customer_no']).\
+            order_by(RechargeEntry.payment_date.desc()).first()
+        # Check if latest plan active via online transaction
+        if last_transaction:
+            # Current OTT allotment
+            current_ott_allotment = VoucherEntry.query.\
+                filter(
+                    and_(
+                        VoucherEntry.voucher_send_dt >= \
+                        last_transaction.payment_date,
+                        VoucherEntry.customer_no == session['portal_customer_no']
+                    )
+                ).all()
+            ott_allotted = len(current_ott_allotment) \
+                if current_ott_allotment else 0
+            validity_days_from_today = \
+                datetime.now().date() - timedelta(days=plan_tariff.validity)
+            allow_voucher = \
+                validity_days_from_today <= last_transaction.payment_date
+        # No online transaction
+        elif not last_transaction:
+            current_ott_allotment = None
+            ott_allotted = 0
+            allow_voucher = False
+        # Voucher packages
+        packages = VoucherPackage.query.\
+            filter_by(ott_pkg_status='ACTIVE').\
+            order_by(VoucherPackage.ott_pkg_priority.asc()).all()
+        filtered_packages = [
+            package for package in packages
+            if package.ott_pkg_code in allowed_packages
+        ]
+    # No active plans
+    elif not active_plans:
+        ott_limit = None
+        current_ott_allotment = None
+        ott_allotted = 0
+        filtered_packages = None
+        allow_voucher = False
+
+    return render_template(
+        'wishott.html',
+        no_of_ott_allowed=ott_limit,
+        no_of_ott_allotted=ott_allotted,
+        ott_data=current_ott_allotment,
+        ott_packages=filtered_packages,
+        allow_voucher=allow_voucher
+    )
 
 
 @app.route('/portal/update_profile')

@@ -1,0 +1,95 @@
+{% extends "self_care_layout.html" %}
+{% from "_macros.html" import render_field, render_select, render_submit %}
+
+{% block title %}Self-care Wish OTT{% endblock %}
+
+{% block portal_content %}
+
+<div class="col-md-8 p-3">
+
+  <h3 class="py-2 text-red">Wish OTT</h3>
+  {# NO ACTIVE PLAN #}
+  {% if not no_of_ott_allowed %}
+    <h5 class="py-4 text-red">You do not have any active plans. To use Wish OTT, please recharge or add a broadband plan.</h5>
+  {# HAS ACTIVE PLAN #}
+  {% elif no_of_ott_allowed %}
+    {# PACKAGES UNAVAILABLE #}
+    {% if not ott_packages %}
+      <h5 class="py-4 text-red">This facility is not available now.</h5>
+    {# PACKAGES AVAILABLE #}
+    {% elif ott_packages %}
+      <p>With your existing broadband plan, you can get <span style="color: red;"><strong class="lead">{{ no_of_ott_allowed }}</strong></span> voucher code(s) which can be redeemed from the respective OTT provider(s). This offer is only valid if you recharge or add a plan using self-care portal.</p>
+      {# OTT VOUCHERS #}
+      <h4 class="py-2">Your OTT Vouchers</h4>
+      {# USER HAS VOUCHERS #}
+      {% if no_of_ott_allotted > 0 %}
+        <table class="table table-striped table-bordered table-responsive-xl text-nowrap">
+          <thead>
+            <tr>
+              <th scope="col" class="text-center">OTT Name</th>
+              <th scope="col" class="text-center">OTT Pack</th>
+              <th scope="col" class="text-center">OTT Code</th>
+              <th scope="col" class="text-center">Redeem Till</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in ott_data %}
+              <tr scope="row">
+                <td class="text-center">{{ entry.ott_provider_name }}</td>
+                <td class="text-center">{{ entry.ott_pkg_name }}</td>
+                <td class="text-center">{{ entry.ott_voucher_code }}</td>
+                <td class="text-center">{{ entry.voucher_end_dt }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {# USER HAS NO VOUCHERS #}
+      {% elif no_of_ott_allotted == 0 %}
+        <h5 class="py-4 text-red">You do not have any active OTT vouchers.</h5>
+      {% endif %}
+
+      {# ADD VOUCHER #}
+      <h4 class="py-2">Add Voucher</h4>
+      {# ALLOW ADD VOUCHER #}
+      {% if allow_voucher %}
+        {% if no_of_ott_allowed > no_of_ott_allotted %}
+          <form method="POST" id="add-voucher-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {# VOUCHERS #}
+            {% for package in ott_packages %}
+              <div class="custom-control custom-radio custom-control-inline">
+                <input class="custom-control-input"
+                       type="radio"
+                       name="ott-package"
+                       value="{{ package.ott_pkg_code }}"
+                       id="{{ package.ott_pkg_name }}"
+                       form="add-voucher-form"
+                       {% if loop.first %}checked{% endif %}>
+                       <label class="custom-control-label" for="{{ package.ott_pkg_name }}">
+                         {{ package.ott_provider_name ~ ' - ' ~ package.ott_pkg_name }}
+                       </label>
+              </div>
+            {% endfor %}
+            {# SUBMIT #}
+            <div class="form-group pt-3">
+              <input type="submit" value="Get Voucher" class="btn btn-red">
+            </div>
+          </form>
+        {% else %}
+          <h5 class="py-4 text-red">You have already redeemed your allotted vouchers.</h5>
+        {% endif %}
+      {# DO NOT ALLOW ADD VOUCHER #}
+      {% elif not allow_voucher %}
+        <h5 class="py-4 text-red">This facility is only available if you recharge or add a plan using the self-care portal.</h5>
+      {% endif %} {# ADD VOUCHER #}
+
+    {% endif %} {# PROVIDERS #}
+
+  {% endif %} {# ACTIVE PLANS #}
+
+</div> {# col #}
+
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

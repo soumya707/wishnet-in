@@ -197,3 +197,23 @@ SUCCESSFUL_SOFTPHONE_SMS_FIXED_LINE = (
     'Your username is {0} and password is {1}. For instructions, visit '
     'https://wishnet.in/wishtalk.'
 )
+
+# SUCCESSFUL VOUCHER ALLOCATION
+SUCCESSFUL_VOUCHER_ALLOTMENT = 'The voucher code was sent successfully.'
+
+# UNSUCCESSFUL VOUCHER ALLOCATION
+UNSUCCESSFUL_VOUCHER_ALLOTMENT = (
+    'There was some problem while allocating the voucher. '
+    'Please try again.'
+)
+
+# SUCCESSFUL SMS FOR VOUCHER ALLOTMENT
+SUCCESSFUL_VOUCHER_SMS = (
+    'Download {0} and use the coupon code {1} to activate {2} before {3}.'
+)
+
+# UNSUCCESSFUL SMS FOR VOUCHER ALLOTMENT
+UNSUCCESSFUL_VOUCHER_SMS = (
+    'There was a problem while sending the voucher but you have been '
+    'successfully allotted and can redeem it.'
+)

@@ -9,7 +9,7 @@ from website import app, db
 from website.models import (
     CustomerInfo, EmailAddressUpdateRequest, GSTUpdateRequest,
     MobileNumberUpdateRequest, NewConnection, RechargeEntry, SoftphoneEntry,
-    Ticket, UpdateProfileRequest)
+    Ticket, UpdateProfileRequest, VoucherEntry)
 
 
 # setup Flask-Mail
@@ -209,4 +209,22 @@ def add_async_softphone_allotment(data):
         user_type='Customer'
     )
     db.session.add(softphone)
+    db.session.commit()
+
+
+@celery.task
+def add_async_voucher_allotment(data):
+    """Asynchronously add OTT voucher allotment data to database."""
+    ott_voucher_entry = VoucherEntry(
+        ott_provider_code=data['ott_provider_code'],
+        ott_provider_name=data['ott_provider_name'],
+        ott_pkg_code=data['ott_package_code'],
+        ott_pkg_name=data['ott_package_name'],
+        ott_voucher_code=data['ott_voucher_code'],
+        customer_no=data['customer_no'],
+        plan_code=data['plan_code'],
+        voucher_send_dt=data['send_date'],
+        voucher_end_dt=data['expiry_date']
+    )
+    db.session.add(ott_voucher_entry)
     db.session.commit()
