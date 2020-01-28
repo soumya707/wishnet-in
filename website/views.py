@@ -28,17 +28,18 @@ from website.models import (
     FAQ, AvailableLocations, BestPlans, CarouselImages, CustomerInfo,
     CustomerLogin, Downloads, GSTUpdateRequest, JobVacancy, RechargeEntry,
     RegionalOffices, Services, SoftphoneEntry, SoftphoneNumber, TariffInfo,
-    Ticket, TicketInfo, Ventures, ZoneIDWithPlanCode)
+    Ticket, TicketInfo, Ventures, Voucher, VoucherEntry, VoucherPackage,
+    VoucherProvider, ZoneIDWithPlanCode)
 from website.paytm_utils import (
     initiate_transaction, verify_final_status, verify_transaction)
 from website.razorpay_utils import get_notes, make_order, verify_signature
 from website.softphone_utils import *
 from website.utils import *
 from website.tasks import (
-    add_async_softphone_allotment, add_email_address_update_request_to_db,
-    add_gst_update_request_to_db, add_mobile_number_update_request_to_db,
-    add_new_connection_data_to_db, add_new_ticket_to_db,
-    add_profile_update_request_to_db, add_txn_data_to_db,
+    add_async_softphone_allotment, add_async_voucher_allotment,
+    add_email_address_update_request_to_db, add_gst_update_request_to_db,
+    add_mobile_number_update_request_to_db, add_new_connection_data_to_db,
+    add_new_ticket_to_db, add_profile_update_request_to_db, add_txn_data_to_db,
     send_async_new_connection_mail, update_profile_in_db)
 
 
